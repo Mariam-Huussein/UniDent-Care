@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">🦷 UniDent Care</h1>
   <p align="center">
-    A modern dental healthcare management platform connecting patients, doctors, and students
+    A modern dental healthcare management platform connecting patients, doctors, and Dentist students
   </p>
 </p>
 
@@ -157,12 +157,3 @@ feature/
 | `tailwindcss`           | Styling          |
 
 ---
-
-## 📜 Scripts
-
-```bash
-npm run dev      # Development
-npm run build    # Production build
-npm start        # Production server
-npm run lint     # ESLint
-```
