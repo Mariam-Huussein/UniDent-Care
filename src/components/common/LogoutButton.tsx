@@ -20,11 +20,11 @@ export default function LogoutButton() {
 
       toast.success("Logged out successfully");
 
-      router.push("/login");
+      router.replace("/login");
       router.refresh();
     } catch (error) {
       Cookies.remove("token");
-      router.push("/login");
+      router.replace("/login");
       toast.error("Session ended");
     }
   };
