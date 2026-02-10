@@ -1,8 +1,7 @@
-import StudentDashboardScreen from "@/features/dashboard/screens/StudentDashboard.screen";
-export default function Dashboard() {
-  return (
-    <>
-    <StudentDashboardScreen />
-    </>
-  )
+import DashboardRenderer from "@/features/dashboard/screens/DashboardRenderer";
+
+export default function DashboardPage() {
+  const role = 'student';
+
+  return <DashboardRenderer role={role} />;
 }
