@@ -6,6 +6,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 import {
   loginSchema,
@@ -29,12 +30,16 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: authService.login,
     onSuccess: (response) => {
-      if (response.success) {
+      const { token, roles } = response.data;
+      if (response.success && token && roles) {
+        // تسجيل الكوكيز
+        Cookies.set("token", token, { expires: 7 });
+        Cookies.set("user_role", roles[0], { expires: 7 });
+    
         dispatch(setCredentials(response.data));
-
         toast.success(response.message || "Login successful!");
-
-        router.push("/dashboard");
+    
+        router.replace("/dashboard");
       } else {
         toast.error(response.message || "Login failed");
       }

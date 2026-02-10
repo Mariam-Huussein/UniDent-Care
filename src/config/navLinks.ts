@@ -9,8 +9,8 @@ import {
     Settings
 } from 'lucide-react';
 
-export const NAV_LINKS: Record<UserRole, NavLink[]> = {
-    doctor: [
+export const NAV_LINKS: Record<UserRole [0], NavLink[]> = {
+    Doctor: [
         {
             name: "Dashboard", path: "/dashboard", icon: LayoutDashboard
         },
@@ -27,7 +27,7 @@ export const NAV_LINKS: Record<UserRole, NavLink[]> = {
             name: "Settings", path: "/settings", icon: Settings
         },
     ],
-    student: [
+    Student: [
         {
             name: "Dashboard", path: "/dashboard", icon: LayoutDashboard
         },
@@ -44,7 +44,7 @@ export const NAV_LINKS: Record<UserRole, NavLink[]> = {
             name: "Settings", path: "/settings", icon: Settings
         },
     ],
-    patient: [
+    Patient: [
         {
             name: "Dashboard", path: "/dashboard", icon: LayoutDashboard
         },
@@ -60,4 +60,4 @@ export const NAV_LINKS: Record<UserRole, NavLink[]> = {
     ],
 };
 
-export type UserRole = 'doctor' | 'student' | 'patient';
+export type UserRole = 'Doctor' | 'Student' | 'Patient';

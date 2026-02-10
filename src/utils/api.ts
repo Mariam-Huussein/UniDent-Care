@@ -1,8 +1,9 @@
+'use client'
 import axios from "axios";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    baseURL: "https://dental-hup1.runasp.net/api/",
 });
 
 axiosInstance.interceptors.request.use(

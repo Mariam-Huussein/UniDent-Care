@@ -7,7 +7,7 @@ export const studentSignupSchema = z.object({
         .min(8, "Password must be at least 8 characters")
         .regex(/[A-Z]/, "Must contain at least one uppercase letter")
         .regex(/[0-9]/, "Must contain at least one digit"),
-    university: z.string().min(2, "University name is required"),
+    universityId: z.string().min(2, "University id is required"),
     grade: z.preprocess((val) => Number(val), z.number().int().min(1, "Grade is required")), 
 });
 
