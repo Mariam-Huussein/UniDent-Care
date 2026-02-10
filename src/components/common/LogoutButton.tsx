@@ -16,6 +16,7 @@ export default function LogoutButton() {
       await authService.logout();
 
       Cookies.remove("token");
+      Cookies.remove("user_role");
       dispatch(logoutAction());
 
       toast.success("Logged out successfully");
@@ -24,6 +25,8 @@ export default function LogoutButton() {
       router.refresh();
     } catch (error) {
       Cookies.remove("token");
+      Cookies.remove("user_role");
+      dispatch(logoutAction());
       router.replace("/login");
       toast.error("Session ended");
     }

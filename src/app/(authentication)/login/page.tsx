@@ -31,16 +31,15 @@ export default function Login() {
     mutationFn: authService.login,
     onSuccess: (response) => {
       const { token, roles } = response.data;
-      if (response.success) {
-        // if (token && roles) {
-        //   Cookies.set("token", token, { expires: 7 });
-        //   Cookies.set("user_role", roles[0], { expires: 7 }); 
-        // }
+      if (response.success && token && roles) {
+        // تسجيل الكوكيز
+        Cookies.set("token", token, { expires: 7 });
+        Cookies.set("user_role", roles[0], { expires: 7 });
+    
         dispatch(setCredentials(response.data));
-
         toast.success(response.message || "Login successful!");
-
-        router.push("/dashboard");
+    
+        router.replace("/dashboard");
       } else {
         toast.error(response.message || "Login failed");
       }
