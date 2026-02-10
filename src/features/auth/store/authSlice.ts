@@ -23,11 +23,13 @@ const authSlice = createSlice({
                 secure: true,
                 sameSite: 'strict'
             });
+            // Cookies.set("user_role", action.payload.roles[0], { expires: 7 });
         },
         logout: (state) => {
             state.user = null;
             state.isAuthenticated = false;
             Cookies.remove("token");
+            Cookies.remove("user_role");
             window.location.href = "/login";
         },
     },

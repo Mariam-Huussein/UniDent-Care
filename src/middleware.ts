@@ -6,9 +6,9 @@ import { ROUTE_PERMISSIONS } from './config/permissions';
 const publicRoutes = ['/login', '/signup', '/forget-password', '/reset-password', '/'];
 
 export function middleware(request: NextRequest) {
-    const token = request.cookies.get('token')?.value || 'jklho';
+    const token = request.cookies.get('token')?.value;
     const { pathname } = request.nextUrl;
-    const userRole = (request.cookies.get('user_role')?.value) as UserRole || 'student';
+    const userRole = (request.cookies.get('user_role')?.value) as UserRole;
 
     const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
 
@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (token && pathname.startsWith('/login')) {
+    if (token && (pathname.startsWith('/login') || pathname.startsWith('/signup'))) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 

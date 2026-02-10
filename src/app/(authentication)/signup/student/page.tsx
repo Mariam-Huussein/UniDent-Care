@@ -79,15 +79,14 @@ export default function StudentSignup() {
           </div>
 
           <div>
-            <label className="text-sm font-medium">University</label>
+            <label className="text-sm font-medium">University Id</label>
             <input
-              {...register("university")}
-              placeholder="e.g. Cairo University"
+              {...register("universityId")}
               className="mt-1 w-full rounded-md border p-2.5 outline-none focus:ring-1 focus:ring-indigo-500"
             />
-            {errors.university && (
+            {errors.universityId && (
               <p className="text-xs text-red-500">
-                {errors.university.message}
+                {errors.universityId.message}
               </p>
             )}
           </div>
