@@ -16,7 +16,7 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    if (token && userRole && isPublicRoute && (pathname === '/login' || pathname === '/signup')) {
+    if (token && userRole && isPublicRoute && (pathname === '/login' || pathname === '/signup' || pathname === '/')) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
