@@ -12,8 +12,12 @@ import {
   loginSchema,
   LoginFormValues,
 } from "@/features/auth/schemas/loginSchema";
-import { authService } from "@/features/auth/services/authService";
-import { setCredentials } from "@/features/auth/store/authSlice";
+import {
+  authService,
+  getProfileByRole,
+} from "@/features/auth/services/authService";
+import { login, setUserFromReload } from "@/features/auth/store/authSlice";
+import { getDecodedToken } from "@/utils/decodeToken";
 
 export default function Login() {
   const router = useRouter();
@@ -29,17 +33,29 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: authService.login,
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       const { token, roles } = response.data;
+
       if (response.success && token && roles) {
-        // تسجيل الكوكيز
         Cookies.set("token", token, { expires: 7 });
         Cookies.set("user_role", roles[0], { expires: 7 });
-    
-        dispatch(setCredentials(response.data));
-        toast.success(response.message || "Login successful!");
-    
-        router.replace("/dashboard");
+
+        dispatch(login(response.data));
+
+        const decoded = getDecodedToken();
+        if (!decoded) return;
+
+        try {
+          const user = await getProfileByRole(decoded.role, decoded.userId);
+
+          dispatch(setUserFromReload({ user, role: decoded.role }));
+
+          toast.success(response.message || "Login successful!");
+          router.replace("/dashboard");
+        } catch (err: any) {
+          console.error(err);
+          toast.error("Failed to fetch user data after login");
+        }
       } else {
         toast.error(response.message || "Login failed");
       }
@@ -119,3 +135,18 @@ export default function Login() {
     </div>
   );
 }
+
+// onSuccess: (response) => {
+//   const { token, roles } = response.data;
+//   if (response.success && token && roles) {
+//     Cookies.set("token", token, { expires: 7 });
+//     Cookies.set("user_role", roles[0], { expires: 7 });
+
+//     dispatch(login(response.data));
+//     toast.success(response.message || "Login successful!");
+
+//     router.replace("/dashboard");
+//   } else {
+//     toast.error(response.message || "Login failed");
+//   }
+// },

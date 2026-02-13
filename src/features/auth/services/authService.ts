@@ -41,3 +41,26 @@ export const authService = {
         return response.data;
     },
 };
+
+
+export const getProfileByRole = async (role: string, userId: string) => {
+    switch (role) {
+        case "Student": {
+            const res = await api.get(`/Students/${userId}`);
+            return res.data.data;
+        }
+
+        case "Doctor": {
+            const res = await api.get(`/Doctors/${userId}`);
+            return res.data.data;
+        }
+
+        case "Patient": {
+            const res = await api.get(`/Patients/${userId}`);
+            return res.data.data;
+        }
+
+        default:
+            throw new Error("Unknown role");
+    }
+};

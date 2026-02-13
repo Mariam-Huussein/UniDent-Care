@@ -1,15 +1,18 @@
-"use client";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { AuthData } from "../types";
+import { AuthData, User } from "../types";
 import Cookies from "js-cookie";
 
 interface AuthState {
-    user: AuthData | null;
+    user: User | null;
+    token: string | null;
+    role: string | null;
     isAuthenticated: boolean;
 }
 
 const initialState: AuthState = {
     user: null,
+    token: null,
+    role: null,
     isAuthenticated: false,
 };
 
@@ -17,22 +20,38 @@ const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        setCredentials: (state, action: PayloadAction<AuthData>) => {
-            state.user = action.payload;
+        login: (state, action: PayloadAction<AuthData>) => {
+            state.user = action.payload.user;
+            state.token = action.payload.token;
+            state.role = action.payload.roles[0];
             state.isAuthenticated = true;
 
             Cookies.set("token", action.payload.token, {
                 expires: 7,
                 secure: true,
-                sameSite: 'strict'
+                sameSite: "strict",
             });
+
             Cookies.set("user_role", action.payload.roles[0], {
                 expires: 7,
-                sameSite: 'strict',
+                sameSite: "strict",
             });
         },
+
+        setUserFromReload: (
+            state,
+            action: PayloadAction<{ user: User; role: string }>
+        ) => {
+            state.user = action.payload.user;
+            state.role = action.payload.role;
+            state.isAuthenticated = true;
+        },
+
+
         logout: (state) => {
             state.user = null;
+            state.token = null;
+            state.role = null;
             state.isAuthenticated = false;
             Cookies.remove("token");
             Cookies.remove("user_role");
@@ -41,10 +60,9 @@ const authSlice = createSlice({
     },
 });
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { login, setUserFromReload, logout } = authSlice.actions;
 export default authSlice.reducer;
 
-// "use client";
 // import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // import { AuthData } from "../types";
 // import Cookies from "js-cookie";
@@ -58,6 +76,7 @@ export default authSlice.reducer;
 //     user: null,
 //     isAuthenticated: false,
 // };
+
 // const authSlice = createSlice({
 //     name: "auth",
 //     initialState,
@@ -65,6 +84,7 @@ export default authSlice.reducer;
 //         setCredentials: (state, action: PayloadAction<AuthData>) => {
 //             state.user = action.payload;
 //             state.isAuthenticated = true;
+
 //             Cookies.set("token", action.payload.token, {
 //                 expires: 7,
 //                 secure: true,
@@ -72,7 +92,7 @@ export default authSlice.reducer;
 //             });
 //             Cookies.set("user_role", action.payload.roles[0], {
 //                 expires: 7,
-//                 sameSite: "strict",
+//                 sameSite: 'strict',
 //             });
 //         },
 //         logout: (state) => {
