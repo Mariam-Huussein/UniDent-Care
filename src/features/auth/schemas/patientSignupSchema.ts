@@ -11,10 +11,7 @@ export const patientSignupSchema = z.object({
     birthDate: z.string().refine(date => !isNaN(Date.parse(date)), {
         message: "Invalid date of birth",
     }),
-    gender: z.preprocess(
-        (val) => Number(val),
-        z.number().int().min(0).max(1)
-    ),
+    gender: z.coerce.number,
 })
 
 export type PatientSignupValues = z.infer<typeof patientSignupSchema>

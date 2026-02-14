@@ -8,7 +8,7 @@ export const studentSignupSchema = z.object({
         .regex(/[A-Z]/, "Must contain at least one uppercase letter")
         .regex(/[0-9]/, "Must contain at least one digit"),
     universityId: z.string().min(2, "University id is required"),
-    grade: z.preprocess((val) => Number(val), z.number().int().min(1, "Grade is required")), 
+    grade: z.coerce.number,
 });
 
 export type StudentSignupValues = z.infer<typeof studentSignupSchema>;
