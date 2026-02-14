@@ -1,1 +1,44 @@
 @import "tailwindcss";
+
+@layer components {
+    .my-btn {
+      @apply flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-2.5 
+             rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700/80 
+             text-slate-50 shadow-sm shadow-blue-600/25 
+             text-xs sm:text-[13px] font-semibold 
+             transition-all duration-300 cursor-pointer;
+    }
+
+    .my-btn:hover {
+        @apply from-blue-600 to-indigo-700 text-white shadow-md shadow-slate-800/20 ;
+    }
+
+    .my-btn-outline {
+        @apply flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-2.5 
+               rounded-xl border-2 border-blue-600/50 bg-transparent
+               text-blue-600 text-xs sm:text-[13px] font-semibold 
+               transition-all duration-300 cursor-pointer;
+      }
+    
+      .my-btn-outline:hover {
+        @apply bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200;
+      }
+}
+
+.case-card-swiper .swiper-pagination {
+    bottom: 8px !important;
+}
+
+.case-card-swiper .swiper-pagination-bullet {
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.case-card-swiper .swiper-pagination-bullet-active {
+    width: 18px;
+    border-radius: 4px;
+    background: #3b82f6;
+}

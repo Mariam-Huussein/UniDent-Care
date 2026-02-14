@@ -18,7 +18,7 @@ export default function Sidebar() {
     }, []);
 
     const roleFromRedux = useSelector(
-        (state: RootState) => state.auth.user?.roles?.[0]
+        (state: RootState) => state.auth.role
     ) as UserRole | undefined;
 
     const userRole =
@@ -29,7 +29,7 @@ export default function Sidebar() {
 
     const links = NAV_LINKS[userRole];
     return (
-        <aside className="fixed bottom-0 left-0 w-full h-16 z-50 bg-white border-t border-gray-200 flex flex-row justify-between md:items-stretch items-center md:relative md:h-screen md:w-64 md:flex-col md:justify-start md:pt-4 md:border-r md:border-t-0 transition-all duration-300">
+        <aside className="fixed bottom-0 left-0 w-full h-16 z-50 bg-white border-t border-gray-100 shadow-sm flex flex-row justify-between md:items-stretch items-center md:relative md:h-screen md:w-64 md:flex-col md:justify-start md:pt-4 md:border-r md:border-t-0 transition-all duration-300">
             <div className="hidden md:flex px-4 mb-6 justify-center md:justify-start">
                 <h1 className="text-xl font-bold text-indigo-600">Unident Care</h1>
             </div>

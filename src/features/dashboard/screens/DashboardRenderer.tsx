@@ -18,7 +18,7 @@ export default function DashboardRenderer() {
     }, []);
 
     const roleFromRedux = useSelector(
-        (state: RootState) => state.auth.user?.roles?.[0]
+        (state: RootState) => state.auth.role
     );
 
     const role = roleFromRedux ?? (Cookies.get("user_role") as UserRole);
