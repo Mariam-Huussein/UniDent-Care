@@ -22,6 +22,16 @@ export interface CaseType {
     description: string;
 }
 
+export interface MetaData {
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    items: CaseItem[];
+    totalCount: number;
+    totalPages: number;
+}
+
+
 export type Cases = CaseCardProps["caseItem"][];
 
-export type AvailableCasesResponse = ApiResponse<Cases>;
+export interface AvailableCasesResponse extends ApiResponse<MetaData> { }
