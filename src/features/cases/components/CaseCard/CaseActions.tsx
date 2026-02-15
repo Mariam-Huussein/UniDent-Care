@@ -15,8 +15,8 @@ export default function CaseActions({ caseId }: CaseActionsProps) {
                 <BookUser size={15} />
                 View Details
             </button>
-            <button className="my-btn">
-                <Send size={15} />
+            <button className="my-btn px-2 group/req">
+                <Send size={15} className="group-hover/req:animate-bounce group-hover/req:animate-duration-1000 transition-all duration-300" />
                 Send Request
             </button>
         </div>

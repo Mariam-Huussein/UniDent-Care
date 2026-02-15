@@ -1,4 +1,4 @@
-import SelectItems from "../SelectItems";
+import SelectItems from "../../../../components/common/SelectItems";
 import { Search, X } from "lucide-react";
 
 interface CasesControlsProps {

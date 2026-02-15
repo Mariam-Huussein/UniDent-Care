@@ -35,3 +35,5 @@ export interface MetaData {
 export type Cases = CaseCardProps["caseItem"][];
 
 export interface AvailableCasesResponse extends ApiResponse<MetaData> { }
+
+export interface CaseDetailResponse extends ApiResponse<CaseItem> { }
