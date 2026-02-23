@@ -59,11 +59,11 @@ export default function Login() {
         try {
           const user = await getProfileByRole(decoded.role, decoded.userId);
           dispatch(setUserFromReload({ user, role: decoded.role }));
-          toast.success("Welcome back to UniDent!");
-          router.replace("/dashboard");
         } catch (err) {
           toast.error("Connected, but failed to load profile.");
         }
+        toast.success("Welcome back to UniDent!");
+        router.replace("/dashboard");
       }
     },
     onError: (error: any) => {
@@ -88,28 +88,28 @@ export default function Login() {
       >
         <div className="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] border border-white p-8 sm:p-12">
           <div className="text-center mb-10">
-              <div className="inline-flex relative mb-6 group">
-                <div className="absolute inset-0 bg-blue-400 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
+            <div className="inline-flex relative mb-6 group">
+              <div className="absolute inset-0 bg-blue-400 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
 
-                <div className="relative w-16 h-16 rounded-[1.25rem] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-xl shadow-blue-200/50 transform group-hover:rotate-6 transition-transform duration-300">
-                  <motion.div
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  >
-                    <FaTooth size={32} strokeWidth={2.5} />
-                  </motion.div>
-                </div>
-                <div className="absolute -right-1 -bottom-1 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full shadow-sm" />
+              <div className="relative w-16 h-16 rounded-[1.25rem] bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-xl shadow-blue-200/50 transform group-hover:rotate-6 transition-transform duration-300">
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                >
+                  <FaTooth size={32} strokeWidth={2.5} />
+                </motion.div>
               </div>
-
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-                UniDent <span className="text-blue-600">Care</span>
-              </h2>
-              <p className="mt-2 text-slate-500 font-medium italic">
-                Your Smile, Our Passion
-              </p>
+              <div className="absolute -right-1 -bottom-1 w-4 h-4 bg-emerald-400 border-2 border-white rounded-full shadow-sm" />
             </div>
+
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+              UniDent <span className="text-blue-600">Care</span>
+            </h2>
+            <p className="mt-2 text-slate-500 font-medium italic">
+              Your Smile, Our Passion
+            </p>
+          </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="space-y-2">
