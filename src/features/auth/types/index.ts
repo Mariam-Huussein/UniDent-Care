@@ -1,7 +1,7 @@
 import { ApiResponse } from "@/types/api";
 
 export type UserBase = {
-    userId: string;
+    publicId: string;
     fullName: string;
     email: string;
     createAt: string;
@@ -37,6 +37,7 @@ export type User = StudentUser | DoctorUser | PatientUser;
 export interface AuthData<TUser = User> {
     token: string;
     roles: string[];
+    publicId: string;
     user: TUser;
 }
 

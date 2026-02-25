@@ -1,7 +1,7 @@
 "use client";
 
 import { PiTooth } from "react-icons/pi";
-import { Clock12, User } from "lucide-react";
+import { Clock12, Send, User } from "lucide-react";
 import { CaseCardProps } from "../../types/caseCardProps.types";
 import { timeAgo } from "../../utils/caseCard.utils";
 
@@ -39,6 +39,24 @@ export default function CaseContent({ caseItem }: CaseContentProps) {
                     <User size={14} className="text-blue-400" />
                     <span className="font-medium">{caseItem.patientAge} Yrs</span>
                 </div>
+
+                {/* Pending requests */}
+                <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
+                {caseItem.pendingRequests > 0 ? (
+                    <>
+                        <Send size={14} className="text-red-400" />
+                        <span className="font-medium">{caseItem.pendingRequests} Request{caseItem.pendingRequests !== 1 ? "s" : ""}</span>
+                    </>
+                    )
+                    :
+                    (
+                    <>
+                        <Send size={14} className="text-green-400" />
+                        <span className="font-medium">0 Request</span>
+                    </>
+                )
+                }
+                    </div>
             </div>
         </div>
     );

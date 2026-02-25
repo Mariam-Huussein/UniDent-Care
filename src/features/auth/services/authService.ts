@@ -1,10 +1,9 @@
 import api from "@/utils/api";
 import { LoginRequest, LoginResponse } from "../types";
-import { email } from "zod";
 import { ApiResponse } from "@/types/api";
 import { PatientSignupValues } from "../schemas/patientSignupSchema";
 import { DoctorSignupValues } from "../schemas/doctorSignupSchema";
-import { StudentSignupValues } from "../schemas/studentSignupSchema";
+import { StudentSignupPayload } from "../types/studentPayload.Types";
 
 export const authService = {
     login: async (credentials: LoginRequest): Promise<LoginResponse> => {
@@ -36,7 +35,7 @@ export const authService = {
         const response = await api.post<ApiResponse<any>>("/Doctors", data);
         return response.data;
     },
-    registerStudent: async (data: StudentSignupValues): Promise<ApiResponse<any>> => {
+    registerStudent: async (data: StudentSignupPayload): Promise<ApiResponse<any>> => {
         const response = await api.post<ApiResponse<any>>("/Students", data);
         return response.data;
     },

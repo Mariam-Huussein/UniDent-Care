@@ -7,7 +7,7 @@ import { CaseItem } from "../types/caseCardProps.types";
 
 
 export const useAvailableCases = () => {
-    const studentId = useSelector((state: RootState) => state.auth.user?.userId || "");
+    const studentId = useSelector((state: RootState) => state.auth.user?.publicId || "");
 
     const [cases, setCases] = useState<CaseItem[]>([]);
     const [loading, setLoading] = useState(true);

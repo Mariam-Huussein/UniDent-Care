@@ -53,13 +53,6 @@ export default function CaseImageSwiper({ caseItem }: CaseImageSwiperProps) {
                 <span className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`} />
                 {statusConfig.label}
             </span>
-
-            {/* Pending requests */}
-            {caseItem.pendingRequests > 0 && (
-                <div className="absolute bottom-8 left-2.5 z-20 bg-white/90 backdrop-blur-sm text-[11px] font-medium text-gray-600 px-2 py-0.5 rounded-full">
-                    {caseItem.pendingRequests} request{caseItem.pendingRequests !== 1 ? "s" : ""}
-                </div>
-            )}
         </div>
     );
 }

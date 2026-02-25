@@ -17,7 +17,7 @@ import {
   getProfileByRole,
 } from "@/features/auth/services/authService";
 import { login, setUserFromReload } from "@/features/auth/store/authSlice";
-import { getDecodedToken } from "@/utils/decodeToken";
+import { LoginResponse } from "@/features/auth/types";
 
 export default function Login() {
   const router = useRouter();
@@ -33,8 +33,8 @@ export default function Login() {
 
   const loginMutation = useMutation({
     mutationFn: authService.login,
-    onSuccess: async (response) => {
-      const { token, roles } = response.data;
+    onSuccess: async (response: LoginResponse) => {
+      const { token, roles, publicId } = response.data;
 
       if (response.success && token && roles) {
         Cookies.set("token", token, { expires: 7 });
@@ -42,13 +42,10 @@ export default function Login() {
 
         dispatch(login(response.data));
 
-        const decoded = getDecodedToken();
-        if (!decoded) return;
-
         try {
-          const user = await getProfileByRole(decoded.role, decoded.userId);
+          const user = await getProfileByRole(roles[0], publicId);
 
-          dispatch(setUserFromReload({ user, role: decoded.role }));
+          dispatch(setUserFromReload({ user, role: roles[0] }));
 
           toast.success(response.message || "Login successful!");
           router.replace("/dashboard");

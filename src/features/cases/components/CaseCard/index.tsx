@@ -14,7 +14,7 @@ export default function CaseCard({ caseItem }: CaseCardProps) {
             {/* Content */}
             <div className="flex flex-col flex-1 p-3.5 sm:p-4">
                 <CaseContent caseItem={caseItem} />
-                <CaseActions caseId={caseItem.id} />
+                <CaseActions caseId={caseItem.id} patientName={caseItem.patientName} caseType={caseItem.caseType?.name} />
             </div>
         </div>
     );

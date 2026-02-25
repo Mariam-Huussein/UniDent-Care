@@ -3,7 +3,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
-    baseURL: "https://dental-hup1.runasp.net/api/",
+    baseURL: "https://dental-hup1.runasp.net/api",
 });
 
 axiosInstance.interceptors.request.use(

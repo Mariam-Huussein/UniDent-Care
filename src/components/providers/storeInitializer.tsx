@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
-import { getDecodedToken } from "@/utils/decodeToken";
 import { getProfileByRole } from "@/features/auth/services/authService";
 import { setUserFromReload } from "@/features/auth/store/authSlice";
 
@@ -13,19 +12,18 @@ export default function StoreInitializer() {
 
   useEffect(() => {
     const token = Cookies.get("token");
-    if (!token) return;
-
-    const decoded = getDecodedToken();
-    if (!decoded) return;
+    const role = Cookies.get("user_role");
+    const publicId = Cookies.get("public_id");
+    if (!token || !role || !publicId) return;
 
     const init = async () => {
       try {
-        const user = await getProfileByRole(decoded.role, decoded.userId);
+        const user = await getProfileByRole(role, publicId);
         console.log("API USER RESPONSE:", user);
         dispatch(
           setUserFromReload({
             user,
-            role: decoded.role,
+            role,
           }),
         );
       } catch (err) {
