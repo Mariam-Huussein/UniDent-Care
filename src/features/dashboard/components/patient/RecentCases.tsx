@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export function RecentCases() {
-  const patientId = useSelector((state: RootState) => state.auth.user?.userId);
+  const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
   const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [limit, setLimit] = useState<number>(5);

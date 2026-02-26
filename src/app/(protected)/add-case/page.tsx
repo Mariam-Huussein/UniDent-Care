@@ -32,7 +32,7 @@ import {
 import { CaseType } from "@/features/cases/types/case.types";
 
 export default function AddCase() {
-  const patientId = useSelector((state: RootState) => state.auth.user?.userId);
+  const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

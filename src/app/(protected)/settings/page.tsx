@@ -84,7 +84,7 @@ export default function SettingsPage() {
   };
 
   const onDeleteAccount = async () => {
-    if (!user?.userId || !role) return;
+    if (!user?.publicId || !role) return;
 
     setIsDeleting(true);
     const toastId = toast.loading("Processing account deletion...");
@@ -96,7 +96,7 @@ export default function SettingsPage() {
           : role === "Doctor"
             ? "Doctors"
             : "Students";
-      const res = await deleteAccount(apiRole, user.userId);
+      const res = await deleteAccount(apiRole, user.publicId);
 
       if (res.data.success) {
         toast.success("Account deleted. We are sorry to see you go.", {
@@ -327,7 +327,7 @@ export default function SettingsPage() {
           Session Management
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           <LogoutButton />
+          <LogoutButton />
         </div>
       </div>
     </div>

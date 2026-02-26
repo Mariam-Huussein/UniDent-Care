@@ -22,8 +22,8 @@ import {
 } from "lucide-react";
 
 import {
-  StudentSignupFormValues,
   studentSignupSchema,
+  StudentSignupValues,
 } from "@/features/auth/schemas/studentSignupSchema";
 import { authService } from "@/features/auth/services/authService";
 import { StudentSignupPayload } from "@/features/auth/types/studentPayload.Types";
@@ -35,44 +35,28 @@ export default function StudentSignup() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<StudentSignupFormValues>({
+    formState: { errors },
+  } = useForm<StudentSignupValues>({
     resolver: zodResolver(studentSignupSchema),
   });
 
   const signupMutation = useMutation({
-    mutationFn: (data: StudentSignupPayload) =>
-      authService.registerStudent(data),
-
+    mutationFn: (data: StudentSignupPayload) => authService.registerStudent(data),
     onSuccess: (res) => {
       if (res.success) {
         toast.success("Student account created! Welcome to the academy.");
         router.push("/login");
       }
     },
-
     onError: (err: any) => {
       const serverErrors = err?.response?.data?.error?.errors;
-
       if (Array.isArray(serverErrors)) {
         serverErrors.forEach((msg: string) => toast.error(msg));
-      } else if (err?.response?.data?.message) {
-        toast.error(err.response.data.message);
       } else {
         toast.error("Registration failed. Please check your inputs.");
       }
     },
   });
-
-  const onSubmit = (data: StudentSignupFormValues) => {
-    const formattedData = {
-      ...data,
-      fullName: `${data.firstName} ${data.lastName}`,
-    };
-
-    signupMutation.mutate(formattedData);
-  };
-
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -125,7 +109,19 @@ export default function StudentSignup() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={handleSubmit((data) => {
+              const payload: StudentSignupPayload = {
+                fullName: data.fullName,
+                email: data.email,
+                password: data.password,
+                university: data.university,
+                universityId: data.universityId,
+                username: data.username,
+                level: data.level,
+                phone: data.phone,
+              };
+              signupMutation.mutate(payload);
+            })}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             <motion.div variants={itemVariants} className="space-y-1.5">
@@ -175,6 +171,72 @@ export default function StudentSignup() {
 
             <motion.div variants={itemVariants} className="space-y-1.5">
               <label className="text-sm font-bold text-slate-700 ml-1">
+                Username
+              </label>
+              <div className="relative group">
+                <User
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
+                  size={18}
+                />
+                <input
+                  {...register("username")}
+                  className={`w-full bg-slate-50 border-2 ${errors.username ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  placeholder="johndoe123"
+                />
+              </div>
+              {errors.username && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.username.message}
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">
+                Phone Number
+              </label>
+              <div className="relative group">
+                <BookOpen
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
+                  size={18}
+                />
+                <input
+                  {...register("phone")}
+                  className={`w-full bg-slate-50 border-2 ${errors.phone ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  placeholder="01XXXXXXXXX"
+                />
+              </div>
+              {errors.phone && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.phone.message}
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">
+                University
+              </label>
+              <div className="relative group">
+                <BookOpen
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
+                  size={18}
+                />
+                <input
+                  {...register("university")}
+                  className={`w-full bg-slate-50 border-2 ${errors.university ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  placeholder="Cairo University"
+                />
+              </div>
+              {errors.university && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.university.message}
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">
                 Student ID
               </label>
               <div className="relative group">
@@ -206,7 +268,7 @@ export default function StudentSignup() {
                 />
                 <input
                   type="number"
-                  {...register("grade")}
+                  {...register("grade", { valueAsNumber: true })}
                   className={`w-full bg-slate-50 border-2 ${errors.grade ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="Year (1-5)"
                 />
@@ -214,6 +276,29 @@ export default function StudentSignup() {
               {errors.grade && (
                 <p className="text-[11px] font-bold text-red-500 ml-1">
                   {errors.grade.message}
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">
+                Academic Level
+              </label>
+              <div className="relative group">
+                <GraduationCap
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
+                  size={18}
+                />
+                <input
+                  type="number"
+                  {...register("level", { valueAsNumber: true })}
+                  className={`w-full bg-slate-50 border-2 ${errors.level ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  placeholder="Level (1-7)"
+                />
+              </div>
+              {errors.level && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.level.message}
                 </p>
               )}
             </motion.div>

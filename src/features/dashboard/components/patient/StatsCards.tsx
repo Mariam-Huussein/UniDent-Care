@@ -13,7 +13,7 @@ interface Stats {
 }
 
 export function StatsCards() {
-  const patientId = useSelector((state: RootState) => state.auth.user?.userId);
+  const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
   const [stats, setStats] = useState<Stats>({
     activeCases: 0,
     upcomingSessions: 0,
@@ -77,8 +77,8 @@ export function StatsCards() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-1">
       {statItems.map((item, index) => (
-        <div 
-          key={index} 
+        <div
+          key={index}
           className="relative overflow-hidden group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
         >
           <div className="flex items-center justify-between">
@@ -94,7 +94,7 @@ export function StatsCards() {
               <item.icon size={24} />
             </div>
           </div>
-          
+
           <div className={`absolute bottom-0 left-0 h-1 w-full opacity-0 group-hover:opacity-100 transition-opacity ${item.color.replace('text', 'bg')}`} />
         </div>
       ))}
