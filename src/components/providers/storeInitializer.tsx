@@ -13,7 +13,7 @@ export default function StoreInitializer() {
   useEffect(() => {
     const token = Cookies.get("token");
     const role = Cookies.get("user_role");
-    const publicId = Cookies.get("public_id");
+    const publicId = Cookies.get("user_id");
     if (!token || !role || !publicId) return;
 
     const init = async () => {

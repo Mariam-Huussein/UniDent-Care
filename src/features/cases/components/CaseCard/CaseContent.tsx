@@ -24,8 +24,8 @@ export default function CaseContent({ caseItem }: CaseContentProps) {
             </div>
 
             {/* Description */}
-            <p className="text-xs text-gray-400 mb-1">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius consequatur, qui quod aspernatur atque placeat similique!
+            <p className="text-xs text-gray-400 mb-1 line-clamp-2">
+                {caseItem.caseType?.description || "No description provided."}
             </p>
 
             {/* Detail chips */}
@@ -42,21 +42,21 @@ export default function CaseContent({ caseItem }: CaseContentProps) {
 
                 {/* Pending requests */}
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
-                {caseItem.pendingRequests > 0 ? (
-                    <>
-                        <Send size={14} className="text-red-400" />
-                        <span className="font-medium">{caseItem.pendingRequests} Request{caseItem.pendingRequests !== 1 ? "s" : ""}</span>
-                    </>
+                    {caseItem.pendingRequests > 0 ? (
+                        <>
+                            <Send size={14} className="text-red-400" />
+                            <span className="font-medium">{caseItem.pendingRequests} Request{caseItem.pendingRequests !== 1 ? "s" : ""}</span>
+                        </>
                     )
-                    :
-                    (
-                    <>
-                        <Send size={14} className="text-green-400" />
-                        <span className="font-medium">0 Request</span>
-                    </>
-                )
-                }
-                    </div>
+                        :
+                        (
+                            <>
+                                <Send size={14} className="text-green-400" />
+                                <span className="font-medium">0 Request</span>
+                            </>
+                        )
+                    }
+                </div>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 import { AvailableCasesResponse, CaseDetailResponse, CaseRequestBody, CaseRequestResponse } from "../types/caseCardProps.types";
 
-export async function getAvailableCases(page: number, pageSize: number, studentId: string): Promise<AvailableCasesResponse> {
+export async function getAvailableCases(page: number, pageSize: number): Promise<AvailableCasesResponse> {
     const token = Cookies.get("token");
     if (!token) {
         throw new Error("Authentication required");
@@ -10,7 +10,7 @@ export async function getAvailableCases(page: number, pageSize: number, studentI
 
     try {
         const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Students/${studentId}/available-cases`,
+            url: `https://dental-hup1.runasp.net/api/Students/available-cases`,
             method: "GET",
             params: { page, pageSize },
             headers: {

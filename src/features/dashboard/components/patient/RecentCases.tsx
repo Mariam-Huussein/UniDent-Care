@@ -27,7 +27,7 @@ export function RecentCases() {
       try {
         setLoading(true);
         const casesRes = await api.get(`/Cases/patient/${patientId}`);
-        const casesData = casesRes.data.data || [];
+        const casesData = Array.isArray(casesRes.data.data) ? casesRes.data.data : (casesRes.data.data?.items || []);
 
         const sortedCases = [...casesData].sort(
           (a, b) =>
