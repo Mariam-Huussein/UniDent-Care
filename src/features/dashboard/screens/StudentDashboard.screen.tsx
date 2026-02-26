@@ -7,9 +7,6 @@ export default function StudentDashboardScreen() {
         <>
             <div>
                 <h1>StudentDashboardScreen</h1>
-                <p>{user?.fullName}</p>
-                <p>{user?.email}</p>
-                <p>{user?.publicId}</p>
             </div>
         </>
     )

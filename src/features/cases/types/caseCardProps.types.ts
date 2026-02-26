@@ -14,10 +14,11 @@ export interface CaseItem {
     createAt: string;
     totalSessions: number;
     pendingRequests: number;
+    imageUrls: string[];
 }
 
 export interface CaseType {
-    id: string;
+    publicId: string;
     name: string;
     description: string;
 }

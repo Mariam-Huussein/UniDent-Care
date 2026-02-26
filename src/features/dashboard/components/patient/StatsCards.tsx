@@ -32,8 +32,8 @@ export function StatsCards() {
           api.get(`/Cases/patient/${patientId}`)
         ]);
 
-        const sessionsData = sessionsRes.data.data || [];
-        const casesData = casesRes.data.data || [];
+        const sessionsData = Array.isArray(sessionsRes.data.data) ? sessionsRes.data.data : (sessionsRes.data.data?.items || []);
+        const casesData = Array.isArray(casesRes.data.data) ? casesRes.data.data : (casesRes.data.data?.items || []);
 
         setStats({
           upcomingSessions: sessionsData.filter((s: any) => s.status === "Scheduled").length,

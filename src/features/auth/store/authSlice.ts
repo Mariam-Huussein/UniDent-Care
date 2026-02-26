@@ -32,6 +32,12 @@ const authSlice = createSlice({
                 sameSite: "strict",
             });
 
+            Cookies.set("user_id", action.payload.publicId, {
+                expires: 7,
+                secure: true,
+                sameSite: "strict",
+            });
+
             Cookies.set("user_role", action.payload.roles[0], {
                 expires: 7,
                 sameSite: "strict",
@@ -55,6 +61,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             Cookies.remove("token");
             Cookies.remove("user_role");
+            Cookies.remove("user_id");
             window.location.href = "/login";
         },
     },

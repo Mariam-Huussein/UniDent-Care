@@ -6,9 +6,10 @@ import { timeAgo } from "./caseCard.utils";
 export function getPatientInfoFields(caseItem: CaseItem) {
     return [
         { icon: User, label: "Patient Name", value: caseItem.patientName, iconColor: "text-blue-500" },
-        { icon: Activity, label: "Age", value: caseItem.patientAge > 0 ? `${caseItem.patientAge} Years` : null , iconColor: "text-emerald-500" },
+        { icon: Activity, label: "Age", value: caseItem.patientAge > 0 ? `${caseItem.patientAge} Years` : null, iconColor: "text-emerald-500" },
         { icon: PiTooth, label: "Case Type", value: caseItem.caseType?.name || "Uncategorized", iconColor: "text-indigo-500" },
         { icon: Calendar, label: "Created", value: timeAgo(caseItem.createAt), iconColor: "text-amber-500" },
+        { icon: Activity, label: "Total Sessions", value: caseItem.totalSessions.toString(), iconColor: "text-purple-500" },
         { icon: Send, label: "Pending Requests", value: caseItem.pendingRequests, iconColor: "text-rose-500" },
     ];
 }

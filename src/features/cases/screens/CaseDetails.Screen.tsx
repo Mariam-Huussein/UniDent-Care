@@ -30,7 +30,7 @@ export default function CaseDetailsScreen({ caseId }: CaseDetailsScreenProps) {
                         {/* White Container */}
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                             {/* Images */}
-                            <CaseDetailImages patientName={caseItem.patientName} />
+                            <CaseDetailImages patientName={caseItem.patientName} imageUrls={caseItem.imageUrls} />
 
                             {/* Top Section: Patient Info + Contact + Request Button */}
                             <div className="p-5 sm:p-6 border-b border-gray-100">

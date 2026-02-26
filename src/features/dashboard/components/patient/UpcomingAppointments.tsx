@@ -28,7 +28,7 @@ export function UpcomingAppointments() {
         const sessionsRes = await api.get(`/Sessions/patient/${patientId}`, {
           params: { page: 1, pageSize: 100 },
         });
-        const sessionsData = sessionsRes.data.data || [];
+        const sessionsData = Array.isArray(sessionsRes.data.data) ? sessionsRes.data.data : (sessionsRes.data.data?.items || []);
 
         const scheduled = sessionsData.filter(
           (s: any) => s.status === "Scheduled",

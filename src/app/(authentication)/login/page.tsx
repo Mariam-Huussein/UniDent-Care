@@ -50,8 +50,6 @@ export default function Login() {
       const { token, roles, publicId } = response.data;
 
       if (response.success && token && roles) {
-        Cookies.set("token", token, { expires: 7 });
-        Cookies.set("user_role", roles[0], { expires: 7 });
         dispatch(login(response.data));
 
         try {
