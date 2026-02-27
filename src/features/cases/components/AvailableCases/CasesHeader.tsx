@@ -6,17 +6,18 @@ interface CasesHeaderProps {
     showingCases: number;
     search: string;
     setSearch: (value: string) => void;
-    sortBy: string;
-    setSortBy: (value: string) => void;
-    sortOptions: string[];
+    selectedCaseType: string;
+    setSelectedCaseType: (value: string) => void;
+    viewMode: 'grid' | 'table';
+    setViewMode: (value: 'grid' | 'table') => void;
 }
 
-export default function CasesHeader({ totalCases, showingCases, search, setSearch, sortBy, setSortBy, sortOptions }: CasesHeaderProps) {
+export default function CasesHeader({ totalCases, showingCases, search, setSearch, selectedCaseType, setSelectedCaseType, viewMode, setViewMode }: CasesHeaderProps) {
     return (
         <div className="relative z-10 rounded-2xl sm:rounded-3xl bg-white border border-gray-100 shadow-xl shadow-gray-100/50 p-5 sm:p-8 mb-6 sm:mb-8">
             {/* Decorative background elements */}
-            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 rounded-full bg-gradient-to-br from-blue-50 to-indigo-50 blur-3xl opacity-60 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 rounded-full bg-gradient-to-tr from-emerald-50 to-teal-50 blur-3xl opacity-60 pointer-events-none" />
+            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 rounded-full bg-linear-to-br from-blue-50 to-indigo-50 blur-3xl opacity-60 pointer-events-none" />
+            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 rounded-full bg-linear-to-tr from-emerald-50 to-teal-50 blur-3xl opacity-60 pointer-events-none" />
 
             <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
                 {/* Title Section */}
@@ -43,10 +44,10 @@ export default function CasesHeader({ totalCases, showingCases, search, setSearc
                         </span>
                         {totalCases} Available
                     </div>
-                    {/* <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-sm font-medium border border-gray-100">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-sm font-medium border border-gray-100">
                         <span className="w-2 h-2 rounded-full bg-gray-400"></span>
                         {showingCases} Showing
-                    </div> */}
+                    </div>
                 </div>
             </div>
 
@@ -54,9 +55,10 @@ export default function CasesHeader({ totalCases, showingCases, search, setSearc
             <CasesControls
                 search={search}
                 setSearch={setSearch}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
-                sortOptions={sortOptions}
+                selectedCaseType={selectedCaseType}
+                setSelectedCaseType={setSelectedCaseType}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
             />
         </div>
     );

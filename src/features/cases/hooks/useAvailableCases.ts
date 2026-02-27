@@ -4,15 +4,17 @@ import { RootState } from "@/store";
 import toast from "react-hot-toast";
 import { getAvailableCases } from "../server/case.action";
 import { CaseItem } from "../types/caseCardProps.types";
+import Cookies from "js-cookie";
 
 
 export const useAvailableCases = () => {
-    const studentId = useSelector((state: RootState) => state.auth.user?.publicId || "");
+    const token = (useSelector((state: RootState) => state.auth.token) || Cookies.get("token")) as string;
 
     const [cases, setCases] = useState<CaseItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-    const [sortBy, setSortBy] = useState("Newest");
+    const [selectedCaseType, setSelectedCaseType] = useState("");
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -21,10 +23,9 @@ export const useAvailableCases = () => {
     const pageSize = 9;
 
     const fetchData = async () => {
-        if (!studentId) return;
         setLoading(true);
         try {
-            const response = await getAvailableCases(currentPage, pageSize, studentId);
+            const response = await getAvailableCases(currentPage, pageSize, token, selectedCaseType || undefined);
             if (response.success) {
                 setCases(response.data.items);
                 setTotalPages(response.data.totalPages);
@@ -41,7 +42,7 @@ export const useAvailableCases = () => {
 
     useEffect(() => {
         fetchData();
-    }, [studentId, currentPage]);
+    }, [currentPage, selectedCaseType]);
 
     const filteredCases = useMemo(() => {
         return cases.filter((c) => {
@@ -52,23 +53,16 @@ export const useAvailableCases = () => {
         });
     }, [cases, search]);
 
-    const sortedCases = useMemo(() => {
-        return [...filteredCases].sort((a, b) => {
-            if (sortBy === "Newest") return new Date(b.createAt).getTime() - new Date(a.createAt).getTime();
-            if (sortBy === "Oldest") return new Date(a.createAt).getTime() - new Date(b.createAt).getTime();
-            if (sortBy === "Most Sessions") return b.totalSessions - a.totalSessions;
-            return 0;
-        });
-    }, [filteredCases, sortBy]);
-
     return {
         cases,
         loading,
         search,
         setSearch,
-        sortBy,
-        setSortBy,
-        sortedCases,
+        selectedCaseType,
+        setSelectedCaseType,
+        viewMode,
+        setViewMode,
+        sortedCases: filteredCases,
         refresh: fetchData,
         pageSize,
         currentPage,

@@ -1,7 +1,8 @@
 import z from "zod";
 
 export const patientSignupSchema = z.object({
-    fullName: z.string().min(2, "Full name must be at least 2 characters"),
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters")
         .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
@@ -11,7 +12,7 @@ export const patientSignupSchema = z.object({
     birthDate: z.string().refine(date => !isNaN(Date.parse(date)), {
         message: "Invalid date of birth",
     }),
-    gender: z.coerce.number,
+    gender: z.number(),
 })
 
 export type PatientSignupValues = z.infer<typeof patientSignupSchema>

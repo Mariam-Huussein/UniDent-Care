@@ -1,43 +1,48 @@
 import axios, { AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 import { AvailableCasesResponse, CaseDetailResponse, CaseRequestBody, CaseRequestResponse } from "../types/caseCardProps.types";
+import { CaseTypeResponse } from "@/types/caseTypes";
 
-export async function getAvailableCases(page: number, pageSize: number): Promise<AvailableCasesResponse> {
-    const token = Cookies.get("token");
-    if (!token) {
-        throw new Error("Authentication required");
-    }
+const cookieToken = Cookies.get("token");
 
+export async function getAvailableCases(page: number, pageSize: number, token: string, caseType?: string): Promise<AvailableCasesResponse> {
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Students/available-cases`,
             method: "GET",
-            params: { page, pageSize },
+            params: { page, pageSize, caseType },
             headers: {
                 Authorization: `Bearer ${token}`,
             },
         };
         const response = await axios.request(options);
-        console.log("response", response);
         return response.data;
     } catch (error: any) {
-        console.log("error", error);
-        throw new Error(error.response?.data?.message || "Failed to fetch available cases");
+        throw new Error(error.response?.data?.message || "Failed to find available cases");
+    }
+}
+
+export async function getCaseTypes(page: number = 1, pageSize: number = 100, search?: string): Promise<CaseTypeResponse> {
+    try {
+        const options: AxiosRequestConfig = {
+            url: `https://dental-hup1.runasp.net/api/CaseTypes`,
+            method: "GET",
+            params: { page, pageSize, search },
+        };
+        const response = await axios.request(options);
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || "Failed to fetch case types");
     }
 }
 
 export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
-    const token = Cookies.get("token");
-    if (!token) {
-        throw new Error("Authentication required");
-    }
-
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Cases/${caseId}`,
             method: "GET",
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${cookieToken}`,
             },
         };
         const response = await axios.request(options);
@@ -48,23 +53,18 @@ export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
 }
 
 export async function sendCaseRequest(body: CaseRequestBody): Promise<CaseRequestResponse> {
-    const token = Cookies.get("token");
-    if (!token) {
-        throw new Error("Authentication required");
-    }
-
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/CaseRequests`,
             method: "POST",
             data: body,
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${cookieToken}`,
             },
         };
         const response = await axios.request(options);
         return response.data;
     } catch (error: any) {
-        throw new Error(error.response?.data?.message || "Failed to send case request");
+        throw new Error(error.response?.data?.message);
     }
 }
