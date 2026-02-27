@@ -1,25 +1,23 @@
 import api from "@/utils/api";
 
 export const createCase = (data: {
-    patientId: string;
-    title: string;
-    description: string;
-    caseTypeId: string;
+    PatientId: string;
+    Title: string;
+    Description: string;
+    CaseTypeId: string;
+    Images?: File[];
 }) => {
-    return api.post("/Cases", data);
-};
+    const formData = new FormData();
+    formData.append("PatientId", data.PatientId);
+    formData.append("Title", data.Title);
+    formData.append("Description", data.Description);
+    formData.append("CaseTypeId", data.CaseTypeId);
 
-export const getCaseTypes = (
-    page: number = 1,
-    pageSize: number = 10,
-    search?: string,
-) => {
-    const params = new URLSearchParams({
-        page: String(page),
-        pageSize: String(pageSize),
-    });
+    if (data.Images && data.Images.length > 0) {
+        data.Images.forEach((image) => {
+            formData.append("Images", image);
+        });
+    }
 
-    if (search) params.append("search", search);
-
-    return api.get(`/CaseTypes?${params.toString()}`);
+    return api.post("/Cases", formData);
 };
