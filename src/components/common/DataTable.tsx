@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Search, ArrowDownAZ, ArrowUpZA, ArrowUpDown } from "lucide-react";
+import { ArrowDownAZ, ArrowUpZA, ArrowUpDown } from "lucide-react";
 
 export type Column<T> = {
     header: string;

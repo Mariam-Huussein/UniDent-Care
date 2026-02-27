@@ -18,6 +18,7 @@ import {
   X,
   Check,
   Sparkles,
+  ImageIcon,
 } from "lucide-react";
 
 import { RootState } from "@/store";
@@ -27,24 +28,41 @@ import {
 } from "@/features/cases/schemas/addCaseSchema";
 import {
   createCase,
-  getCaseTypes,
 } from "@/features/cases/services/caseService";
+import { getCaseTypes } from "@/server/caseTypes.action";
 import { CaseType } from "@/features/cases/types/case.types";
+import Cookies from "js-cookie";
 
 export default function AddCase() {
-  const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
+  const patientId = useSelector((state: RootState) => state.auth.user?.publicId) || Cookies.get("user_id");
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [caseTypes, setCaseTypes] = useState<CaseType[]>([]);
   const [isLoadingTypes, setIsLoadingTypes] = useState(false);
   const [selectedTypeName, setSelectedTypeName] = useState("");
+  const [images, setImages] = useState<File[]>([]);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      const updatedFiles = [...images, ...newFiles];
+      setImages(updatedFiles);
+      setValue("Images", updatedFiles, { shouldValidate: true });
+    }
+  };
+
+  const handleRemoveFile = (indexToRemove: number) => {
+    const updatedFiles = images.filter((_, index) => index !== indexToRemove);
+    setImages(updatedFiles);
+    setValue("Images", updatedFiles, { shouldValidate: true });
+  };
+
   const form = useForm<AddCaseFormValues>({
     resolver: zodResolver(addCaseSchema),
-    defaultValues: { patientId: patientId || "", caseTypeId: "" },
+    defaultValues: { PatientId: patientId },
   });
 
   const {
@@ -54,7 +72,7 @@ export default function AddCase() {
     watch,
     formState: { errors, isSubmitting },
   } = form;
-  const currentCaseTypeId = watch("caseTypeId");
+  const currentCaseTypeId = watch("CaseTypeId");
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -74,7 +92,7 @@ export default function AddCase() {
   }, [search]);
 
   useEffect(() => {
-    if (patientId) setValue("patientId", patientId);
+    if (patientId) setValue("PatientId", patientId);
   }, [patientId, setValue]);
 
   useEffect(() => {
@@ -85,7 +103,10 @@ export default function AddCase() {
     try {
       setIsLoadingTypes(true);
       const res = await getCaseTypes(1, 20, searchValue);
-      setCaseTypes(res.data.data);
+      setCaseTypes(((res as any).data?.items || (res as any).items || []).map((item: any) => ({
+        id: item.publicId,
+        name: item.name,
+      })));
     } catch (error) {
       console.error(error);
     } finally {
@@ -94,7 +115,7 @@ export default function AddCase() {
   };
 
   const handleSelectType = (type: CaseType) => {
-    setValue("caseTypeId", type.id, { shouldValidate: true });
+    setValue("CaseTypeId", type.id, { shouldValidate: true });
     setSelectedTypeName(type.name);
     setIsOpen(false);
     setSearch("");
@@ -106,8 +127,14 @@ export default function AddCase() {
       const res = await createCase(values);
       if (res.data?.success) {
         toast.success("Case submitted perfectly!", { id: toastId });
-        form.reset({ patientId });
+        form.reset({
+          Title: "",
+          Description: "",
+          CaseTypeId: "",
+          Images: [],
+        });
         setSelectedTypeName("");
+        setImages([]);
       } else {
         toast.error(res.data?.message || "Error creating case", {
           id: toastId,
@@ -117,6 +144,13 @@ export default function AddCase() {
       toast.error("An unexpected error occurred", { id: toastId });
     }
   };
+
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      console.log("Validation errors:", errors);
+      console.log("Current patientId value:", patientId);
+    }
+  }, [errors, patientId]);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-[#FDFDFF] p-6 overflow-hidden">
@@ -129,7 +163,7 @@ export default function AddCase() {
         className="relative w-full max-w-xl"
       >
         <div className="bg-white rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden backdrop-blur-sm">
-          <div className="h-2 w-full bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-500" />
+          <div className="h-2 w-full bg-linear-to-r from-blue-500 via-indigo-600 to-purple-500" />
 
           <div className="pt-10 pb-6 text-center">
             <div className="inline-flex relative mb-4">
@@ -159,18 +193,18 @@ export default function AddCase() {
                 Case Subject
               </label>
               <input
-                {...register("title")}
+                {...register("Title")}
                 placeholder="Brief name for your condition"
-                className={`w-full bg-slate-50 border-2 ${errors.title ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl px-5 py-3.5 outline-none transition-all duration-300 placeholder:text-slate-400 font-medium focus:bg-white focus:shadow-sm`}
+                className={`w-full bg-slate-50 border-2 ${errors.Title ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl px-5 py-3.5 outline-none transition-all duration-300 placeholder:text-slate-400 font-medium focus:bg-white focus:shadow-sm`}
               />
               <AnimatePresence>
-                {errors.title && (
+                {errors.Title && (
                   <motion.p
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     className="text-xs font-semibold text-red-500 flex items-center gap-1 ml-1"
                   >
-                    <AlertCircle size={12} /> {errors.title.message}
+                    <AlertCircle size={12} /> {errors.Title.message}
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -248,6 +282,17 @@ export default function AddCase() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+                <AnimatePresence>
+                  {errors.CaseTypeId && (
+                    <motion.p
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="text-xs font-semibold text-red-500 flex items-center gap-1 mt-2 ml-1 absolute -bottom-6"
+                    >
+                      <AlertCircle size={12} /> {errors.CaseTypeId.message}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 
@@ -257,18 +302,82 @@ export default function AddCase() {
                 Symptom Details
               </label>
               <textarea
-                {...register("description")}
+                {...register("Description")}
                 placeholder="Describe your pain, duration, and any relevant info..."
-                className="w-full min-h-[140px] bg-slate-50 border-2 border-slate-50 focus:border-indigo-500 focus:bg-white rounded-2xl px-5 py-4 outline-none transition-all duration-300 resize-none font-medium placeholder:text-slate-400 focus:shadow-sm"
+                className={`w-full min-h-[140px] bg-slate-50 border-2 ${errors.Description ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} focus:bg-white rounded-2xl px-5 py-4 outline-none transition-all duration-300 resize-none font-medium placeholder:text-slate-400 focus:shadow-sm`}
               />
+              <AnimatePresence>
+                {errors.Description && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-xs font-semibold text-red-500 flex items-center gap-1 ml-1"
+                  >
+                    <AlertCircle size={12} /> {errors.Description.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+                <ImageIcon size={14} className="text-blue-500" />
+                Case Images
+              </label>
+
+              <label
+                htmlFor="fileInput"
+                className="w-full bg-slate-50 border-2 border-slate-50 hover:border-indigo-400 border-dashed rounded-2xl px-5 py-8 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 group"
+              >
+                <div className="p-3 bg-indigo-100/50 rounded-full group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-300">
+                  <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M25.665 3.667H11a3.667 3.667 0 0 0-3.667 3.666v29.334A3.667 3.667 0 0 0 11 40.333h22a3.667 3.667 0 0 0 3.666-3.666v-22m-11-11 11 11m-11-11v11h11m-7.333 9.166H14.665m14.667 7.334H14.665M18.332 16.5h-3.667" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <p className="text-slate-600 font-medium">Drag & drop your files here</p>
+                  <p className="text-slate-400 text-sm mt-1">Or <span className="text-indigo-600 font-semibold hover:underline">click</span> to upload</p>
+                </div>
+                <input id="fileInput" type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+              </label>
+
+              {images.length > 0 && (
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  {images.map((file, idx) => (
+                    <div key={idx} className="relative flex items-center justify-between p-3 bg-white border border-slate-200 shadow-sm rounded-xl">
+                      <div className="flex-1 truncate text-xs font-semibold text-slate-600 mr-2" title={file.name}>
+                        {file.name}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(idx)}
+                        className="text-slate-400 hover:text-red-500 transition-colors shrink-0"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <AnimatePresence>
+                {errors.Images && (
+                  <motion.p
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-xs font-semibold text-red-500 flex items-center gap-1 ml-1"
+                  >
+                    <AlertCircle size={12} /> {String(errors.Images.message)}
+                  </motion.p>
+                )}
+              </AnimatePresence>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="relative w-full group overflow-hidden bg-slate-900 text-white py-4 rounded-2xl font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-200 active:scale-[0.97] disabled:opacity-50"
+              className="relative w-full group overflow-hidden bg-slate-900 text-white py-4 rounded-2xl font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-200 active:scale-[0.97] disabled:opacity-50 cursor-pointer"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10 flex items-center justify-center gap-3">
                 {isSubmitting ? (
                   <Loader2 className="animate-spin" size={20} />

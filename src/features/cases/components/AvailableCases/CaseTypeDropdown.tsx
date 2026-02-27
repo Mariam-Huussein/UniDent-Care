@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, ChevronDown } from "lucide-react";
-import { getCaseTypes } from "../../server/case.action";
 import { CaseType } from "../../types/caseCardProps.types";
+import { getCaseTypes } from "@/server/caseTypes.action";
 
 interface CaseTypeDropdownProps {
     selectedCaseType: string;
