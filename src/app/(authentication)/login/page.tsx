@@ -16,7 +16,6 @@ import {
   EyeOff,
   Loader2,
   ArrowRight,
-  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -57,7 +56,6 @@ export default function Login() {
 
           dispatch(setUserFromReload({ user, role: roles[0] }));
 
-          toast.success(response.message || "Login successful!");
           router.replace("/dashboard");
         } catch (err: any) {
           console.error(err);

@@ -40,7 +40,8 @@ export default function PatientSignup() {
     resolver: zodResolver(patientSignupSchema),
     mode: "onChange",
     defaultValues: {
-      fullName: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
       phoneNumber: "",
@@ -120,12 +121,20 @@ export default function PatientSignup() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            onSubmit={handleSubmit((data) => signupMutation.mutate(data))}
+            onSubmit={handleSubmit((data: any) => {
+              const payload = {
+                ...data,
+                fullName: `${data.firstName} ${data.lastName}`.trim(),
+              };
+              delete payload.firstName;
+              delete payload.lastName;
+              signupMutation.mutate(payload);
+            })}
             className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5"
           >
             <motion.div variants={itemVariants} className="space-y-1.5">
               <label className="text-sm font-bold text-slate-700 ml-1">
-                Full Name
+                First Name
               </label>
               <div className="relative group">
                 <User
@@ -133,14 +142,36 @@ export default function PatientSignup() {
                   size={18}
                 />
                 <input
-                  {...register("fullName")}
-                  className={`w-full bg-slate-50 border-2 ${errors.fullName ? "border-red-100" : "border-slate-50 focus:border-blue-600"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
-                  placeholder="Ahmed Salem"
+                  {...register("firstName", { required: "First name is required" })}
+                  className={`w-full bg-slate-50 border-2 ${errors.firstName ? "border-red-100" : "border-slate-50 focus:border-blue-600"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  placeholder="Ahmed"
                 />
               </div>
-              {errors.fullName && (
+              {errors.firstName && (
                 <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.fullName.message}
+                  {errors.firstName.message as string}
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-1.5">
+              <label className="text-sm font-bold text-slate-700 ml-1">
+                Last Name
+              </label>
+              <div className="relative group">
+                <User
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors"
+                  size={18}
+                />
+                <input
+                  {...register("lastName", { required: "Last name is required" })}
+                  className={`w-full bg-slate-50 border-2 ${errors.lastName ? "border-red-100" : "border-slate-50 focus:border-blue-600"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  placeholder="Salem"
+                />
+              </div>
+              {errors.lastName && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.lastName.message as string}
                 </p>
               )}
             </motion.div>
