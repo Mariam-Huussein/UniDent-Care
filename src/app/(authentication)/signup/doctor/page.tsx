@@ -18,6 +18,8 @@ import {
   Loader2,
   ArrowRight,
   ChevronLeft,
+  Phone,
+  AtSign,
 } from "lucide-react";
 
 import {
@@ -37,6 +39,15 @@ export default function DoctorSignup() {
     formState: { errors },
   } = useForm<DoctorSignupValues>({
     resolver: zodResolver(doctorSignupSchema),
+    defaultValues: {
+      fullName: "",
+      username: "",
+      email: "",
+      phone: "",
+      specialty: "",
+      universityId: "",
+      password: "",
+    },
   });
 
   const signupMutation = useMutation({
@@ -49,8 +60,13 @@ export default function DoctorSignup() {
     },
     onError: (err: any) => {
       const serverErrors = err?.response?.data?.error?.errors;
-      if (Array.isArray(serverErrors)) {
-        serverErrors.forEach((msg) => toast.error(msg));
+      if (serverErrors) {
+        Object.keys(serverErrors).forEach((key) => {
+          const messages = serverErrors[key];
+          messages.forEach((msg: string) => {
+            toast.error(`${key}: ${msg}`);
+          });
+        });
       } else {
         toast.error("Registration failed. Please check your data.");
       }
@@ -61,7 +77,7 @@ export default function DoctorSignup() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 },
+      transition: { staggerChildren: 0.05 },
     },
   };
 
@@ -123,22 +139,38 @@ export default function DoctorSignup() {
                   size={18}
                 />
                 <input
-                  {...register("name")}
-                  className={`w-full bg-slate-50/50 border-2 ${errors.name ? "border-red-100" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  {...register("fullName")}
+                  className={`w-full bg-slate-50/50 border-2 ${errors.fullName ? "border-red-200" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
                   placeholder="Dr. Ahmed Ali"
                 />
               </div>
-              <AnimatePresence>
-                {errors.name && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="text-[11px] font-bold text-red-500 ml-1"
-                  >
-                    {errors.name.message}
-                  </motion.p>
-                )}
-              </AnimatePresence>
+              {errors.fullName && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.fullName.message}
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">
+                Username
+              </label>
+              <div className="relative group">
+                <AtSign
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-600 transition-colors"
+                  size={18}
+                />
+                <input
+                  {...register("username")}
+                  className={`w-full bg-slate-50/50 border-2 ${errors.username ? "border-red-200" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  placeholder="ahmed_dentist"
+                />
+              </div>
+              {errors.username && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.username.message}
+                </p>
+              )}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-2">
@@ -153,13 +185,35 @@ export default function DoctorSignup() {
                 <input
                   type="email"
                   {...register("email")}
-                  className={`w-full bg-slate-50/50 border-2 ${errors.email ? "border-red-100" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50/50 border-2 ${errors.email ? "border-red-200" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
                   placeholder="doctor@example.com"
                 />
               </div>
               {errors.email && (
                 <p className="text-[11px] font-bold text-red-500 ml-1">
                   {errors.email.message}
+                </p>
+              )}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className="space-y-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">
+                Phone Number
+              </label>
+              <div className="relative group">
+                <Phone
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-600 transition-colors"
+                  size={18}
+                />
+                <input
+                  {...register("phone")}
+                  className={`w-full bg-slate-50/50 border-2 ${errors.phone ? "border-red-200" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  placeholder="01234567890"
+                />
+              </div>
+              {errors.phone && (
+                <p className="text-[11px] font-bold text-red-500 ml-1">
+                  {errors.phone.message}
                 </p>
               )}
             </motion.div>
@@ -175,7 +229,7 @@ export default function DoctorSignup() {
                 />
                 <input
                   {...register("specialty")}
-                  className={`w-full bg-slate-50/50 border-2 ${errors.specialty ? "border-red-100" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50/50 border-2 ${errors.specialty ? "border-red-200" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
                   placeholder="e.g. Endodontics"
                 />
               </div>
@@ -196,9 +250,9 @@ export default function DoctorSignup() {
                   size={18}
                 />
                 <input
-                  type="number"
+                  type="text"
                   {...register("universityId")}
-                  className={`w-full bg-slate-50/50 border-2 ${errors.universityId ? "border-red-100" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50/50 border-2 ${errors.universityId ? "border-red-200" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-4 py-3 outline-none transition-all focus:bg-white`}
                   placeholder="1234567"
                 />
               </div>
@@ -224,7 +278,7 @@ export default function DoctorSignup() {
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className={`w-full bg-slate-50/50 border-2 ${errors.password ? "border-red-100" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-12 py-3 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50/50 border-2 ${errors.password ? "border-red-200" : "border-slate-100 focus:border-teal-500"} rounded-2xl pl-11 pr-12 py-3 outline-none transition-all focus:bg-white`}
                   placeholder="••••••••"
                 />
                 <button

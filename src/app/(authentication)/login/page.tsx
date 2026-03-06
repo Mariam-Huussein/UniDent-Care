@@ -196,7 +196,7 @@ export default function Login() {
           <p className="mt-8 text-center text-slate-500 font-medium text-sm">
             Don't have an account?{" "}
             <a
-              href="/register"
+              href="/signup/patient"
               className="text-blue-600 font-bold hover:underline"
             >
               Create one

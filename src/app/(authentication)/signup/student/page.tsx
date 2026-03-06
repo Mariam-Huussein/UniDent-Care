@@ -19,6 +19,8 @@ import {
   ArrowRight,
   ChevronLeft,
   BookOpen,
+  Phone,
+  AtSign,
 } from "lucide-react";
 
 import {
@@ -38,6 +40,16 @@ export default function StudentSignup() {
     formState: { errors },
   } = useForm<StudentSignupValues>({
     resolver: zodResolver(studentSignupSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      username: "",
+      phone: "",
+      university: "",
+      universityId: "",
+      level: 1,
+      password: "",
+    }
   });
 
   const signupMutation = useMutation({
@@ -49,9 +61,17 @@ export default function StudentSignup() {
       }
     },
     onError: (err: any) => {
-      const serverErrors = err?.response?.data?.error?.errors;
-      if (Array.isArray(serverErrors)) {
-        serverErrors.forEach((msg: string) => toast.error(msg));
+      const serverErrors = err?.response?.data?.errors || err?.response?.data?.error?.errors;
+      
+      if (serverErrors && typeof serverErrors === 'object') {
+        Object.keys(serverErrors).forEach((key) => {
+          const messages = serverErrors[key];
+          if (Array.isArray(messages)) {
+            messages.forEach((msg: string) => toast.error(`${key}: ${msg}`));
+          } else {
+            toast.error(messages);
+          }
+        });
       } else {
         toast.error("Registration failed. Please check your inputs.");
       }
@@ -82,10 +102,7 @@ export default function StudentSignup() {
           onClick={() => router.back()}
           className="flex items-center gap-2 text-indigo-600 font-bold mb-6 hover:gap-3 transition-all group"
         >
-          <ChevronLeft
-            size={20}
-            className="group-hover:scale-110 transition-transform"
-          />
+          <ChevronLeft size={20} className="group-hover:scale-110 transition-transform" />
           Back
         </button>
 
@@ -97,12 +114,8 @@ export default function StudentSignup() {
                 <BookOpen size={28} />
               </div>
             </div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
-              Academic Access
-            </h2>
-            <p className="mt-2 text-slate-500 font-medium">
-              Join the next generation of dental professionals
-            </p>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Academic Access</h2>
+            <p className="mt-2 text-slate-500 font-medium">Join the next generation of dental professionals</p>
           </div>
 
           <motion.form
@@ -110,215 +123,112 @@ export default function StudentSignup() {
             initial="hidden"
             animate="visible"
             onSubmit={handleSubmit((data) => {
-              const payload: StudentSignupPayload = {
-                fullName: data.fullName,
-                email: data.email,
-                password: data.password,
-                university: data.university,
-                universityId: data.universityId,
-                username: data.username,
-                level: data.level,
-                phone: data.phone,
-              };
-              signupMutation.mutate(payload);
+              const { grade, ...rest } = data as any; 
+              signupMutation.mutate(rest);
             })}
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                Full Name
-              </label>
+              <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
               <div className="relative group">
-                <User
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   {...register("fullName")}
-                  className={`w-full bg-slate-50 border-2 ${errors.fullName ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.fullName ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="John Doe"
                 />
               </div>
-              {errors.fullName && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.fullName.message}
-                </p>
-              )}
+              {errors.fullName && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.fullName.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                University Email
-              </label>
+              <label className="text-sm font-bold text-slate-700 ml-1">University Email</label>
               <div className="relative group">
-                <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   type="email"
                   {...register("email")}
-                  className={`w-full bg-slate-50 border-2 ${errors.email ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.email ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="student@university.edu"
                 />
               </div>
-              {errors.email && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.email.message}
-                </p>
-              )}
+              {errors.email && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.email.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                Username
-              </label>
+              <label className="text-sm font-bold text-slate-700 ml-1">Username</label>
               <div className="relative group">
-                <User
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   {...register("username")}
-                  className={`w-full bg-slate-50 border-2 ${errors.username ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.username ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="johndoe123"
                 />
               </div>
-              {errors.username && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.username.message}
-                </p>
-              )}
+              {errors.username && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.username.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                Phone Number
-              </label>
+              <label className="text-sm font-bold text-slate-700 ml-1">Phone Number</label>
               <div className="relative group">
-                <BookOpen
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   {...register("phone")}
-                  className={`w-full bg-slate-50 border-2 ${errors.phone ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.phone ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="01XXXXXXXXX"
                 />
               </div>
-              {errors.phone && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.phone.message}
-                </p>
-              )}
+              {errors.phone && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.phone.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                University
-              </label>
+              <label className="text-sm font-bold text-slate-700 ml-1">University</label>
               <div className="relative group">
-                <BookOpen
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   {...register("university")}
-                  className={`w-full bg-slate-50 border-2 ${errors.university ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.university ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="Cairo University"
                 />
               </div>
-              {errors.university && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.university.message}
-                </p>
-              )}
+              {errors.university && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.university.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                Student ID
-              </label>
+              <label className="text-sm font-bold text-slate-700 ml-1">Student ID</label>
               <div className="relative group">
-                <IdCard
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   {...register("universityId")}
-                  className={`w-full bg-slate-50 border-2 ${errors.universityId ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.universityId ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="ID Number"
                 />
               </div>
-              {errors.universityId && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.universityId.message}
-                </p>
-              )}
+              {errors.universityId && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.universityId.message}</p>}
             </motion.div>
 
-            <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                Academic Year
-              </label>
+            <motion.div variants={itemVariants} className="space-y-1.5 md:col-span-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">Academic Level</label>
               <div className="relative group">
-                <GraduationCap
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
-                <input
-                  type="number"
-                  {...register("grade", { valueAsNumber: true })}
-                  className={`w-full bg-slate-50 border-2 ${errors.grade ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
-                  placeholder="Year (1-5)"
-                />
-              </div>
-              {errors.grade && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.grade.message}
-                </p>
-              )}
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                Academic Level
-              </label>
-              <div className="relative group">
-                <GraduationCap
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   type="number"
                   {...register("level", { valueAsNumber: true })}
-                  className={`w-full bg-slate-50 border-2 ${errors.level ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.level ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="Level (1-7)"
                 />
               </div>
-              {errors.level && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.level.message}
-                </p>
-              )}
+              {errors.level && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.level.message}</p>}
             </motion.div>
 
-            <motion.div
-              variants={itemVariants}
-              className="space-y-1.5 md:col-span-2"
-            >
-              <label className="text-sm font-bold text-slate-700 ml-1">
-                Secure Password
-              </label>
+            <motion.div variants={itemVariants} className="space-y-1.5 md:col-span-2">
+              <label className="text-sm font-bold text-slate-700 ml-1">Secure Password</label>
               <div className="relative group">
-                <Lock
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors"
-                  size={18}
-                />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className={`w-full bg-slate-50 border-2 ${errors.password ? "border-red-100" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-12 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 border-2 ${errors.password ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-12 py-3.5 outline-none transition-all focus:bg-white`}
                   placeholder="••••••••"
                 />
                 <button
@@ -329,11 +239,7 @@ export default function StudentSignup() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-[11px] font-bold text-red-500 ml-1">
-                  {errors.password.message}
-                </p>
-              )}
+              {errors.password && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.password.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="md:col-span-2 pt-4">
@@ -348,10 +254,7 @@ export default function StudentSignup() {
                   ) : (
                     <>
                       <span>Create Account</span>
-                      <ArrowRight
-                        size={20}
-                        className="group-hover:translate-x-1 transition-transform"
-                      />
+                      <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
                 </div>
@@ -362,12 +265,7 @@ export default function StudentSignup() {
           <div className="mt-8 text-center">
             <p className="text-slate-500 font-medium text-sm">
               Already a member?{" "}
-              <a
-                href="/login"
-                className="text-indigo-600 font-bold hover:underline decoration-2 underline-offset-4"
-              >
-                Log in
-              </a>
+              <a href="/login" className="text-indigo-600 font-bold hover:underline decoration-2 underline-offset-4">Log in</a>
             </p>
           </div>
         </div>
