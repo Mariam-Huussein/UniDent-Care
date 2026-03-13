@@ -9,14 +9,7 @@ import { useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
-import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Loader2,
-  ArrowRight,
-} from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from "lucide-react";
 
 import {
   loginSchema,
@@ -121,10 +114,10 @@ export default function Login() {
                   size={20}
                 />
                 <input
-                  type="email"
+                  type="text"
                   {...register("email")}
                   className={`w-full bg-white border-2 ${errors.email ? "border-red-100" : "border-slate-100 focus:border-blue-600"} rounded-2xl pl-12 pr-4 py-3.5 outline-none transition-all font-medium placeholder:text-slate-400`}
-                  placeholder="name@unident.com"
+                  placeholder="Email or Phone number"
                 />
               </div>
               {errors.email && (
