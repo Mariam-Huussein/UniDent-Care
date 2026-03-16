@@ -7,5 +7,5 @@ export default async function MyCaseDetail({
 }) {
   const { id } = await params;
 
-  return <div>{id}</div>;
+  return <CaseDetailsScreen caseId={id} />;
 }
