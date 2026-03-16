@@ -13,12 +13,16 @@ import {
   AlertCircle,
   MoreVertical,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function RecentCases() {
-  const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
+  const patientId = useSelector(
+    (state: RootState) => state.auth.user?.publicId,
+  );
   const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [limit, setLimit] = useState<number>(5);
+  const router = useRouter();
 
   useEffect(() => {
     if (!patientId) return;
@@ -27,7 +31,9 @@ export function RecentCases() {
       try {
         setLoading(true);
         const casesRes = await api.get(`/Cases/patient/${patientId}`);
-        const casesData = Array.isArray(casesRes.data.data) ? casesRes.data.data : (casesRes.data.data?.items || []);
+        const casesData = Array.isArray(casesRes.data.data)
+          ? casesRes.data.data
+          : casesRes.data.data?.items || [];
 
         const sortedCases = [...casesData].sort(
           (a, b) =>
@@ -45,7 +51,6 @@ export function RecentCases() {
     fetchCases();
   }, [patientId]);
 
-  // دالة لتحديد لون وشكل الـ Status Badge
   const getStatusStyles = (status: string) => {
     switch (status.toLowerCase()) {
       case "completed":
@@ -70,6 +75,10 @@ export function RecentCases() {
           label: status,
         };
     }
+  };
+
+  const showDetails = (id: string) => {
+    router.push(`/my-cases/${id}`);
   };
 
   return (
@@ -119,7 +128,10 @@ export function RecentCases() {
               return (
                 <div
                   key={c.id}
-                  className="group flex items-center justify-between p-4 bg-white border border-gray-50 rounded-xl hover:border-indigo-100 hover:shadow-sm transition-all duration-200"
+                  className="cursor-pointer group flex items-center justify-between p-4 bg-white border border-gray-50 rounded-xl hover:border-indigo-100 hover:shadow-sm transition-all duration-200"
+                  onClick={() => {
+                    showDetails(c.id);
+                  }}
                 >
                   <div className="flex items-center gap-4">
                     <div className="hidden sm:flex w-10 h-10 rounded-full bg-gray-50 items-center justify-center text-gray-400 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">

@@ -26,15 +26,15 @@ import {
   addCaseSchema,
   AddCaseFormValues,
 } from "@/features/cases/schemas/addCaseSchema";
-import {
-  createCase,
-} from "@/features/cases/services/caseService";
+import { createCase } from "@/features/cases/services/caseService";
 import { getCaseTypes } from "@/server/caseTypes.action";
 import { CaseType } from "@/features/cases/types/case.types";
 import Cookies from "js-cookie";
 
 export default function AddCase() {
-  const patientId = useSelector((state: RootState) => state.auth.user?.publicId) || Cookies.get("user_id");
+  const patientId =
+    useSelector((state: RootState) => state.auth.user?.publicId) ||
+    Cookies.get("user_id");
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -103,10 +103,14 @@ export default function AddCase() {
     try {
       setIsLoadingTypes(true);
       const res = await getCaseTypes(1, 20, searchValue);
-      setCaseTypes(((res as any).data?.items || (res as any).items || []).map((item: any) => ({
-        id: item.publicId,
-        name: item.name,
-      })));
+      setCaseTypes(
+        ((res as any).data?.items || (res as any).items || []).map(
+          (item: any) => ({
+            id: item.publicId,
+            name: item.name,
+          }),
+        ),
+      );
     } catch (error) {
       console.error(error);
     } finally {
@@ -330,22 +334,55 @@ export default function AddCase() {
                 className="w-full bg-slate-50 border-2 border-slate-50 hover:border-indigo-400 border-dashed rounded-2xl px-5 py-8 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 group"
               >
                 <div className="p-3 bg-indigo-100/50 rounded-full group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-300">
-                  <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M25.665 3.667H11a3.667 3.667 0 0 0-3.667 3.666v29.334A3.667 3.667 0 0 0 11 40.333h22a3.667 3.667 0 0 0 3.666-3.666v-22m-11-11 11 11m-11-11v11h11m-7.333 9.166H14.665m14.667 7.334H14.665M18.332 16.5h-3.667" stroke="#4F46E5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    width="44"
+                    height="44"
+                    viewBox="0 0 44 44"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M25.665 3.667H11a3.667 3.667 0 0 0-3.667 3.666v29.334A3.667 3.667 0 0 0 11 40.333h22a3.667 3.667 0 0 0 3.666-3.666v-22m-11-11 11 11m-11-11v11h11m-7.333 9.166H14.665m14.667 7.334H14.665M18.332 16.5h-3.667"
+                      stroke="#4F46E5"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </div>
                 <div className="text-center">
-                  <p className="text-slate-600 font-medium">Drag & drop your files here</p>
-                  <p className="text-slate-400 text-sm mt-1">Or <span className="text-indigo-600 font-semibold hover:underline">click</span> to upload</p>
+                  <p className="text-slate-600 font-medium">
+                    Drag & drop your files here
+                  </p>
+                  <p className="text-slate-400 text-sm mt-1">
+                    Or{" "}
+                    <span className="text-indigo-600 font-semibold hover:underline">
+                      click
+                    </span>{" "}
+                    to upload
+                  </p>
                 </div>
-                <input id="fileInput" type="file" multiple accept="image/*" className="hidden" onChange={handleFileChange} />
+                <input
+                  id="fileInput"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
               </label>
 
               {images.length > 0 && (
                 <div className="mt-4 grid grid-cols-2 gap-3">
                   {images.map((file, idx) => (
-                    <div key={idx} className="relative flex items-center justify-between p-3 bg-white border border-slate-200 shadow-sm rounded-xl">
-                      <div className="flex-1 truncate text-xs font-semibold text-slate-600 mr-2" title={file.name}>
+                    <div
+                      key={idx}
+                      className="relative flex items-center justify-between p-3 bg-white border border-slate-200 shadow-sm rounded-xl"
+                    >
+                      <div
+                        className="flex-1 truncate text-xs font-semibold text-slate-600 mr-2"
+                        title={file.name}
+                      >
                         {file.name}
                       </div>
                       <button
