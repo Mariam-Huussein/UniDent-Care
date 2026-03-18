@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import api from "@/utils/api";
 import { Activity, Calendar, CheckCircle2, Loader2 } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface Stats {
   activeCases: number;
@@ -14,6 +15,8 @@ interface Stats {
 
 export function StatsCards() {
   const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
+  const { t, language } = useLanguage();
+  const isRtl = language === "ar";
   const [stats, setStats] = useState<Stats>({
     activeCases: 0,
     upcomingSessions: 0,
@@ -52,50 +55,50 @@ export function StatsCards() {
 
   const statItems = [
     {
-      label: "Active Cases",
+      label: t.dashStatsActive,
       value: stats.activeCases,
       icon: Activity,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-900/30",
     },
     {
-      label: "Upcoming Sessions",
+      label: t.dashStatsUpcoming,
       value: stats.upcomingSessions,
       icon: Calendar,
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-purple-600 dark:text-purple-400",
+      bgColor: "bg-purple-50 dark:bg-purple-900/30",
     },
     {
-      label: "Completed",
+      label: t.dashStatsCompleted,
       value: stats.completedTreatments,
       icon: CheckCircle2,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bgColor: "bg-emerald-50 dark:bg-emerald-900/30",
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-1">
+    <div className={`grid grid-cols-1 md:grid-cols-3 gap-6 p-1 transition-colors duration-300`} dir={isRtl ? 'rtl' : 'ltr'}>
       {statItems.map((item, index) => (
         <div
           key={index}
-          className="relative overflow-hidden group bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
+          className="relative overflow-hidden group bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md dark:shadow-slate-900/50 transition-all duration-300"
         >
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500 mb-1">{item.label}</p>
+              <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">{item.label}</p>
               {loading ? (
-                <div className="h-8 w-12 bg-gray-200 animate-pulse rounded" />
+                <div className="h-8 w-12 bg-slate-200 dark:bg-slate-800 animate-pulse rounded" />
               ) : (
-                <h3 className="text-2xl font-bold text-gray-900">{item.value}</h3>
+                <h3 className="text-3xl font-black text-slate-900 dark:text-white">{item.value}</h3>
               )}
             </div>
-            <div className={`p-3 rounded-xl ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform`}>
-              <item.icon size={24} />
+            <div className={`p-4 rounded-2xl ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform`}>
+              <item.icon size={26} strokeWidth={2.5} />
             </div>
           </div>
 
-          <div className={`absolute bottom-0 left-0 h-1 w-full opacity-0 group-hover:opacity-100 transition-opacity ${item.color.replace('text', 'bg')}`} />
+          <div className={`absolute bottom-0 left-0 h-1.5 w-full opacity-0 group-hover:opacity-100 transition-opacity ${item.bgColor}`} />
         </div>
       ))}
     </div>

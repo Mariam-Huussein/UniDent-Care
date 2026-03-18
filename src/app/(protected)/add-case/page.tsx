@@ -30,11 +30,13 @@ import { createCase } from "@/features/cases/services/caseService";
 import { getCaseTypes } from "@/server/caseTypes.action";
 import { CaseType } from "@/features/cases/types/case.types";
 import Cookies from "js-cookie";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function AddCase() {
-  const patientId =
-    useSelector((state: RootState) => state.auth.user?.publicId) ||
-    Cookies.get("user_id");
+  const patientId = useSelector((state: RootState) => state.auth.user?.publicId) || Cookies.get("user_id");
+  const { t, language } = useLanguage();
+  const isRtl = language === "ar";
+  
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -76,19 +78,17 @@ export default function AddCase() {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      )
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 400);
-    return () => clearTimeout(t);
+    const timeOut = setTimeout(() => setDebouncedSearch(search), 400);
+    return () => clearTimeout(timeOut);
   }, [search]);
 
   useEffect(() => {
@@ -105,10 +105,10 @@ export default function AddCase() {
       const res = await getCaseTypes(1, 20, searchValue);
       setCaseTypes(
         ((res as any).data?.items || (res as any).items || []).map(
-          (item: any) => ({
+           (item: any) => ({
             id: item.publicId,
-            name: item.name,
-          }),
+            name: isRtl && item.nameArabic ? item.nameArabic : item.name,
+          })
         ),
       );
     } catch (error) {
@@ -126,11 +126,11 @@ export default function AddCase() {
   };
 
   const onSubmit = async (values: AddCaseFormValues) => {
-    const toastId = toast.loading("Finalizing your request...");
+    const toastId = toast.loading(t.addCaseSubmitting);
     try {
       const res = await createCase(values);
       if (res.data?.success) {
-        toast.success("Case submitted perfectly!", { id: toastId });
+        toast.success(t.addCaseSuccess, { id: toastId });
         form.reset({
           Title: "",
           Description: "",
@@ -140,130 +140,128 @@ export default function AddCase() {
         setSelectedTypeName("");
         setImages([]);
       } else {
-        toast.error(res.data?.message || "Error creating case", {
+        toast.error(res.data?.message || t.addCaseErrorCreation, {
           id: toastId,
         });
       }
     } catch (error: any) {
-      toast.error("An unexpected error occurred", { id: toastId });
+      toast.error(t.addCaseErrorUnexpected, { id: toastId });
     }
   };
 
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log("Validation errors:", errors);
-      console.log("Current patientId value:", patientId);
-    }
-  }, [errors, patientId]);
-
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#FDFDFF] p-6 overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-200/30 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-200/30 rounded-full blur-[120px] animate-pulse" />
+    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 overflow-hidden transition-colors duration-300" dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="relative w-full max-w-xl"
+        initial={{ opacity: 0, scale: 0.98, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="relative w-full max-w-2xl mx-auto"
       >
-        <div className="bg-white rounded-[2.5rem] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] border border-slate-100 overflow-hidden backdrop-blur-sm">
-          <div className="h-2 w-full bg-linear-to-r from-blue-500 via-indigo-600 to-purple-500" />
+        <div className="bg-white/80 dark:bg-slate-900/80 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/40 dark:border-slate-800/60 backdrop-blur-xl overflow-hidden">
+          <div className="h-1.5 w-full bg-linear-to-r from-blue-500 via-indigo-600 to-purple-500" />
 
-          <div className="pt-10 pb-6 text-center">
-            <div className="inline-flex relative mb-4">
-              <div className="absolute inset-0 bg-indigo-400 blur-xl opacity-20 animate-pulse" />
-              <div className="relative w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                <ClipboardPlus size={28} />
+          <div className="pt-10 pb-6 px-6 sm:px-10 text-center">
+            <div className="inline-flex relative mb-5 group">
+              <div className="absolute inset-0 bg-indigo-400 dark:bg-indigo-600 blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500 rounded-full" />
+              <div className="relative w-16 h-16 bg-indigo-600 dark:bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50 transform group-hover:-translate-y-1 transition-transform duration-300 rotate-3 group-hover:rotate-6">
+                <ClipboardPlus size={32} />
               </div>
             </div>
-            <h1 className="text-2xl font-extrabold text-slate-800 tracking-tight">
-              Create Medical Case
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
+              {t.addCaseTitle}
             </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              Get the right diagnosis by filling the details
+            <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-2 font-medium">
+              {t.addCaseDesc}
             </p>
           </div>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="px-8 pb-10 space-y-6"
+            className="px-6 sm:px-10 pb-10 space-y-6 sm:space-y-7"
           >
-            <div className="group space-y-2">
-              <label className="flex items-center gap-2 text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+            {/* Subject */}
+            <div className="group space-y-2.5">
+              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
                 <FileText
-                  size={14}
-                  className="group-focus-within:text-indigo-600 transition-colors"
+                  size={16}
+                  className="text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors"
                 />
-                Case Subject
+                {t.addCaseSubject}
               </label>
               <input
                 {...register("Title")}
-                placeholder="Brief name for your condition"
-                className={`w-full bg-slate-50 border-2 ${errors.Title ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl px-5 py-3.5 outline-none transition-all duration-300 placeholder:text-slate-400 font-medium focus:bg-white focus:shadow-sm`}
+                placeholder={t.addCaseSubjectPlaceholder}
+                className={`w-full bg-slate-50/50 dark:bg-slate-950/50 border-2 ${errors.Title ? "border-red-300 dark:border-red-500/50 focus:border-red-500" : "border-slate-100 dark:border-slate-800 focus:border-blue-500 dark:focus:border-blue-500/50"} rounded-2xl px-5 py-3.5 sm:py-4 outline-none transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 font-bold text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:focus:shadow-[0_8px_30px_rgb(0,0,0,0.2)]`}
               />
               <AnimatePresence>
                 {errors.Title && (
                   <motion.p
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-xs font-semibold text-red-500 flex items-center gap-1 ml-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-1.5 ${isRtl ? 'mr-2' : 'ml-2'}`}
                   >
-                    <AlertCircle size={12} /> {errors.Title.message}
+                    <AlertCircle size={14} /> {errors.Title.message}
                   </motion.p>
                 )}
               </AnimatePresence>
             </div>
 
-            <div className="space-y-2" ref={dropdownRef}>
-              <label className="flex items-center gap-2 text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                <Stethoscope size={14} className="text-indigo-600" />
-                Medical Specialty
+            {/* Specialty */}
+            <div className="space-y-2.5 relative" ref={dropdownRef}>
+              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
+                <Stethoscope size={16} className="text-indigo-500 dark:text-indigo-400" />
+                {t.addCaseSpecialty}
               </label>
               <div className="relative">
                 <div
                   onClick={() => setIsOpen(!isOpen)}
-                  className={`w-full flex items-center justify-between bg-slate-50 border-2 cursor-pointer transition-all duration-300 ${isOpen ? "border-indigo-500 bg-white ring-4 ring-indigo-50" : "border-slate-50"} rounded-2xl px-5 py-3.5`}
+                  className={`w-full flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50 border-2 cursor-pointer transition-all duration-300 ${isOpen ? "border-indigo-500 dark:border-indigo-500/50 bg-white dark:bg-slate-900 ring-4 ring-indigo-50 dark:ring-indigo-900/20" : "border-slate-100 dark:border-slate-800"} rounded-2xl px-5 py-3.5 sm:py-4`}
                 >
                   <span
-                    className={`font-semibold ${selectedTypeName ? "text-slate-800" : "text-slate-400"}`}
+                    className={`font-bold ${selectedTypeName ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}
                   >
-                    {selectedTypeName || "Select Specialty..."}
+                    {selectedTypeName || t.addCaseSpecialtyPlaceholder}
                   </span>
                   <ChevronDown
-                    className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-                    size={18}
+                    className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isOpen ? "rotate-180 text-indigo-500" : ""}`}
+                    size={20}
                   />
                 </div>
 
                 <AnimatePresence>
                   {isOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      className="absolute z-50 w-full mt-3 bg-white rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 overflow-hidden"
+                      exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute z-50 w-full mt-3 bg-white dark:bg-slate-900 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-100 dark:border-slate-800 overflow-hidden"
                     >
-                      <div className="p-3 bg-slate-50/50 border-b border-slate-100">
+                      <div className="p-3 bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-100 dark:border-slate-800">
                         <div className="relative flex items-center">
                           <Search
-                            className="absolute left-3 text-slate-400"
-                            size={14}
+                            className={`absolute ${isRtl ? 'right-4' : 'left-4'} text-slate-400 dark:text-slate-500`}
+                            size={16}
                           />
                           <input
                             autoFocus
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Filter specialties..."
-                            className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm outline-none focus:ring-2 ring-indigo-500/20"
+                            placeholder={t.addCaseSpecialtyFilter}
+                            className={`w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 text-sm outline-none focus:ring-2 ring-indigo-500/20 dark:ring-indigo-500/40 text-slate-800 dark:text-white font-medium ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'}`}
                           />
                         </div>
                       </div>
-                      <div className="max-h-52 overflow-y-auto p-2 custom-scrollbar">
+                      <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
                         {isLoadingTypes ? (
-                          <div className="py-10 flex flex-col items-center gap-2 text-slate-400">
-                            <Loader2 className="animate-spin" size={20} />
-                            <span className="text-xs font-medium tracking-tight">
-                              Updating List...
+                          <div className="py-12 flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500">
+                            <Loader2 className="animate-spin" size={24} />
+                            <span className="text-sm font-bold tracking-tight">
+                              {t.addCaseSpecialtyUpdating}
                             </span>
                           </div>
                         ) : (
@@ -271,13 +269,13 @@ export default function AddCase() {
                             <div
                               key={type.id}
                               onClick={() => handleSelectType(type)}
-                              className={`flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all mb-1 ${currentCaseTypeId === type.id ? "bg-indigo-600 text-white shadow-md shadow-indigo-100" : "hover:bg-indigo-50 text-slate-600"}`}
+                              className={`flex items-center justify-between px-4 py-3.5 rounded-xl cursor-pointer transition-all mb-1 ${currentCaseTypeId === type.id ? "bg-indigo-600 dark:bg-indigo-500 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/50" : "hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"}`}
                             >
                               <span className="font-bold text-sm tracking-tight">
                                 {type.name}
                               </span>
                               {currentCaseTypeId === type.id && (
-                                <Check size={16} />
+                                <Check size={18} strokeWidth={3} />
                               )}
                             </div>
                           ))
@@ -289,77 +287,67 @@ export default function AddCase() {
                 <AnimatePresence>
                   {errors.CaseTypeId && (
                     <motion.p
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="text-xs font-semibold text-red-500 flex items-center gap-1 mt-2 ml-1 absolute -bottom-6"
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }}
+                      className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-2 absolute -bottom-7 ${isRtl ? 'mr-2' : 'ml-2'}`}
                     >
-                      <AlertCircle size={12} /> {errors.CaseTypeId.message}
+                      <AlertCircle size={14} /> {errors.CaseTypeId.message}
                     </motion.p>
                   )}
                 </AnimatePresence>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                <Sparkles size={14} className="text-amber-500" />
-                Symptom Details
+            {/* Symptoms / Description */}
+            <div className="space-y-2.5">
+              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
+                <Sparkles size={16} className="text-amber-500" />
+                {t.addCaseSymptoms}
               </label>
               <textarea
                 {...register("Description")}
-                placeholder="Describe your pain, duration, and any relevant info..."
-                className={`w-full min-h-[140px] bg-slate-50 border-2 ${errors.Description ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} focus:bg-white rounded-2xl px-5 py-4 outline-none transition-all duration-300 resize-none font-medium placeholder:text-slate-400 focus:shadow-sm`}
+                placeholder={t.addCaseSymptomsPlaceholder}
+                className={`w-full min-h-[160px] bg-slate-50/50 dark:bg-slate-950/50 border-2 ${errors.Description ? "border-red-300 dark:border-red-500/50 focus:border-red-500" : "border-slate-100 dark:border-slate-800 focus:border-amber-400 dark:focus:border-amber-500/50"} focus:bg-white dark:focus:bg-slate-900 rounded-2xl px-5 py-4 outline-none transition-all duration-300 resize-none font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-800 dark:text-white focus:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:focus:shadow-[0_8px_30px_rgb(0,0,0,0.2)]`}
               />
               <AnimatePresence>
                 {errors.Description && (
                   <motion.p
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-xs font-semibold text-red-500 flex items-center gap-1 ml-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-1.5 ${isRtl ? 'mr-2' : 'ml-2'}`}
                   >
-                    <AlertCircle size={12} /> {errors.Description.message}
+                    <AlertCircle size={14} /> {errors.Description.message}
                   </motion.p>
                 )}
               </AnimatePresence>
             </div>
 
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-[13px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                <ImageIcon size={14} className="text-blue-500" />
-                Case Images
+            {/* Images */}
+            <div className="space-y-2.5">
+              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
+                <ImageIcon size={16} className="text-blue-500" />
+                {t.addCaseImages}
               </label>
 
               <label
                 htmlFor="fileInput"
-                className="w-full bg-slate-50 border-2 border-slate-50 hover:border-indigo-400 border-dashed rounded-2xl px-5 py-8 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 group"
+                className="w-full bg-slate-50/50 dark:bg-slate-900/40 border-2 border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500/60 border-dashed rounded-3xl px-5 py-10 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 group hover:bg-slate-50 dark:hover:bg-slate-900/80"
               >
-                <div className="p-3 bg-indigo-100/50 rounded-full group-hover:scale-110 group-hover:bg-indigo-100 transition-all duration-300">
-                  <svg
-                    width="44"
-                    height="44"
-                    viewBox="0 0 44 44"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M25.665 3.667H11a3.667 3.667 0 0 0-3.667 3.666v29.334A3.667 3.667 0 0 0 11 40.333h22a3.667 3.667 0 0 0 3.666-3.666v-22m-11-11 11 11m-11-11v11h11m-7.333 9.166H14.665m14.667 7.334H14.665M18.332 16.5h-3.667"
-                      stroke="#4F46E5"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                <div className="p-4 bg-indigo-100/50 dark:bg-indigo-900/30 rounded-full group-hover:scale-110 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-all duration-300 shadow-sm text-indigo-600 dark:text-indigo-400">
+                  <ClipboardPlus size={32} strokeWidth={2} />
                 </div>
                 <div className="text-center">
-                  <p className="text-slate-600 font-medium">
-                    Drag & drop your files here
+                  <p className="text-slate-700 dark:text-slate-300 font-bold text-base">
+                    {t.addCaseImagesDrag}
                   </p>
-                  <p className="text-slate-400 text-sm mt-1">
-                    Or{" "}
-                    <span className="text-indigo-600 font-semibold hover:underline">
-                      click
+                  <p className="text-slate-400 dark:text-slate-500 text-sm mt-1.5 font-medium">
+                    {t.addCaseImagesOr}{" "}
+                    <span className="text-indigo-600 dark:text-indigo-400 font-black hover:underline cursor-pointer">
+                      {t.addCaseImagesClick}
                     </span>{" "}
-                    to upload
+                    {t.addCaseImagesUpload}
                   </p>
                 </div>
                 <input
@@ -373,14 +361,17 @@ export default function AddCase() {
               </label>
 
               {images.length > 0 && (
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {images.map((file, idx) => (
-                    <div
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       key={idx}
-                      className="relative flex items-center justify-between p-3 bg-white border border-slate-200 shadow-sm rounded-xl"
+                      className="relative flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl overflow-hidden group"
                     >
+                      <div className="absolute inset-0 bg-blue-50 dark:bg-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div
-                        className="flex-1 truncate text-xs font-semibold text-slate-600 mr-2"
+                        className="relative z-10 flex-1 truncate text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mx-2"
                         title={file.name}
                       >
                         {file.name}
@@ -388,22 +379,23 @@ export default function AddCase() {
                       <button
                         type="button"
                         onClick={() => handleRemoveFile(idx)}
-                        className="text-slate-400 hover:text-red-500 transition-colors shrink-0"
+                        className="relative z-10 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
                       >
-                        <X size={14} />
+                        <X size={16} strokeWidth={2.5} />
                       </button>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
               <AnimatePresence>
                 {errors.Images && (
                   <motion.p
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="text-xs font-semibold text-red-500 flex items-center gap-1 ml-1"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-1.5 ${isRtl ? 'mr-2' : 'ml-2'}`}
                   >
-                    <AlertCircle size={12} /> {String(errors.Images.message)}
+                    <AlertCircle size={14} /> {String(errors.Images.message)}
                   </motion.p>
                 )}
               </AnimatePresence>
@@ -412,18 +404,23 @@ export default function AddCase() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="relative w-full group overflow-hidden bg-slate-900 text-white py-4 rounded-2xl font-bold transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-200 active:scale-[0.97] disabled:opacity-50 cursor-pointer"
+              className="relative w-full group overflow-hidden bg-slate-900 dark:bg-indigo-600 text-white py-4 sm:py-5 rounded-2xl font-black text-lg transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-200 dark:hover:shadow-indigo-900/50 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 cursor-pointer border border-transparent dark:border-indigo-500/50"
             >
-              <div className="absolute inset-0 bg-linear-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 dark:group-hover:opacity-0 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-r from-indigo-500 to-blue-500 opacity-0 dark:opacity-0 dark:group-hover:opacity-100 transition-opacity duration-500" />
               <div className="relative z-10 flex items-center justify-center gap-3">
                 {isSubmitting ? (
-                  <Loader2 className="animate-spin" size={20} />
+                  <>
+                    <Loader2 className="animate-spin" size={24} />
+                    <span>{t.addCaseSubmitting}</span>
+                  </>
                 ) : (
                   <>
-                    <span>Submit Request</span>
+                    <span>{t.addCaseSubmit}</span>
                     <CheckCircle2
-                      size={18}
-                      className="group-hover:rotate-12 transition-transform"
+                      size={20}
+                      className="group-hover:scale-110 group-hover:rotate-12 transition-transform"
+                      strokeWidth={2.5}
                     />
                   </>
                 )}

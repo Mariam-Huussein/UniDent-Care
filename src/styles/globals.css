@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer components {
     .my-btn {
       @apply flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-2.5 

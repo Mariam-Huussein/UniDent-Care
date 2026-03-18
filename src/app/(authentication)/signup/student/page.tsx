@@ -18,6 +18,7 @@ import {
   Loader2,
   ArrowRight,
   ChevronLeft,
+  ChevronRight,
   BookOpen,
   Phone,
   AtSign,
@@ -29,10 +30,13 @@ import {
 } from "@/features/auth/schemas/studentSignupSchema";
 import { authService } from "@/features/auth/services/authService";
 import { StudentSignupPayload } from "@/features/auth/types/studentPayload.Types";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function StudentSignup() {
   const router = useRouter();
+  const { t, language } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
+  const isRtl = language === "ar";
 
   const {
     register,
@@ -56,7 +60,7 @@ export default function StudentSignup() {
     mutationFn: (data: StudentSignupPayload) => authService.registerStudent(data),
     onSuccess: (res) => {
       if (res.success) {
-        toast.success("Student account created! Welcome to the academy.");
+        toast.success(isRtl ? "تم إنشاء حساب الطالب! أهلاً بك." : "Student account created! Welcome to the academy.");
         router.push("/login");
       }
     },
@@ -73,7 +77,7 @@ export default function StudentSignup() {
           }
         });
       } else {
-        toast.error("Registration failed. Please check your inputs.");
+        toast.error(isRtl ? "فشل التسجيل. يرجى التحقق من المدخلات." : "Registration failed. Please check your inputs.");
       }
     },
   });
@@ -89,9 +93,9 @@ export default function StudentSignup() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-[#F9FAFF] py-12 px-4 overflow-hidden">
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-100 rounded-full blur-[100px] opacity-60" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-100 rounded-full blur-[100px] opacity-60" />
+    <div className="relative min-h-screen flex items-center justify-center bg-[#F9FAFF] dark:bg-slate-950 py-12 px-4 overflow-hidden transition-colors duration-300">
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-100 dark:bg-indigo-900/20 rounded-full blur-[100px] opacity-60" />
+      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-purple-100 dark:bg-purple-900/10 rounded-full blur-[100px] opacity-60" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -100,22 +104,23 @@ export default function StudentSignup() {
       >
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-indigo-600 font-bold mb-6 hover:gap-3 transition-all group"
+          className={`flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold mb-6 hover:gap-3 transition-all group`}
         >
-          <ChevronLeft size={20} className="group-hover:scale-110 transition-transform" />
-          Back
+          {isRtl ? <ChevronRight size={20} className="group-hover:scale-110 transition-transform" /> : <ChevronLeft size={20} className="group-hover:scale-110 transition-transform" /> }
+          {isRtl ? 'رجوع' : 'Back'}
         </button>
 
-        <div className="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-[0_40px_80px_-15px_rgba(79,70,229,0.1)] border border-indigo-50/50 p-8 sm:p-12">
+        <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_40px_80px_-15px_rgba(79,70,229,0.1)] dark:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.5)] border border-indigo-50/50 dark:border-slate-800 p-8 sm:p-12 transition-all duration-300">
           <div className="text-center mb-10">
             <div className="inline-flex relative mb-4">
               <div className="absolute inset-0 bg-indigo-400 blur-xl opacity-20 animate-pulse" />
-              <div className="relative w-14 h-14 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100">
+              <div className="relative w-14 h-14 bg-indigo-600 dark:bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50">
                 <BookOpen size={28} />
               </div>
             </div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Academic Access</h2>
-            <p className="mt-2 text-slate-500 font-medium">Join the next generation of dental professionals</p>
+            <h2 className={`text-3xl font-black text-slate-900 dark:text-white tracking-tight ${isRtl ? 'font-arabic' : ''}`}>
+              {t.createAccountTitle}
+            </h2>
           </div>
 
           <motion.form
@@ -129,132 +134,138 @@ export default function StudentSignup() {
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.fullNameLabel}</label>
               <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <User className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   {...register("fullName")}
-                  className={`w-full bg-slate-50 border-2 ${errors.fullName ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
-                  placeholder="John Doe"
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.fullName ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
+                  placeholder={t.fullNamePlaceholder}
                 />
               </div>
-              {errors.fullName && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.fullName.message}</p>}
+              {errors.fullName && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.fullName.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">University Email</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>University Email</label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <Mail className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   type="email"
                   {...register("email")}
-                  className={`w-full bg-slate-50 border-2 ${errors.email ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.email ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
                   placeholder="student@university.edu"
+                  dir="ltr"
                 />
               </div>
-              {errors.email && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.email.message}</p>}
+              {errors.email && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.email.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">Username</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>Username</label>
               <div className="relative group">
-                <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <AtSign className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   {...register("username")}
-                  className={`w-full bg-slate-50 border-2 ${errors.username ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.username ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
                   placeholder="johndoe123"
+                  dir="ltr"
                 />
               </div>
-              {errors.username && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.username.message}</p>}
+              {errors.username && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.username.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">Phone Number</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.phoneLabel}</label>
               <div className="relative group">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <Phone className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   {...register("phone")}
-                  className={`w-full bg-slate-50 border-2 ${errors.phone ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.phone ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
                   placeholder="01XXXXXXXXX"
+                  dir="ltr"
                 />
               </div>
-              {errors.phone && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.phone.message}</p>}
+              {errors.phone && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.phone.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">University</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>University</label>
               <div className="relative group">
-                <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <BookOpen className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   {...register("university")}
-                  className={`w-full bg-slate-50 border-2 ${errors.university ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.university ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
                   placeholder="Cairo University"
                 />
               </div>
-              {errors.university && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.university.message}</p>}
+              {errors.university && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.university.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className="text-sm font-bold text-slate-700 ml-1">Student ID</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.universityIdLabel}</label>
               <div className="relative group">
-                <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <IdCard className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   {...register("universityId")}
-                  className={`w-full bg-slate-50 border-2 ${errors.universityId ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.universityId ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
                   placeholder="ID Number"
+                  dir="ltr"
                 />
               </div>
-              {errors.universityId && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.universityId.message}</p>}
+              {errors.universityId && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.universityId.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5 md:col-span-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Academic Level</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.levelLabel}</label>
               <div className="relative group">
-                <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <GraduationCap className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   type="number"
                   {...register("level", { valueAsNumber: true })}
-                  className={`w-full bg-slate-50 border-2 ${errors.level ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-4 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.level ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
                   placeholder="Level (1-7)"
+                  dir="ltr"
                 />
               </div>
-              {errors.level && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.level.message}</p>}
+              {errors.level && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.level.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5 md:col-span-2">
-              <label className="text-sm font-bold text-slate-700 ml-1">Secure Password</label>
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.passwordLabel}</label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+                <Lock className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className={`w-full bg-slate-50 border-2 ${errors.password ? "border-red-200" : "border-slate-50 focus:border-indigo-500"} rounded-2xl pl-11 pr-12 py-3.5 outline-none transition-all focus:bg-white`}
+                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.password ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl px-11 py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
                   placeholder="••••••••"
+                  dir="ltr"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-600 transition-colors"
+                  className={`absolute ${isRtl ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors`}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && <p className="text-[11px] font-bold text-red-500 ml-1">{errors.password.message}</p>}
+              {errors.password && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.password.message}</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="md:col-span-2 pt-4">
               <button
                 type="submit"
                 disabled={signupMutation.isPending}
-                className="group relative w-full bg-slate-900 text-white py-4 rounded-[1.25rem] font-bold text-lg transition-all duration-300 hover:bg-indigo-600 hover:shadow-2xl hover:shadow-indigo-200 active:scale-[0.98] disabled:opacity-70"
+                className="group relative w-full bg-slate-900 dark:bg-indigo-600 text-white py-4 rounded-[1.25rem] font-bold text-lg transition-all duration-300 hover:bg-indigo-600 dark:hover:bg-indigo-500 hover:shadow-2xl hover:shadow-indigo-200 dark:hover:shadow-indigo-900/30 active:scale-[0.98] disabled:opacity-70"
               >
                 <div className="flex items-center justify-center gap-2">
                   {signupMutation.isPending ? (
                     <Loader2 className="animate-spin" size={22} />
                   ) : (
                     <>
-                      <span>Create Account</span>
-                      <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                      <span>{t.createAccountTitle}</span>
+                      <ArrowRight size={20} className={`group-hover:${isRtl ? '-translate-x-1' : 'translate-x-1'} transition-transform ${isRtl ? 'rotate-180' : ''}`} />
                     </>
                   )}
                 </div>
@@ -263,9 +274,9 @@ export default function StudentSignup() {
           </motion.form>
 
           <div className="mt-8 text-center">
-            <p className="text-slate-500 font-medium text-sm">
-              Already a member?{" "}
-              <a href="/login" className="text-indigo-600 font-bold hover:underline decoration-2 underline-offset-4">Log in</a>
+            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
+              {isRtl ? 'لديك حساب بالفعل؟' : 'Already a member?'}{" "}
+              <a href="/login" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline decoration-2 underline-offset-4">{isRtl ? 'سجل دخولك' : 'Log in here'}</a>
             </p>
           </div>
         </div>
