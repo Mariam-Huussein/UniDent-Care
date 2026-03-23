@@ -1,13 +1,8 @@
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import StatsCards from "@/features/dashboard/components/student/StatsCards";
-import UpcomingAppointments from "@/features/dashboard/components/student/UpcomingAppointments";
-import RecentCases from "@/features/dashboard/components/student/RecentCases";
 import { containerVariants, itemVariants } from "@/lib/animations";
 
 export default function StudentDashboardScreen() {
-    const user = useSelector((state: RootState) => state.auth.user);
     return (
         <>
             <motion.div

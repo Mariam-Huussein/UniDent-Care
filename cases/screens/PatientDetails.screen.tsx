@@ -4,18 +4,18 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { CaseStatus } from "../types/CaseDetails.types";
-import { getMockPatientCase, getPatientStatusConfig } from "../utils/CaseDetails.utils";
-import DentalImageGallery from "../components/CaseDetails/DentalImageGallery";
-import PatientInfoPanel from "../components/CaseDetails/CaseInfoPanel";
-import PatientDetailTabs from "../components/CaseDetails/CaseDetailTabs";
-import PatientDetailsSkeleton from "../components/CaseDetails/CaseDetailsSkeleton";
-import Odontogram from "../components/CaseDetails/Odontogram";
-import ActivityTimeline from "../components/CaseDetails/ActivityTimeline";
+import { CaseStatus } from "../types/patientDetails.types";
+import { getMockPatientCase, getPatientStatusConfig } from "../utils/patientDetails.utils";
+import DentalImageGallery from "../components/PatientDetails/DentalImageGallery";
+import PatientInfoPanel from "../components/PatientDetails/PatientInfoPanel";
+import PatientDetailTabs from "../components/PatientDetails/PatientDetailTabs";
+import PatientDetailsSkeleton from "../components/PatientDetails/PatientDetailsSkeleton";
+import Odontogram from "../components/PatientDetails/Odontogram";
+import ActivityTimeline from "../components/PatientDetails/ActivityTimeline";
 
 const STATUS_OPTIONS: CaseStatus[] = ["unassigned", "diagnosis", "in-progress", "completed"];
 
-export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
+export default function PatientDetailsScreen() {
     const router = useRouter();
     const [currentStatus, setCurrentStatus] = useState<CaseStatus>("in-progress");
     const [isLoading, setIsLoading] = useState(false);
@@ -96,7 +96,7 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
                                 <div className="lg:col-span-5">
                                     <DentalImageGallery images={patient.imageUrls} />
                                 </div>
-
+                                
                                 {/* RIGHT — Info Panel */}
                                 <div className="lg:col-span-7 bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100/80 shadow-sm shadow-gray-100/50 p-5 sm:p-6 lg:p-8">
                                     <PatientInfoPanel patient={patient} />
@@ -139,61 +139,3 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
         </div>
     );
 }
-
-
-
-// "use client";
-
-// import { useCaseDetails } from "../hooks/useCaseDetails";
-// import CaseDetailHeader from "../components/CaseDetails/CaseDetailHeader";
-// import CaseDetailImages from "../components/CaseDetails/CaseDetailImages";
-// import CaseDetailInfo from "../components/CaseDetails/CaseDetailInfo";
-// import CaseDetailActions from "../components/CaseDetails/CaseDetailActions";
-// import CaseDetailTabs from "../components/CaseDetails/CaseDetailTabs";
-// import CaseDetailSkeleton from "../components/CaseDetails/CaseDetailSkeleton";
-
-// interface CaseDetailsScreenProps {
-//     caseId: string;
-// }
-
-// export default function CaseDetailsScreen({ caseId }: CaseDetailsScreenProps) {
-//     const { caseItem, loading } = useCaseDetails(caseId);
-
-//     return (
-//         <div className="min-h-screen bg-gray-50/60 px-3 py-4 pb-20 sm:px-6 sm:py-6 md:pb-6 lg:px-10">
-//             <div className="max-w-5xl mx-auto space-y-6">
-//                 {loading || !caseItem ? (
-//                     <CaseDetailSkeleton />
-//                 ) : (
-//                     <>
-//                         <CaseDetailHeader
-//                             patientName={caseItem.patientName}
-//                             status={caseItem.status}
-//                         />
-
-//                         {/* White Container */}
-//                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-//                             {/* Images */}
-//                             <CaseDetailImages patientName={caseItem.patientName} imageUrls={caseItem.imageUrls} />
-
-//                             {/* Top Section: Patient Info + Contact + Request Button */}
-//                             <div className="p-5 sm:p-6 border-b border-gray-100">
-//                                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-//                                     <div className="flex-1">
-//                                         <CaseDetailInfo caseItem={caseItem} />
-//                                     </div>
-//                                     <div className="flex-shrink-0 self-start">
-//                                         <CaseDetailActions caseId={caseItem.id} />
-//                                     </div>
-//                                 </div>
-//                             </div>
-
-//                             {/* Bottom Section: Tabs */}
-//                             <CaseDetailTabs />
-//                         </div>
-//                     </>
-//                 )}
-//             </div>
-//         </div>
-//     );
-// }

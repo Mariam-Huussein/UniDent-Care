@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { CaseStatus, PatientCase } from "../../types/CaseDetails.types";
+import { CaseStatus, PatientCase } from "../../types/patientDetails.types";
 import Odontogram from "./Odontogram";
 import ActivityTimeline from "./ActivityTimeline";
 import ProgressTracker from "./ProgressTracker";
 import { Stethoscope } from "lucide-react";
-import DetailCard from "./DetailCard";
 
 interface PatientDetailTabsProps {
     patient: PatientCase;
@@ -197,5 +196,14 @@ export default function PatientDetailTabs({ patient }: PatientDetailTabsProps) {
                 </div>
             </div>
         </motion.div>
+    );
+}
+
+function DetailCard({ label, value }: { label: string; value: string }) {
+    return (
+        <div className="bg-gray-50/70 border border-gray-100/50 rounded-xl px-4 py-3 hover:bg-gray-50 hover:border-gray-200/60 transition-all duration-200">
+            <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">{label}</p>
+            <p className="text-sm font-semibold text-gray-800">{value}</p>
+        </div>
     );
 }
