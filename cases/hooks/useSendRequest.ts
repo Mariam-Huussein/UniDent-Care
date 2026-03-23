@@ -26,9 +26,10 @@ export const useSendRequest = (caseId: string, onClose: () => void) => {
             const response = await sendCaseRequest({
                 patientCasePublicId: caseId,
                 studentPublicId: studentId,
-                doctorPublicId: data.doctorPublicId,
-                description: data.description,
+                doctorPublicId: data.doctorPublicId.trim(),
+                description: data.description.trim(),
             });
+
             if (response.success) {
                 toast.success("Request sent successfully!");
                 onClose();
@@ -36,7 +37,7 @@ export const useSendRequest = (caseId: string, onClose: () => void) => {
                 toast.error("Failed to send request");
             }
         } catch (err: any) {
-            toast.error(err.message);
+            toast.error("Failed to send request");
         } finally {
             setLoading(false);
         }

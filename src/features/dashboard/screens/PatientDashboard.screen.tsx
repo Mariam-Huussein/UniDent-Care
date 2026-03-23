@@ -4,28 +4,7 @@ import { motion, Variants } from "framer-motion";
 import { StatsCards } from "@/features/dashboard/components/patient/StatsCards";
 import { UpcomingAppointments } from "@/features/dashboard/components/patient/UpcomingAppointments";
 import { RecentCases } from "@/features/dashboard/components/patient/RecentCases";
-
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.15,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut",
-    },
-  },
-};
+import { containerVariants, itemVariants } from "@/lib/animations";
 
 export default function PatientDashboardScreen() {
   return (

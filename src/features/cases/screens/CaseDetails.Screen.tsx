@@ -1,53 +1,83 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
+import DentalImageGallery from "../components/CaseDetails/DentalImageGallery";
+import PatientInfoPanel from "../components/CaseDetails/CaseInfoPanel";
+import PatientDetailTabs from "../components/CaseDetails/CaseDetailTabs";
+import PatientDetailsSkeleton from "../components/CaseDetails/CaseDetailsSkeleton";
+import Odontogram from "../components/CaseDetails/Odontogram";
+import ActivityTimeline from "../components/CaseDetails/ActivityTimeline";
+import CaseDetailsTopBar from "../components/CaseDetails/CaseDetailsTopBar";
 import { useCaseDetails } from "../hooks/useCaseDetails";
-import CaseDetailHeader from "../components/CaseDetails/CaseDetailHeader";
-import CaseDetailImages from "../components/CaseDetails/CaseDetailImages";
-import CaseDetailInfo from "../components/CaseDetails/CaseDetailInfo";
-import CaseDetailActions from "../components/CaseDetails/CaseDetailActions";
-import CaseDetailTabs from "../components/CaseDetails/CaseDetailTabs";
-import CaseDetailSkeleton from "../components/CaseDetails/CaseDetailSkeleton";
 
-interface CaseDetailsScreenProps {
-    caseId: string;
-}
-
-export default function CaseDetailsScreen({ caseId }: CaseDetailsScreenProps) {
-    const { caseItem, loading } = useCaseDetails(caseId);
+export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
+    const { patient, isLoading, status, role } = useCaseDetails(caseId);
 
     return (
-        <div className="min-h-screen bg-gray-50/60 px-3 py-4 pb-20 sm:px-6 sm:py-6 md:pb-6 lg:px-10">
-            <div className="max-w-5xl mx-auto space-y-6">
-                {loading || !caseItem ? (
-                    <CaseDetailSkeleton />
+        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
+            <div className="max-w-[1200px] mx-auto space-y-6">
+
+                {/* ═══ Top Bar ═══ */}
+                <CaseDetailsTopBar currentStatus={status} patientName={patient?.patientName || ""} />
+
+                {/* ═══ Content ═══ */}
+                {isLoading ? (
+                    <PatientDetailsSkeleton />
+                ) : !patient ? (
+                    <div className="flex items-center justify-center p-20 text-gray-500">Case not found.</div>
                 ) : (
-                    <>
-                        <CaseDetailHeader
-                            patientName={caseItem.patientName}
-                            status={caseItem.status}
-                        />
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={status}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.25 }}
+                            className="space-y-6"
+                        >
+                            {/* ── Split Layout: Images (L) + Info Panel (R) ── */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
+                                {/* LEFT — Image Gallery */}
+                                <div className="lg:col-span-5">
+                                    <DentalImageGallery images={patient.imageUrls} />
+                                </div>
 
-                        {/* White Container */}
-                        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                            {/* Images */}
-                            <CaseDetailImages patientName={caseItem.patientName} imageUrls={caseItem.imageUrls} />
-
-                            {/* Top Section: Patient Info + Contact + Request Button */}
-                            <div className="p-5 sm:p-6 border-b border-gray-100">
-                                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-                                    <div className="flex-1">
-                                        <CaseDetailInfo caseItem={caseItem} />
-                                    </div>
-                                    <div className="flex-shrink-0 self-start">
-                                        <CaseDetailActions caseId={caseItem.id} />
-                                    </div>
+                                {/* RIGHT — Info Panel */}
+                                <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 lg:p-8 transition-colors duration-300">
+                                    <PatientInfoPanel patient={patient} role={role} />
                                 </div>
                             </div>
 
-                            {/* Bottom Section: Tabs */}
-                            <CaseDetailTabs />
-                        </div>
-                    </>
+                            {/* ── In Progress: Split View (Odontogram L + Timeline/Progress R) ── */}
+                            {status === "in-progress" && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.15 }}
+                                    className="grid grid-cols-1 lg:grid-cols-5 gap-6"
+                                >
+                                    {/* LEFT — Odontogram (larger) */}
+                                    <div className="relative lg:col-span-3 p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-colors duration-300">
+                                        <div className="relative z-10 w-full">
+                                            <Odontogram teeth={patient.teeth} readonly={true} status={status} />
+                                        </div>
+                                    </div>
+
+                                    {/* RIGHT — Timeline */}
+                                    <div className="lg:col-span-2 space-y-5">
+                                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 transition-colors duration-300">
+                                            <ActivityTimeline events={patient.timeline} />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* ── Other states: Bottom Tabs ── */}
+                            {status !== "in-progress" && (
+                                <PatientDetailTabs patient={patient} />
+                            )}
+                        </motion.div>
+                    </AnimatePresence>
                 )}
             </div>
         </div>
