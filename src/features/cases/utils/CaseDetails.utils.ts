@@ -46,6 +46,15 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-emerald-200',
                 gradient: 'from-emerald-400 to-emerald-600',
             };
+        default:
+            return {
+                label: status,
+                bg: 'bg-gray-100',
+                text: 'text-gray-600',
+                dot: 'bg-gray-400',
+                border: 'border-gray-200',
+                gradient: 'from-gray-400 to-gray-500',
+            };
     }
 }
 
@@ -58,16 +67,6 @@ export function getToothStatusColor(status: ToothStatus) {
     }
 }
 
-export function getUrgencyConfig(tag: string) {
-    switch (tag) {
-        case 'pain': return { label: 'Pain', icon: 'zap', bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' };
-        case 'emergency': return { label: 'Emergency', icon: 'alert-triangle', bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-300' };
-        case 'cosmetic': return { label: 'Cosmetic', icon: 'sparkles', bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-200' };
-        case 'routine': return { label: 'Routine', icon: 'clipboard-list', bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-200' };
-        default: return { label: tag, icon: 'info', bg: 'bg-gray-50', text: 'text-gray-600', border: 'border-gray-200' };
-    }
-}
-
 export function getMockPatientCase(status: CaseStatus): PatientCase {
     const base: PatientCase = {
         id: 'case-001',
@@ -75,10 +74,9 @@ export function getMockPatientCase(status: CaseStatus): PatientCase {
         patientAge: 28,
         patientPhone: '+20 123 456 7890',
         patientCity: 'Cairo',
-        patientNotes: 'Patient reports intermittent sharp pain in the lower right quadrant when biting down on hard foods. Pain has been persistent for approximately two weeks.',
+        description: 'Patient reports intermittent sharp pain in the lower right quadrant when biting down on hard foods. Pain has been persistent for approximately two weeks.',
         status,
         caseType: 'Restorative',
-        urgencyTag: 'pain',
         imageUrls: [
             'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80',
             'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=800&q=80',

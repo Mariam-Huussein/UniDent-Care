@@ -37,13 +37,14 @@ export interface PatientCase {
     id: string;
     patientName: string;
     patientAge: number;
-    patientPhone: string;
-    patientCity: string;
-    patientNotes: string;
+    patientPhone?: string;
+    patientCity?: string;
+    description?: string;
     patientAvatar?: string;
     status: CaseStatus;
     caseType: string;
-    urgencyTag?: 'pain' | 'cosmetic' | 'routine' | 'emergency';
+    medicalHistory?: string[];
+    medications?: string[];
     imageUrls: string[];
     beforeImageUrls?: string[];
     afterImageUrls?: string[];

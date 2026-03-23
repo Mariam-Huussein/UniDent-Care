@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Send, Loader2, User } from "lucide-react";
+import { createPortal } from "react-dom";
 import { PiTooth } from "react-icons/pi";
 import { useSendRequest } from "../../hooks/useSendRequest";
 
@@ -14,7 +15,7 @@ interface SendRequestModalProps {
 export default function SendRequestModal({ caseId, patientName, caseType, onClose }: SendRequestModalProps) {
     const { register, handleSubmit, errors, isValid, loading } = useSendRequest(caseId, onClose);
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
             <div
                 className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200"
@@ -116,6 +117,7 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -16,9 +16,9 @@ function getEventConfig(type: TimelineEvent["type"]) {
         case "treatment":
             return { icon: Activity, gradient: "from-blue-500 to-indigo-600", glow: "shadow-blue-200" };
         case "note":
-            return { icon: MessageSquare, gradient: "from-amber-400 to-orange-500", glow: "shadow-amber-200" };
+            return { icon: MessageSquare, gradient: "from-amber-400 to-orange-500", glow: "shadow-amber-200 dark:shadow-amber-900/30" };
         default:
-            return { icon: FileText, gradient: "from-gray-400 to-slate-500", glow: "shadow-gray-200" };
+            return { icon: FileText, gradient: "from-slate-400 to-slate-500", glow: "shadow-slate-200 dark:shadow-slate-800" };
     }
 }
 
@@ -28,13 +28,13 @@ export default function ActivityTimeline({ events }: ActivityTimelineProps) {
     return (
         <div className="space-y-4">
             <div>
-                <h3 className="text-sm font-semibold text-gray-800">Activity Timeline</h3>
-                <p className="text-[11px] text-gray-400 mt-0.5">{events.length} events recorded</p>
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Activity Timeline</h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{events.length} events recorded</p>
             </div>
 
             <div className="relative max-h-[400px] overflow-y-auto patient-details-scrollbar pr-1">
                 {/* Glowing vertical line */}
-                <div className="absolute left-[14px] top-4 bottom-4 w-px bg-gradient-to-b from-blue-200 via-indigo-200 to-transparent" />
+                <div className="absolute left-[14px] top-4 bottom-4 w-px bg-indigo-200 dark:bg-indigo-900/50" />
 
                 <div className="space-y-0.5">
                     {sorted.map((event, i) => {
@@ -57,10 +57,10 @@ export default function ActivityTimeline({ events }: ActivityTimelineProps) {
 
                                 {/* Content */}
                                 <div className="flex-1 min-w-0 pt-0.5">
-                                    <p className="text-[13px] text-gray-700 leading-snug font-medium group-hover:text-gray-900 transition-colors">
+                                    <p className="text-[13px] text-slate-700 dark:text-slate-300 leading-snug font-medium group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
                                         {event.description}
                                     </p>
-                                    <p className="text-[10px] text-gray-400 mt-1 font-medium">
+                                    <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium">
                                         {date} · {time}
                                     </p>
                                 </div>

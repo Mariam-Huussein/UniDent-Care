@@ -49,8 +49,14 @@ export async function sendCaseRequest(body: CaseRequestBody): Promise<CaseReques
             },
         };
         const response = await axios.request(options);
+        console.log("response", response.data);
         return response.data;
     } catch (error: any) {
-        throw new Error(error.response?.data?.message);
+        const data = error.response?.data;
+        const validationErrors = data?.error?.errors;
+        if (validationErrors?.length) {
+            throw new Error(validationErrors.join(", "));
+        }
+        throw new Error(data?.message);
     }
 }

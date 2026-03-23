@@ -1,89 +1,34 @@
 "use client";
 
-import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { CaseStatus } from "../types/CaseDetails.types";
-import { getMockPatientCase, getPatientStatusConfig } from "../utils/CaseDetails.utils";
 import DentalImageGallery from "../components/CaseDetails/DentalImageGallery";
 import PatientInfoPanel from "../components/CaseDetails/CaseInfoPanel";
 import PatientDetailTabs from "../components/CaseDetails/CaseDetailTabs";
 import PatientDetailsSkeleton from "../components/CaseDetails/CaseDetailsSkeleton";
 import Odontogram from "../components/CaseDetails/Odontogram";
 import ActivityTimeline from "../components/CaseDetails/ActivityTimeline";
-
-const STATUS_OPTIONS: CaseStatus[] = ["unassigned", "diagnosis", "in-progress", "completed"];
+import CaseDetailsTopBar from "../components/CaseDetails/CaseDetailsTopBar";
+import { useCaseDetails } from "../hooks/useCaseDetails";
 
 export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
-    const router = useRouter();
-    const [currentStatus, setCurrentStatus] = useState<CaseStatus>("in-progress");
-    const [isLoading, setIsLoading] = useState(false);
-
-    const patient = getMockPatientCase(currentStatus);
-
-    const handleStatusChange = (status: CaseStatus) => {
-        setIsLoading(true);
-        setCurrentStatus(status);
-        setTimeout(() => setIsLoading(false), 300);
-    };
+    const { patient, isLoading, status, role } = useCaseDetails(caseId);
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50/80 via-slate-50 to-blue-50/30 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8">
+        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
             <div className="max-w-[1200px] mx-auto space-y-6">
 
                 {/* ═══ Top Bar ═══ */}
-                <motion.div
-                    initial={{ opacity: 0, y: -12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                    <div className="flex items-center gap-3">
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => router.back()}
-                            className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200/60 shadow-sm flex items-center justify-center text-gray-600 hover:text-gray-900 hover:shadow-md transition-all cursor-pointer"
-                            aria-label="Go back"
-                        >
-                            <ArrowLeft size={17} />
-                        </motion.button>
-                        <div>
-                            <h1 className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">Patient Details</h1>
-                            <p className="text-[11px] text-gray-400 font-medium">Case lifecycle view</p>
-                        </div>
-                    </div>
-
-                    {/* Status Toggle — glassy pill */}
-                    <div className="flex flex-wrap gap-1 bg-white/70 backdrop-blur-md rounded-xl border border-gray-200/50 shadow-sm p-1">
-                        {STATUS_OPTIONS.map((status) => {
-                            const cfg = getPatientStatusConfig(status);
-                            const active = currentStatus === status;
-                            return (
-                                <button
-                                    key={status}
-                                    onClick={() => handleStatusChange(status)}
-                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-250 cursor-pointer ${active
-                                        ? `${cfg.bg} ${cfg.text} shadow-sm`
-                                        : "text-gray-400 hover:text-gray-600 hover:bg-gray-50/60"
-                                        }`}
-                                >
-                                    <span className={`w-1.5 h-1.5 rounded-full transition-colors ${active ? cfg.dot : "bg-gray-300"}`} />
-                                    {cfg.label}
-                                </button>
-                            );
-                        })}
-                    </div>
-                </motion.div>
+                <CaseDetailsTopBar currentStatus={status} patientName={patient?.patientName || ""} />
 
                 {/* ═══ Content ═══ */}
                 {isLoading ? (
                     <PatientDetailsSkeleton />
+                ) : !patient ? (
+                    <div className="flex items-center justify-center p-20 text-gray-500">Case not found.</div>
                 ) : (
                     <AnimatePresence mode="wait">
                         <motion.div
-                            key={currentStatus}
+                            key={status}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -98,13 +43,13 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
                                 </div>
 
                                 {/* RIGHT — Info Panel */}
-                                <div className="lg:col-span-7 bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100/80 shadow-sm shadow-gray-100/50 p-5 sm:p-6 lg:p-8">
-                                    <PatientInfoPanel patient={patient} />
+                                <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 lg:p-8 transition-colors duration-300">
+                                    <PatientInfoPanel patient={patient} role={role} />
                                 </div>
                             </div>
 
                             {/* ── In Progress: Split View (Odontogram L + Timeline/Progress R) ── */}
-                            {currentStatus === "in-progress" && (
+                            {status === "in-progress" && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
@@ -112,16 +57,15 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
                                     className="grid grid-cols-1 lg:grid-cols-5 gap-6"
                                 >
                                     {/* LEFT — Odontogram (larger) */}
-                                    <div className="relative lg:col-span-3 p-5 sm:p-6">
-                                        <div className="absolute inset-0 bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100/80 shadow-sm pointer-events-none" />
+                                    <div className="relative lg:col-span-3 p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-colors duration-300">
                                         <div className="relative z-10 w-full">
-                                            <Odontogram teeth={patient.teeth} />
+                                            <Odontogram teeth={patient.teeth} readonly={true} status={status} />
                                         </div>
                                     </div>
 
                                     {/* RIGHT — Timeline */}
                                     <div className="lg:col-span-2 space-y-5">
-                                        <div className="bg-white/80 backdrop-blur-md rounded-2xl border border-gray-100/80 shadow-sm p-5 sm:p-6">
+                                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 transition-colors duration-300">
                                             <ActivityTimeline events={patient.timeline} />
                                         </div>
                                     </div>
@@ -129,7 +73,7 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
                             )}
 
                             {/* ── Other states: Bottom Tabs ── */}
-                            {currentStatus !== "in-progress" && (
+                            {status !== "in-progress" && (
                                 <PatientDetailTabs patient={patient} />
                             )}
                         </motion.div>
@@ -139,61 +83,3 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
         </div>
     );
 }
-
-
-
-// "use client";
-
-// import { useCaseDetails } from "../hooks/useCaseDetails";
-// import CaseDetailHeader from "../components/CaseDetails/CaseDetailHeader";
-// import CaseDetailImages from "../components/CaseDetails/CaseDetailImages";
-// import CaseDetailInfo from "../components/CaseDetails/CaseDetailInfo";
-// import CaseDetailActions from "../components/CaseDetails/CaseDetailActions";
-// import CaseDetailTabs from "../components/CaseDetails/CaseDetailTabs";
-// import CaseDetailSkeleton from "../components/CaseDetails/CaseDetailSkeleton";
-
-// interface CaseDetailsScreenProps {
-//     caseId: string;
-// }
-
-// export default function CaseDetailsScreen({ caseId }: CaseDetailsScreenProps) {
-//     const { caseItem, loading } = useCaseDetails(caseId);
-
-//     return (
-//         <div className="min-h-screen bg-gray-50/60 px-3 py-4 pb-20 sm:px-6 sm:py-6 md:pb-6 lg:px-10">
-//             <div className="max-w-5xl mx-auto space-y-6">
-//                 {loading || !caseItem ? (
-//                     <CaseDetailSkeleton />
-//                 ) : (
-//                     <>
-//                         <CaseDetailHeader
-//                             patientName={caseItem.patientName}
-//                             status={caseItem.status}
-//                         />
-
-//                         {/* White Container */}
-//                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-//                             {/* Images */}
-//                             <CaseDetailImages patientName={caseItem.patientName} imageUrls={caseItem.imageUrls} />
-
-//                             {/* Top Section: Patient Info + Contact + Request Button */}
-//                             <div className="p-5 sm:p-6 border-b border-gray-100">
-//                                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
-//                                     <div className="flex-1">
-//                                         <CaseDetailInfo caseItem={caseItem} />
-//                                     </div>
-//                                     <div className="flex-shrink-0 self-start">
-//                                         <CaseDetailActions caseId={caseItem.id} />
-//                                     </div>
-//                                 </div>
-//                             </div>
-
-//                             {/* Bottom Section: Tabs */}
-//                             <CaseDetailTabs />
-//                         </div>
-//                     </>
-//                 )}
-//             </div>
-//         </div>
-//     );
-// }
