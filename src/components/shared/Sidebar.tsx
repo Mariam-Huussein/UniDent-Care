@@ -55,13 +55,13 @@ export default function Sidebar() {
             <div className={`hidden md:flex items-center px-4 mb-6 relative w-full h-8 ${isExpanded ? 'justify-between' : 'justify-center'}`}>
                 {isExpanded ? (
                     <div className="flex items-center gap-2 transition-opacity duration-300">
-                        <FaTooth className="text-blue-600 dark:text-blue-500" size={20} />
+                        <FaTooth className="text-indigo-600 dark:text-indigo-500" size={20} />
                         <h1 className={`text-lg font-black text-slate-900 dark:text-white tracking-tight truncate ${isRtl ? 'font-arabic' : ''}`}>
-                            UniDent<span className="text-blue-600 dark:text-blue-500">Care</span>
+                            UniDent <span className="text-indigo-600 dark:text-indigo-500">Care</span>
                         </h1>
                     </div>
                 ) : (
-                    <FaTooth className="text-blue-600 dark:text-blue-500 mx-auto transition-opacity duration-300" size={22} />
+                    <FaTooth className="text-indigo-600 dark:text-indigo-500 mx-auto transition-opacity duration-300" size={22} />
                 )}
                 
                 <button
@@ -86,18 +86,18 @@ export default function Sidebar() {
                         <Link
                             href={item.path}
                             key={item.path}
-                            className={`flex flex-col md:flex-row items-center justify-center ${isExpanded ? 'md:justify-start px-1 md:px-4' : 'md:justify-center px-1 md:px-0'} py-2 md:py-3.5 gap-1 md:gap-3 rounded-none md:rounded-xl mx-2 transition-all duration-200 group h-full md:h-auto flex-1 md:flex-none
+                            className={`flex flex-col md:flex-row items-center justify-center ${isExpanded ? 'md:justify-start px-1 md:px-4' : 'md:justify-center px-1 md:px-0'} py-2 md:py-3.5 gap-1 md:gap-3 rounded-none md:rounded-xl mx-1 transition-all duration-200 group h-full md:h-auto flex-1 md:flex-none
                             ${isActive
-                                    ? "text-blue-600 dark:text-blue-400 md:bg-blue-50 dark:md:bg-blue-900/20 md:border-r-0 border-t-2 md:border-t-0 border-blue-600 dark:border-blue-400 font-bold"
-                                    : "text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 md:hover:bg-slate-50 dark:md:hover:bg-slate-800/50 border-t-2 md:border-t-0 border-transparent font-medium"
+                                    ? "text-indigo-600 dark:text-indigo-400 md:bg-indigo-50 dark:md:bg-indigo-900/20 md:border-r-0 border-t-2 md:border-t-0 border-indigo-600 dark:border-indigo-400 font-bold"
+                                    : "text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 md:hover:bg-gray-50 dark:md:hover:bg-slate-800/50 border-t-2 md:border-t-0 border-transparent font-medium"
                                 }`}
                             title={!isExpanded ? getLinkName(item.name) : undefined}
                         >
-                            <Icon
+                            <Icon 
                                 size={20}
-                                className={`flex-shrink-0 transition-colors ${isActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400'}`}
+                                className={`flex-shrink-0 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`}
                             />
-                            <span className={`text-[10px] md:text-sm text-center transition-all duration-300 ${isExpanded ? 'md:block opacity-100 w-auto' : 'md:hidden opacity-0 md:w-0'}`}>
+                            <span className={`text-[14px] md:text-md text-center transition-all duration-300 ${isExpanded ? 'md:block opacity-100 w-auto' : 'md:hidden opacity-0 md:w-0'}`}>
                                 {getLinkName(item.name)}
                             </span>
                         </Link>

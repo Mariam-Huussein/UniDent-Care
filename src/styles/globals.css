@@ -16,7 +16,7 @@
     }
 
     .my-btn-outline:hover {
-        @apply bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200;
+        @apply bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md shadow-indigo-200;
     }
 }
 
@@ -38,7 +38,6 @@
     background: #3b82f6;
 }
 
-/* Patient Details - Custom Scrollbar */
 .patient-details-scrollbar::-webkit-scrollbar {
     width: 4px;
 }

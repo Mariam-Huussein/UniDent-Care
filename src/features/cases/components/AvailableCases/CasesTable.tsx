@@ -1,14 +1,17 @@
 import DataTable, { Column } from "@/components/common/DataTable";
 import { CaseItem } from "../../types/caseCardProps.types";
-import { Eye } from "lucide-react";
+import { Eye, Send } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import SendRequestModal from "../CaseCard/SendRequestModal";
 import CaseTypeDropdown from "./CaseTypeDropdown";
+import EmptyState from "./EmptyState";
 
 interface CasesTableProps {
     cases: CaseItem[];
     loading: boolean;
+    search: string;
+    setSearch: (value: string) => void;
     hasPreviousPage: boolean;
     hasNextPage: boolean;
     currentPage: number;
@@ -20,6 +23,8 @@ interface CasesTableProps {
 export default function CasesTable({
     cases,
     loading,
+    search,
+    setSearch,
     hasPreviousPage,
     hasNextPage,
     currentPage,
@@ -47,7 +52,6 @@ export default function CasesTable({
                 </div>
             )
         },
-        { header: "Requests", accessor: "pendingRequests", sortable: true },
         { header: "Date Added", accessor: "createAt", sortable: true },
         { header: "Actions", accessor: "id" }
     ];
@@ -60,7 +64,7 @@ export default function CasesTable({
         status: (
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${c.status === "Available"
                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                : "bg-blue-50 text-blue-700 border-blue-200"
+                : "bg-indigo-50 text-indigo-700 border-indigo-200"
                 }`}>
                 {c.status}
             </span>
@@ -69,16 +73,17 @@ export default function CasesTable({
             <div className="flex gap-2 items-center">
                 <Link
                     href={`/cases/${c.id}`}
-                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    className="my-btn-outline !flex-none p-2 flex items-center justify-center rounded-lg"
                     title="View details"
                 >
-                    <Eye className="w-5 h-5" />
+                    <Eye size={16} />
                 </Link>
                 <button
-                    onClick={() => setSelectedCaseId(c.id)}
-                    className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+                    onClick={() => setSelectedCaseId(c.id) }
+                    className="my-btn-outline !flex-none p-2 flex items-center justify-center rounded-lg group-hover/request:animate-bounce group-hover/request:animate-duration-1000 transition-all duration-300"
+                    title="Send request"
                 >
-                    Request
+                    <Send size={16} />
                 </button>
             </div>
         )
@@ -94,8 +99,8 @@ export default function CasesTable({
 
     if (cases.length === 0) {
         return (
-            <div className="text-center py-12 text-gray-500">
-                No cases match your filters.
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px] flex flex-col justify-center">
+                <EmptyState search={search} onClear={() => setSearch("")} />
             </div>
         );
     }
@@ -114,7 +119,7 @@ export default function CasesTable({
                     <button
                         onClick={() => onPageChange(currentPage - 1)}
                         disabled={!hasPreviousPage}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className={`${!hasPreviousPage ? "hidden" : ""} px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
                     >
                         Previous
                     </button>
@@ -124,7 +129,7 @@ export default function CasesTable({
                     <button
                         onClick={() => onPageChange(currentPage + 1)}
                         disabled={!hasNextPage}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className={`${!hasNextPage ? "hidden" : ""} px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
                     >
                         Next
                     </button>

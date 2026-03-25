@@ -37,6 +37,8 @@ export default function AvailableCasesScreen() {
                 <CasesTable
                     cases={sortedCases}
                     loading={loading}
+                    search={search}
+                    setSearch={setSearch}
                     pageSize={pageSize}
                     currentPage={currentPage}
                     totalPages={totalPages}

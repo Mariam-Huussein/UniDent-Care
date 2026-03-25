@@ -30,8 +30,7 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                 if (response.success && response.data) {
                     const apiData: any = response.data;
                     
-                    // let mappedStatus = apiData.status?.toLowerCase() || "unassigned";
-                    let mappedStatus = "unassigned";
+                    let mappedStatus = apiData.status?.toLowerCase() || "unassigned";
                     if (mappedStatus === 'inprogress') mappedStatus = 'in-progress';
                     
                     setStatus(mappedStatus as CaseStatus);
