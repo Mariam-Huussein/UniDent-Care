@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
@@ -19,6 +19,8 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  Search,
   Phone,
   AtSign,
 } from "lucide-react";
@@ -30,6 +32,7 @@ import {
 import { authService } from "@/features/auth/services/authService";
 import { FaTooth } from "react-icons/fa";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import SearchableSelect from "@/components/common/SearchableSelect";
 
 export default function DoctorSignup() {
   const router = useRouter();
@@ -40,6 +43,8 @@ export default function DoctorSignup() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<DoctorSignupValues>({
     resolver: zodResolver(doctorSignupSchema),
@@ -53,6 +58,13 @@ export default function DoctorSignup() {
       password: "",
     },
   });
+
+  const { data: universitiesData, isLoading: isLoadingUniversities } = useQuery({
+    queryKey: ["universities-lookup"],
+    queryFn: authService.getUniversitiesLookup,
+  });
+
+  const universities = universitiesData?.data || [];
 
   const signupMutation = useMutation({
     mutationFn: authService.registerDoctor,
@@ -246,19 +258,22 @@ export default function DoctorSignup() {
 
             <motion.div variants={itemVariants} className="space-y-2">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>
-                {t.universityIdLabel}
+                {isRtl ? "الجامعة" : t.universityIdLabel}
               </label>
               <div className="relative group">
                 <IdCard
-                  className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-teal-600 dark:group-focus-within:text-teal-400 transition-colors`}
+                  className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-teal-600 dark:group-focus-within:text-teal-400 transition-colors z-20`}
                   size={18}
                 />
-                <input
-                  type="text"
-                  {...register("universityId")}
-                  className={`w-full bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.universityId ? "border-red-200 dark:border-red-900/50" : "border-slate-100 dark:border-slate-800 focus:border-teal-500 dark:focus:border-teal-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
-                  placeholder="1234567"
-                  dir="ltr"
+                <SearchableSelect
+                  options={universities.map(u => ({ id: u.id, label: u.name }))}
+                  value={watch("universityId")}
+                  onChange={(id) => setValue("universityId", id as string)}
+                  placeholder={isRtl ? "اختر الجامعة" : "Select University"}
+                  searchPlaceholder={isRtl ? "ابحث عن الجامعة..." : "Search for university..."}
+                  isRtl={isRtl}
+                  error={errors.universityId?.message}
+                  accentColor="teal"
                 />
               </div>
               {errors.universityId && (
@@ -266,6 +281,7 @@ export default function DoctorSignup() {
                   {errors.universityId.message}
                 </p>
               )}
+              {isLoadingUniversities && <p className="text-[10px] text-teal-500 animate-pulse px-2">Loading universities...</p>}
             </motion.div>
 
             <motion.div

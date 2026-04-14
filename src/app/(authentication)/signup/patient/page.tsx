@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { motion } from "framer-motion";
@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MapPin,
+  Search,
 } from "lucide-react";
 
 import {
@@ -29,6 +30,7 @@ import {
 import { authService } from "@/features/auth/services/authService";
 import { FaTooth, FaVenusMars } from "react-icons/fa";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import SearchableSelect from "@/components/common/SearchableSelect";
 
 export default function PatientSignup() {
   const router = useRouter();
@@ -40,6 +42,8 @@ export default function PatientSignup() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<PatientSignupValues>({
     resolver: zodResolver(patientSignupSchema),
@@ -53,6 +57,11 @@ export default function PatientSignup() {
       gender: 0,
       city: 0,
     },
+  });
+  
+  const { data: cities, isLoading: isLoadingCities } = useQuery({
+    queryKey: ["cities-lookup"],
+    queryFn: authService.getCitiesLookup,
   });
 
   const signupMutation = useMutation({
@@ -68,6 +77,19 @@ export default function PatientSignup() {
       toast.error(msg);
     },
   });
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05 },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1 },
+  };
 
   const onSubmit = (data: PatientSignupValues) => {
     signupMutation.mutate(data);
@@ -95,10 +117,16 @@ export default function PatientSignup() {
             </h2>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
+          <motion.form
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            onSubmit={handleSubmit(onSubmit)}
+            className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5"
+          >
             
             {/* Full Name */}
-            <div className="md:col-span-2 space-y-1.5">
+            <motion.div variants={itemVariants} className="md:col-span-2 space-y-1.5">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.fullNameLabel}</label>
               <div className="relative">
                 <User className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500`} size={18} />
@@ -109,10 +137,10 @@ export default function PatientSignup() {
                 />
               </div>
               {errors.fullName && <p className="text-xs text-red-500 dark:text-red-400 font-bold">{errors.fullName.message}</p>}
-            </div>
+            </motion.div>
 
             {/* Password */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.passwordLabel}</label>
               <div className="relative">
                 <Lock className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500`} size={18} />
@@ -128,10 +156,10 @@ export default function PatientSignup() {
                 </button>
               </div>
               {errors.password && <p className="text-xs text-red-500 dark:text-red-400 font-bold">{errors.password.message}</p>}
-            </div>
+            </motion.div>
 
             {/* Phone */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.phoneLabel}</label>
               <div className="relative">
                 <Phone className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500`} size={18} />
@@ -143,10 +171,10 @@ export default function PatientSignup() {
                 />
               </div>
               {errors.phoneNumber && <p className="text-xs text-red-500 dark:text-red-400 font-bold">{errors.phoneNumber.message}</p>}
-            </div>
+            </motion.div>
 
             {/* National ID */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.nationalIdLabel}</label>
               <div className="relative">
                 <Fingerprint className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500`} size={18} />
@@ -158,10 +186,10 @@ export default function PatientSignup() {
                 />
               </div>
               {errors.nationalId && <p className="text-xs text-red-500 dark:text-red-400 font-bold">{errors.nationalId.message}</p>}
-            </div>
+            </motion.div>
 
             {/* Birth Date */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.dobLabel}</label>
               <div className="relative">
                 <Calendar className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 z-10`} size={18} />
@@ -172,10 +200,10 @@ export default function PatientSignup() {
                 />
               </div>
               {errors.birthDate && <p className="text-xs text-red-500 dark:text-red-400 font-bold">{errors.birthDate.message}</p>}
-            </div>
+            </motion.div>
 
             {/* Gender */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.genderLabel}</label>
               <div className="relative">
                 <FaVenusMars className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500`} size={18} />
@@ -187,26 +215,29 @@ export default function PatientSignup() {
                   <option value={1}>{t.genderFemale}</option>
                 </select>
               </div>
-            </div>
+            </motion.div>
 
             {/* City */}
-            <div className="space-y-1.5">
+            <motion.div variants={itemVariants} className="space-y-1.5">
               <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.cityLabel}</label>
-              <div className="relative">
-                <MapPin className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500`} size={18} />
-                <select
-                  {...register("city", { valueAsNumber: true })}
-                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 border-slate-50 dark:border-slate-800 focus:border-blue-600 dark:focus:border-blue-500 rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3 outline-none appearance-none cursor-pointer`}
-                >
-                  <option value={0}>{t.citySelect}</option>
-                  <option value={1}>Cairo</option>
-                  <option value={2}>Alexandria</option>
-                </select>
+              <div className="relative group">
+                <MapPin className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 z-20`} size={18} />
+                <SearchableSelect
+                  options={cities?.map(city => ({ id: city.id, label: isRtl ? city.name_ar : city.name_en })) || []}
+                  value={watch("city")}
+                  onChange={(id) => setValue("city", id as number)}
+                  placeholder={t.citySelect}
+                  searchPlaceholder={isRtl ? "ابحث عن المدينة..." : "Search for city..."}
+                  isRtl={isRtl}
+                  error={errors.city?.message}
+                  accentColor="blue"
+                />
               </div>
               {errors.city && <p className="text-xs text-red-500 dark:text-red-400 font-bold">{errors.city.message}</p>}
-            </div>
+              {isLoadingCities && <p className="text-[10px] text-blue-500 animate-pulse px-2">Loading cities...</p>}
+            </motion.div>
 
-            <div className="md:col-span-2 pt-6">
+            <motion.div variants={itemVariants} className="md:col-span-2 pt-6">
               <button
                 type="submit"
                 disabled={signupMutation.isPending}
@@ -218,8 +249,8 @@ export default function PatientSignup() {
                   <ArrowRight size={20} className={`${isRtl ? 'rotate-180' : ''}`} />
                 </>}
               </button>
-            </div>
-          </form>
+            </motion.div>
+          </motion.form>
         </div>
       </motion.div>
     </div>
