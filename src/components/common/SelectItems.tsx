@@ -39,7 +39,7 @@ export default function SelectItems({ value, onChange, options }: SelectItemsPro
             </button>
 
             {isOpen && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-lg ring-1 ring-black/5 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute z-0 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-lg ring-1 ring-black/5 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                     <ul className="py-1 max-h-60 overflow-auto">
                         {options.map((item) => (
                             <li

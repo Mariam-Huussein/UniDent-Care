@@ -7,6 +7,7 @@ interface AuthState {
     token: string | null;
     role: string | null;
     isAuthenticated: boolean;
+    uinversalId: string | null;
 }
 
 const initialState: AuthState = {
@@ -14,6 +15,7 @@ const initialState: AuthState = {
     token: null,
     role: null,
     isAuthenticated: false,
+    uinversalId: null,
 };
 
 const authSlice = createSlice({
@@ -25,6 +27,7 @@ const authSlice = createSlice({
             state.token = action.payload.token;
             state.role = action.payload.roles[0];
             state.isAuthenticated = true;
+            state.uinversalId = action.payload.uinversalId;
 
             Cookies.set("token", action.payload.token, {
                 expires: 7,
@@ -33,6 +36,12 @@ const authSlice = createSlice({
             });
 
             Cookies.set("user_id", action.payload.publicId, {
+                expires: 7,
+                secure: true,
+                sameSite: "strict",
+            });
+
+            Cookies.set("uinversal_id", action.payload.uinversalId, {
                 expires: 7,
                 secure: true,
                 sameSite: "strict",
@@ -59,9 +68,11 @@ const authSlice = createSlice({
             state.token = null;
             state.role = null;
             state.isAuthenticated = false;
+            state.uinversalId = null;
             Cookies.remove("token");
             Cookies.remove("user_role");
             Cookies.remove("user_id");
+            Cookies.remove("uinversal_id");
             window.location.href = "/login";
         },
     },

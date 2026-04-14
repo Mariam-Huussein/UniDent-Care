@@ -95,7 +95,7 @@ export default function Sidebar() {
                         >
                             <Icon 
                                 size={20}
-                                className={`flex-shrink-0 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`}
+                                className={`shrink-0 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`}
                             />
                             <span className={`text-[14px] md:text-md text-center transition-all duration-300 ${isExpanded ? 'md:block opacity-100 w-auto' : 'md:hidden opacity-0 md:w-0'}`}>
                                 {getLinkName(item.name)}

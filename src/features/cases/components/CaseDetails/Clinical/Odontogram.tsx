@@ -58,10 +58,8 @@ export default function Odontogram({ teeth, readonly = false, status }: Odontogr
             return [...prev, { number: num, status: "needs-treatment", ...updates } as ToothData];
         });
     };
-    const isAssignedStudent = false; // We don't have patient.student in Odontogram right now, wait.
-    // If I cannot check patient.student, I should pass `patient` in! 
+    const isAssignedStudent = false; 
 
-    // For now, I'll export `isEditable = status === "diagnosis" && !readonly`
     const isDiagnosisActive = status === "diagnosis" && !readonly;
     const isUnassigned = status === "unassigned";
 
@@ -112,7 +110,7 @@ export default function Odontogram({ teeth, readonly = false, status }: Odontogr
                 </div>
 
                 {/* Odontogram Chart */}
-                <div className={`relative rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 max-w-[450px] mx-auto overflow-x-auto odontogram-wrapper transition-all duration-300 ${isUnassigned ? "pointer-events-none opacity-60 grayscale-[20%]" : ""}`}>
+                <div className={`relative rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 max-w-[450px] mx-auto overflow-x-auto odontogram-wrapper transition-all duration-300 ${isUnassigned ? "pointer-events-none opacity-60 grayscale20" : ""}`}>
                     <ReactOdontogram
                         notation="FDI"
                         showTooltip

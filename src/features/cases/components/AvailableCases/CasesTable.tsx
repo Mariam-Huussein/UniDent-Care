@@ -6,12 +6,17 @@ import { useState } from "react";
 import SendRequestModal from "../CaseCard/SendRequestModal";
 import CaseTypeDropdown from "./CaseTypeDropdown";
 import EmptyState from "./EmptyState";
+import { SortConfig } from "../../hooks/useFilterCases";
 
 interface CasesTableProps {
     cases: CaseItem[];
     loading: boolean;
-    search: string;
-    setSearch: (value: string) => void;
+    filters: Record<string, string>;
+    onFilterChange: (key: string, value: string) => void;
+    clearFilters: () => void;
+    hasActiveFilters: boolean;
+    sortConfig: SortConfig;
+    onSort: (key: string) => void;
     hasPreviousPage: boolean;
     hasNextPage: boolean;
     currentPage: number;
@@ -21,16 +26,9 @@ interface CasesTableProps {
 }
 
 export default function CasesTable({
-    cases,
-    loading,
-    search,
-    setSearch,
-    hasPreviousPage,
-    hasNextPage,
-    currentPage,
-    totalPages,
-    pageSize,
-    onPageChange
+    cases, loading, filters, onFilterChange, clearFilters, hasActiveFilters,
+    sortConfig, onSort,
+    hasPreviousPage, hasNextPage, currentPage, totalPages, pageSize, onPageChange
 }: CasesTableProps) {
     const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
 
@@ -56,7 +54,6 @@ export default function CasesTable({
         { header: "Actions", accessor: "id" }
     ];
 
-    // Data Mapping for display formatting
     const tableData = cases.map((c) => ({
         ...c,
         caseType: c.caseType?.name || "N/A",
@@ -73,17 +70,17 @@ export default function CasesTable({
             <div className="flex gap-2 items-center">
                 <Link
                     href={`/cases/${c.id}`}
-                    className="my-btn-outline !flex-none p-2 flex items-center justify-center rounded-lg"
+                    className="my-btn-outline flex-none p-2 flex items-center justify-center rounded-lg group/view"
                     title="View details"
                 >
-                    <Eye size={16} />
+                    <Eye size={16} className="group-hover/view:animate-pulse group-hover/view:animate-duration-1000 transition-all duration-300" />
                 </Link>
                 <button
-                    onClick={() => setSelectedCaseId(c.id) }
-                    className="my-btn-outline !flex-none p-2 flex items-center justify-center rounded-lg group-hover/request:animate-bounce group-hover/request:animate-duration-1000 transition-all duration-300"
+                    onClick={() => setSelectedCaseId(c.id)}
+                    className="my-btn-outline flex-none p-2 flex items-center justify-center rounded-lg group/request"
                     title="Send request"
                 >
-                    <Send size={16} />
+                    <Send size={16} className="group-hover/request:animate-bounce group-hover/request:animate-duration-1000 transition-all duration-300" />
                 </button>
             </div>
         )
@@ -100,21 +97,30 @@ export default function CasesTable({
     if (cases.length === 0) {
         return (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px] flex flex-col justify-center">
-                <EmptyState search={search} onClear={() => setSearch("")} />
+                <EmptyState
+                    search={hasActiveFilters ? "filter" : ""}
+                    onClear={clearFilters}
+                />
             </div>
         );
     }
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <DataTable columns={columns as any} data={tableData} />
+            <DataTable
+                columns={columns as any}
+                data={tableData}
+                filters={filters}
+                onFilterChange={onFilterChange}
+                sortConfig={sortConfig}
+                onSort={onSort}
+            />
 
-            {/* Pagination controls */}
+            {/* Pagination */}
             <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-gray-100 gap-4">
                 <div className="text-sm text-gray-500">
                     Showing <span className="font-medium text-gray-900">{cases.length}</span> cases
                 </div>
-
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => onPageChange(currentPage - 1)}

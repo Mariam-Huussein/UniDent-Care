@@ -38,6 +38,7 @@ export interface AuthData<TUser = User> {
     token: string;
     roles: string[];
     publicId: string;
+    uinversalId: string;
     user: TUser;
 }
 

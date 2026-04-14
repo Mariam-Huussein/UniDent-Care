@@ -14,6 +14,10 @@ export type Column<T> = {
 type DataTableProps<T> = {
     columns: Column<T>[];
     data: T[];
+    filters?: Record<string, string>;
+    onFilterChange?: (key: string, value: string) => void;
+    sortConfig?: { key: string; direction: "asc" | "desc" } | null;
+    onSort?: (key: string) => void;
 };
 
 type SortConfig<T> = {
@@ -24,57 +28,63 @@ type SortConfig<T> = {
 export default function DataTable<T extends Record<string, any>>({
     columns,
     data,
+    filters: externalFilters,
+    onFilterChange: externalOnFilterChange,
+    sortConfig: externalSortConfig,
+    onSort: externalOnSort,
 }: DataTableProps<T>) {
-    const [filters, setFilters] = useState<Record<string, string>>({});
-    const [sortConfig, setSortConfig] = useState<SortConfig<T>>(null);
+    const [internalFilters, setInternalFilters] = useState<Record<string, string>>({});
+    const [internalSortConfig, setInternalSortConfig] = useState<SortConfig<T>>(null);
+
+    const activeFilters = externalFilters !== undefined ? externalFilters : internalFilters;
+    const activeSortConfig = externalSortConfig !== undefined ? externalSortConfig : internalSortConfig;
 
     const handleFilterChange = (key: string, value: string) => {
-        setFilters((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
+        if (externalOnFilterChange) {
+            externalOnFilterChange(key, value);
+        } else {
+            setInternalFilters((prev) => ({ ...prev, [key]: value }));
+        }
     };
 
     const handleSort = (key: keyof T) => {
-        if (!sortConfig || sortConfig.key !== key) {
-            // First click on a new column: sort ascending
-            setSortConfig({ key, direction: "asc" });
-        } else if (sortConfig.direction === "asc") {
-            // Second click on the same column: sort descending
-            setSortConfig({ key, direction: "desc" });
+        if (externalOnSort) {
+            externalOnSort(String(key));
         } else {
-            // Third click: remove sorting
-            setSortConfig(null);
+            if (!internalSortConfig || internalSortConfig.key !== key) {
+                setInternalSortConfig({ key, direction: "asc" });
+            } else if (internalSortConfig.direction === "asc") {
+                setInternalSortConfig({ key, direction: "desc" });
+            } else {
+                setInternalSortConfig(null);
+            }
         }
     };
 
     const processedData = useMemo(() => {
+        // Filter
         let filtered = data.filter((row) =>
             columns.every((col) => {
                 const value = row[col.accessor];
-                const filterValue = filters[col.accessor as string];
-
+                const filterValue = activeFilters[col.accessor as string];
                 if (!filterValue) return true;
-
-                return String(value)
-                    .toLowerCase()
-                    .includes(filterValue.toLowerCase());
+                return String(value).toLowerCase().includes(filterValue.toLowerCase());
             })
         );
 
-        if (sortConfig) {
+        // Sort — skip if external sort is provided (data arrives pre-sorted)
+        if (!externalOnSort && activeSortConfig) {
             filtered = [...filtered].sort((a, b) => {
-                const aValue = a[sortConfig.key];
-                const bValue = b[sortConfig.key];
-
-                if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-                if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+                const aValue = a[activeSortConfig.key as keyof T];
+                const bValue = b[activeSortConfig.key as keyof T];
+                if (aValue < bValue) return activeSortConfig.direction === "asc" ? -1 : 1;
+                if (aValue > bValue) return activeSortConfig.direction === "asc" ? 1 : -1;
                 return 0;
             });
         }
 
         return filtered;
-    }, [data, filters, sortConfig, columns]);
+    }, [data, activeFilters, activeSortConfig, columns, externalOnSort]);
 
     return (
         <div className="w-full bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 overflow-hidden">
@@ -83,8 +93,7 @@ export default function DataTable<T extends Record<string, any>>({
                     <thead className="bg-white border-b border-gray-200 sticky top-0 z-10">
                         <tr>
                             {columns.map((col) => {
-                                const isSorted =
-                                    sortConfig && sortConfig.key === col.accessor;
+                                const isSorted = activeSortConfig && activeSortConfig.key === String(col.accessor);
 
                                 const SortIcon = () => {
                                     if (!col.sortable) return null;
@@ -99,7 +108,7 @@ export default function DataTable<T extends Record<string, any>>({
                                             title={`Sort by ${col.header}`}
                                         >
                                             {isSorted ? (
-                                                sortConfig?.direction === "asc" ? (
+                                                activeSortConfig?.direction === "asc" ? (
                                                     <ArrowUpZA size={14} className="text-blue-500" />
                                                 ) : (
                                                     <ArrowDownAZ size={14} className="text-blue-500" />
@@ -117,11 +126,10 @@ export default function DataTable<T extends Record<string, any>>({
                                         className="px-4 py-3 text-left font-medium text-gray-700 align-bottom"
                                     >
                                         <div className="flex flex-col gap-2">
-                                            {/* Unified Header / Filter Element */}
                                             {col.filterComponent ? (
                                                 <div className="flex items-center justify-between gap-2 border-b border-gray-200 pb-1 w-full pl-1">
                                                     {col.filterComponent({
-                                                        value: filters[String(col.accessor)] || "",
+                                                        value: activeFilters[String(col.accessor)] || "",
                                                         onChange: (val) => handleFilterChange(String(col.accessor), val)
                                                     })}
                                                     <SortIcon />
@@ -132,7 +140,7 @@ export default function DataTable<T extends Record<string, any>>({
                                                         type="text"
                                                         placeholder={col.header}
                                                         className="w-full bg-transparent text-sm placeholder:text-gray-700 focus:outline-none focus:placeholder:text-gray-400 font-medium pb-0.5 px-1 transition-all"
-                                                        value={filters[String(col.accessor)] || ""}
+                                                        value={activeFilters[String(col.accessor)] || ""}
                                                         onChange={(e) =>
                                                             handleFilterChange(
                                                                 String(col.accessor),

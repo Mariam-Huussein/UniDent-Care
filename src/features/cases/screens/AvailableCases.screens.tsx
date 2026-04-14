@@ -7,25 +7,32 @@ import CasesTable from "../components/AvailableCases/CasesTable";
 
 export default function AvailableCasesScreen() {
 
-    const { cases, loading, search, setSearch, selectedCaseType, setSelectedCaseType, viewMode, setViewMode, sortedCases,
-        pageSize, currentPage, totalPages, hasPreviousPage, hasNextPage, onPageChange } = useAvailableCases();
+    const {
+        cases, loading, filters, handleFilterChange, clearFilters, hasActiveFilters,
+        sortConfig, handleSort, viewMode, setViewMode, sortedCases,
+        pageSize, currentPage, totalPages, hasPreviousPage, hasNextPage, onPageChange
+    } = useAvailableCases();
 
     return (
         <div className="min-h-screen bg-gray-50/60 px-3 py-4 pb-20 sm:px-6 sm:py-6 md:pb-6 lg:px-10">
 
-            <CasesHeader totalCases={cases.length} showingCases={sortedCases.length} search={search}
-                setSearch={setSearch}
-                selectedCaseType={selectedCaseType}
-                setSelectedCaseType={setSelectedCaseType}
+            <CasesHeader
+                totalCases={cases.length}
+                showingCases={sortedCases.length}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
             />
+
             {viewMode === 'grid' ? (
                 <CasesGrid
                     cases={sortedCases}
                     loading={loading}
-                    search={search}
-                    setSearch={setSearch}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    clearFilters={clearFilters}
+                    hasActiveFilters={hasActiveFilters}
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
                     pageSize={pageSize}
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -37,8 +44,12 @@ export default function AvailableCasesScreen() {
                 <CasesTable
                     cases={sortedCases}
                     loading={loading}
-                    search={search}
-                    setSearch={setSearch}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    clearFilters={clearFilters}
+                    hasActiveFilters={hasActiveFilters}
+                    sortConfig={sortConfig}
+                    onSort={handleSort}
                     pageSize={pageSize}
                     currentPage={currentPage}
                     totalPages={totalPages}
