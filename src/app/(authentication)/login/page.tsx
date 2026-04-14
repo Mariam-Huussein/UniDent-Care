@@ -54,8 +54,8 @@ export default function Login() {
           console.error(err);
           // Silent gracefully
         }
-        toast.success(isRtl ? "مرحباً بك مرة أخرى!" : "Welcome back!");
         router.replace("/dashboard");
+        toast.success(isRtl ? "مرحباً بك مرة أخرى!" : "Welcome back!");
       }
     },
     onError: (error: any) => {

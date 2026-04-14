@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import toast from "react-hot-toast";
 import { getAvailableCases } from "../server/case.action";
 import { CaseItem } from "../types/caseCardProps.types";
 import Cookies from "js-cookie";
+import { useFilterCases } from "./useFilterCases";
 
 
 export const useAvailableCases = () => {
@@ -12,8 +13,6 @@ export const useAvailableCases = () => {
 
     const [cases, setCases] = useState<CaseItem[]>([]);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
-    const [selectedCaseType, setSelectedCaseType] = useState("");
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -22,10 +21,13 @@ export const useAvailableCases = () => {
     const [hasNextPage, setHasNextPage] = useState(false);
     const pageSize = 9;
 
+    // Unified filter + sort
+    const { filters, handleFilterChange, clearFilters, sortConfig, handleSort, hasActiveFilters, filteredAndSortedCases } = useFilterCases(cases);
+
     const fetchData = async () => {
         setLoading(true);
         try {
-            const response = await getAvailableCases(currentPage, pageSize, token, selectedCaseType || undefined);
+            const response = await getAvailableCases(currentPage, pageSize, token);
             if (response.success) {
                 setCases(response.data.items);
                 setTotalPages(response.data.totalPages);
@@ -42,27 +44,20 @@ export const useAvailableCases = () => {
 
     useEffect(() => {
         fetchData();
-    }, [currentPage, selectedCaseType]);
-
-    const filteredCases = useMemo(() => {
-        return cases.filter((c) => {
-            const matchesSearch =
-                c.patientName.toLowerCase().includes(search.toLowerCase()) ||
-                (c.caseType?.name || "").toLowerCase().includes(search.toLowerCase());
-            return matchesSearch;
-        });
-    }, [cases, search]);
+    }, [currentPage]);
 
     return {
         cases,
         loading,
-        search,
-        setSearch,
-        selectedCaseType,
-        setSelectedCaseType,
+        filters,
+        handleFilterChange,
+        clearFilters,
+        sortConfig,
+        handleSort,
+        hasActiveFilters,
         viewMode,
         setViewMode,
-        sortedCases: filteredCases,
+        sortedCases: filteredAndSortedCases,
         refresh: fetchData,
         pageSize,
         currentPage,

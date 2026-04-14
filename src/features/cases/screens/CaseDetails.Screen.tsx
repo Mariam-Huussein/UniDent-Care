@@ -1,13 +1,13 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import DentalImageGallery from "../components/CaseDetails/DentalImageGallery";
-import PatientInfoPanel from "../components/CaseDetails/CaseInfoPanel";
-import PatientDetailTabs from "../components/CaseDetails/CaseDetailTabs";
-import PatientDetailsSkeleton from "../components/CaseDetails/CaseDetailsSkeleton";
-import Odontogram from "../components/CaseDetails/Odontogram";
-import ActivityTimeline from "../components/CaseDetails/ActivityTimeline";
-import CaseDetailsTopBar from "../components/CaseDetails/CaseDetailsTopBar";
+import DentalImageGallery from "../components/CaseDetails/Clinical/DentalImageGallery";
+import PatientInfoPanel from "../components/CaseDetails/Layout/CaseInfoPanel";
+import PatientDetailTabs from "../components/CaseDetails/Tabs/CaseDetailTabs";
+import PatientDetailsSkeleton from "../components/CaseDetails/Layout/CaseDetailsSkeleton";
+import Odontogram from "../components/CaseDetails/Clinical/Odontogram";
+import ActivityTimeline from "../components/CaseDetails/Tracking/ActivityTimeline";
+import CaseDetailsTopBar from "../components/CaseDetails/Layout/CaseDetailsTopBar";
 import { useCaseDetails } from "../hooks/useCaseDetails";
 
 export default function CaseDetailsScreen({ caseId }: { caseId: string }) {

@@ -31,31 +31,13 @@ export default function CaseContent({ caseItem }: CaseContentProps) {
             {/* Detail chips */}
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
-                    <PiTooth size={14} className="text-blue-400" />
+                    <PiTooth size={14} className="text-indigo-500" />
                     <span className="font-medium">{caseItem.caseType?.name || "Uncategorized"}</span>
                 </div>
 
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
-                    <User size={14} className="text-blue-400" />
+                    <User size={14} className="text-indigo-500" />
                     <span className="font-medium">{caseItem.patientAge} Yrs</span>
-                </div>
-
-                {/* Pending requests */}
-                <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
-                    {caseItem.pendingRequests > 0 ? (
-                        <>
-                            <Send size={14} className="text-red-400" />
-                            <span className="font-medium">{caseItem.pendingRequests} Request{caseItem.pendingRequests !== 1 ? "s" : ""}</span>
-                        </>
-                    )
-                        :
-                        (
-                            <>
-                                <Send size={14} className="text-green-400" />
-                                <span className="font-medium">0 Request</span>
-                            </>
-                        )
-                    }
                 </div>
             </div>
         </div>

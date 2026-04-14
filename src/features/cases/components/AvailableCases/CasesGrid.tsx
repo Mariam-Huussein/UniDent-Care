@@ -3,13 +3,19 @@ import { CaseItem } from "../../types/caseCardProps.types";
 import CasesGridSkeleton from "./CasesGridSkeleton";
 import EmptyState from "./EmptyState";
 import Pagination from "@/components/common/pagination";
+import GridControlsToolbar from "./GridControlsToolbar";
+import { SortConfig } from "../../hooks/useFilterCases";
 
 
 interface CasesGridProps {
     cases: CaseItem[];
     loading: boolean;
-    search: string;
-    setSearch: (value: string) => void;
+    filters: Record<string, string>;
+    onFilterChange: (key: string, value: string) => void;
+    clearFilters: () => void;
+    hasActiveFilters: boolean;
+    sortConfig: SortConfig;
+    onSort: (key: string) => void;
     pageSize: number;
     currentPage: number;
     totalPages: number;
@@ -18,10 +24,22 @@ interface CasesGridProps {
     onPageChange: (page: number) => void;
 }
 
-export default function CasesGrid({ cases, loading, search, setSearch, pageSize, currentPage, totalPages, hasPreviousPage, hasNextPage, onPageChange }: CasesGridProps) {
+export default function CasesGrid({
+    cases, loading, filters, onFilterChange, clearFilters, hasActiveFilters,
+    sortConfig, onSort, pageSize, currentPage, totalPages, hasPreviousPage, hasNextPage, onPageChange
+}: CasesGridProps) {
 
     return (
         <>
+            <GridControlsToolbar
+                filters={filters}
+                onFilterChange={onFilterChange}
+                clearFilters={clearFilters}
+                hasActiveFilters={hasActiveFilters}
+                sortConfig={sortConfig}
+                onSort={onSort}
+            />
+
             {loading ? (
                 <CasesGridSkeleton pageSize={pageSize} />
             ) :
@@ -41,7 +59,10 @@ export default function CasesGrid({ cases, loading, search, setSearch, pageSize,
                         />
                     </>
                 ) : (
-                    <EmptyState search={search} onClear={() => setSearch("")} />
+                    <EmptyState
+                        search={hasActiveFilters ? "filter" : ""}
+                        onClear={clearFilters}
+                    />
                 )
             }
         </>
