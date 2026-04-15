@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { getAvailableCases } from "../server/case.action";
-import { CaseItem } from "../types/caseCardProps.types";
+import { CasesQueryParams } from "../types/caseCardProps.types";
 import Cookies from "js-cookie";
 import { useFilterCases } from "./useFilterCases";
 
@@ -11,44 +12,42 @@ import { useFilterCases } from "./useFilterCases";
 export const useAvailableCases = () => {
     const token = (useSelector((state: RootState) => state.auth.token) || Cookies.get("token")) as string;
 
-    const [cases, setCases] = useState<CaseItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
-
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [hasPreviousPage, setHasPreviousPage] = useState(false);
-    const [hasNextPage, setHasNextPage] = useState(false);
     const pageSize = 9;
 
-    // Unified filter + sort
+    // Build query params — extend this object when you need to send
+    // server-side filters (PatientName, CaseType, Status, Gender, SortBy, SortDirection)
+    const queryParams: CasesQueryParams = useMemo(() => ({
+        Page: currentPage,
+        PageSize: pageSize,
+    }), [currentPage, pageSize]);
+
+    const { data, isLoading, isError, refetch } = useQuery({
+        queryKey: ["availableCases", queryParams],
+        queryFn: () => getAvailableCases(queryParams, token),
+        enabled: !!token,
+        placeholderData: (prev) => prev,   // keep previous data while new page loads
+    });
+
+    // Show toast on error
+    useMemo(() => {
+        if (isError) toast.error("Can't fetch cases");
+    }, [isError]);
+
+    // Derive items & pagination from the query response
+    const cases = useMemo(() => data?.data?.items ?? [], [data]);
+    const totalCount = data?.data?.totalCount ?? 0;
+    const totalPages = data?.data?.totalPages ?? 1;
+    const hasPreviousPage = data?.data?.hasPreviousPage ?? false;
+    const hasNextPage = data?.data?.hasNextPage ?? false;
+
+    // Unified client-side filter + sort (memoized — won't re-run on viewMode toggle)
     const { filters, handleFilterChange, clearFilters, sortConfig, handleSort, hasActiveFilters, filteredAndSortedCases } = useFilterCases(cases);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await getAvailableCases(currentPage, pageSize, token);
-            if (response.success) {
-                setCases(response.data.items);
-                setTotalPages(response.data.totalPages);
-                setCurrentPage(response.data.currentPage);
-                setHasPreviousPage(response.data.hasPreviousPage);
-                setHasNextPage(response.data.hasNextPage);
-            }
-        } catch (err: any) {
-            toast.error(err.message || "Can't fetch cases");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, [currentPage]);
 
     return {
         cases,
-        loading,
+        loading: isLoading,
         filters,
         handleFilterChange,
         clearFilters,
@@ -58,12 +57,13 @@ export const useAvailableCases = () => {
         viewMode,
         setViewMode,
         sortedCases: filteredAndSortedCases,
-        refresh: fetchData,
+        refresh: refetch,
         pageSize,
         currentPage,
+        totalCount,
         totalPages,
         hasPreviousPage,
         hasNextPage,
-        onPageChange: setCurrentPage
+        onPageChange: setCurrentPage,
     };
 };

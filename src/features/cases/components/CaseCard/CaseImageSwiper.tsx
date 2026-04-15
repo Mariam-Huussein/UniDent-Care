@@ -19,7 +19,7 @@ export default function CaseImageSwiper({ caseItem }: CaseImageSwiperProps) {
         : [noToothFoundImg.src];
 
     return (
-        <div className="relative w-full h-[220px] sm:h-[250px] flex-shrink-0 overflow-hidden bg-gray-50">
+        <div className="relative w-full h-[220px] sm:h-[250px] shrink-0 overflow-hidden bg-gray-50 dark:bg-slate-800 transition-colors">
             <Swiper
                 modules={[Pagination, Autoplay]}
                 pagination={{ clickable: true }}
@@ -42,7 +42,7 @@ export default function CaseImageSwiper({ caseItem }: CaseImageSwiperProps) {
                     </SwiperSlide>
                 ))}
             </Swiper>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent pointer-events-none z-10" />
 
             {/* Badge */}
             <span className={`absolute top-2.5 left-2.5 z-20 inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusConfig.bg} ${statusConfig.text} backdrop-blur-sm`}>

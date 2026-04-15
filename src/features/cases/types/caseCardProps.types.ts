@@ -32,6 +32,16 @@ export interface MetaData {
     totalPages: number;
 }
 
+export interface CasesQueryParams {
+    PatientName?: string;
+    CaseType?: string;
+    Status?: string;
+    Gender?: 0 | 1;
+    SortBy?: string;
+    SortDirection?: string;
+    Page?: number;
+    PageSize?: number;
+}
 
 export type Cases = CaseCardProps["caseItem"][];
 

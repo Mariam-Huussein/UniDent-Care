@@ -59,9 +59,9 @@ export default function CasesTable({
         caseType: c.caseType?.name || "N/A",
         createAt: new Date(c.createAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
         status: (
-            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${c.status === "Available"
-                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                : "bg-indigo-50 text-indigo-700 border-indigo-200"
+            <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border transition-colors ${c.status === "Available"
+                ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
+                : "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-500/20"
                 }`}>
                 {c.status}
             </span>
@@ -89,24 +89,13 @@ export default function CasesTable({
     if (loading) {
         return (
             <div className="flex items-center justify-center p-12">
-                <div className="w-8 h-8 rounded-full border-4 border-emerald-100 border-t-emerald-500 animate-spin" />
-            </div>
-        );
-    }
-
-    if (cases.length === 0) {
-        return (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[400px] flex flex-col justify-center">
-                <EmptyState
-                    search={hasActiveFilters ? "filter" : ""}
-                    onClear={clearFilters}
-                />
+                <div className="w-8 h-8 rounded-full border-4 border-emerald-100 dark:border-slate-800 border-t-emerald-500 dark:border-t-emerald-400 animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white dark:bg-slate-900/50 rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-slate-800 overflow-hidden transition-colors">
             <DataTable
                 columns={columns as any}
                 data={tableData}
@@ -114,28 +103,36 @@ export default function CasesTable({
                 onFilterChange={onFilterChange}
                 sortConfig={sortConfig}
                 onSort={onSort}
+                emptyStateComponent={
+                    <div className="p-4">
+                        <EmptyState
+                            search={hasActiveFilters ? "filter" : ""}
+                            onClear={clearFilters}
+                        />
+                    </div>
+                }
             />
 
             {/* Pagination */}
-            <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-gray-100 gap-4">
-                <div className="text-sm text-gray-500">
-                    Showing <span className="font-medium text-gray-900">{cases.length}</span> cases
+            <div className="flex flex-col sm:flex-row items-center justify-between p-4 border-t border-gray-100 dark:border-slate-800 gap-4 transition-colors">
+                <div className="text-sm text-gray-500 dark:text-slate-400">
+                    Showing <span className="font-medium text-gray-900 dark:text-slate-100">{cases.length}</span> cases
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => onPageChange(currentPage - 1)}
                         disabled={!hasPreviousPage}
-                        className={`${!hasPreviousPage ? "hidden" : ""} px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+                        className={`${!hasPreviousPage ? "hidden" : ""} px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
                     >
                         Previous
                     </button>
-                    <span className="text-sm text-gray-600 font-medium px-2">
+                    <span className="text-sm text-gray-600 dark:text-slate-400 font-medium px-2">
                         Page {currentPage} of {totalPages}
                     </span>
                     <button
                         onClick={() => onPageChange(currentPage + 1)}
                         disabled={!hasNextPage}
-                        className={`${!hasNextPage ? "hidden" : ""} px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
+                        className={`${!hasNextPage ? "hidden" : ""} px-4 py-2 text-sm font-medium text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
                     >
                         Next
                     </button>
