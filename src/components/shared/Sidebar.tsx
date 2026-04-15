@@ -50,7 +50,7 @@ export default function Sidebar() {
     };
 
     return (
-        <aside className={`fixed bottom-0 left-0 w-full h-16 z-50 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 shadow-sm flex flex-row justify-between md:items-stretch items-center md:sticky md:top-0 md:h-screen ${isExpanded ? 'md:w-64' : 'md:w-20'} md:flex-col md:justify-start md:pt-4 md:border-r ${isRtl ? 'md:border-l md:border-r-0' : ''} md:border-t-0 transition-all duration-300`}>
+        <aside className={`fixed bottom-0 left-0 w-full h-20 z-50 bg-white dark:bg-slate-900 border-t border-gray-100 dark:border-slate-800 shadow-sm flex flex-row justify-between md:items-stretch items-center md:sticky md:top-0 md:h-screen ${isExpanded ? 'md:w-64' : 'md:w-20'} md:flex-col md:justify-start md:pt-4 md:border-r ${isRtl ? 'md:border-l md:border-r-0' : ''} md:border-t-0 transition-all duration-300`}>
             {/* Desktop Header & Toggle */}
             <div className={`hidden md:flex items-center px-4 mb-6 relative w-full h-8 ${isExpanded ? 'justify-between' : 'justify-center'}`}>
                 {isExpanded ? (

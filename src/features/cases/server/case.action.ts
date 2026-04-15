@@ -1,7 +1,6 @@
 import axios, { AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 import { AvailableCasesResponse, CaseDetailResponse, CaseRequestBody, CaseRequestResponse, CasesQueryParams } from "../types/caseCardProps.types";
-import { CaseTypeResponse } from "@/types/caseTypes";
 
 const cookieToken = Cookies.get("token");
 

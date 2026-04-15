@@ -42,7 +42,7 @@ export default function CaseInfoPanel({ patient, role }: PatientInfoPanelProps) 
         >
             {/* Patient Identity */}
             <div className="flex items-center gap-3.5">
-                <div className={`shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br ${sc.gradient} flex items-center justify-center shadow-lg dark:shadow-none`}>
+                <div className={`shrink-0 w-12 h-12 rounded-2xl bg-linear-to-br ${sc.gradient} flex items-center justify-center shadow-lg dark:shadow-none`}>
                     <span className="text-white font-bold text-base">{initials}</span>
                 </div>
                 <div className="min-w-0">

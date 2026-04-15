@@ -16,21 +16,18 @@ export const useAvailableCases = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 9;
 
-    // Build query params — extend this object when you need to send
-    // server-side filters (PatientName, CaseType, Status, Gender, SortBy, SortDirection)
     const queryParams: CasesQueryParams = useMemo(() => ({
         Page: currentPage,
         PageSize: pageSize,
     }), [currentPage, pageSize]);
 
-    const { data, isLoading, isError, refetch } = useQuery({
+    const { data, isPending, isError, refetch } = useQuery({
         queryKey: ["availableCases", queryParams],
         queryFn: () => getAvailableCases(queryParams, token),
         enabled: !!token,
-        placeholderData: (prev) => prev,   // keep previous data while new page loads
+        placeholderData: (prev) => prev,
     });
 
-    // Show toast on error
     useMemo(() => {
         if (isError) toast.error("Can't fetch cases");
     }, [isError]);
@@ -47,7 +44,7 @@ export const useAvailableCases = () => {
 
     return {
         cases,
-        loading: isLoading,
+        loading: isPending,
         filters,
         handleFilterChange,
         clearFilters,
