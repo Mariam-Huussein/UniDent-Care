@@ -33,8 +33,8 @@ export default function StudentCard({ student, status }: { student: NonNullable<
                 <p className="flex items-center gap-2"><Mail size={11} className="text-slate-400 dark:text-slate-500" />{student.email}</p>
             </div>
             <div className="flex gap-2 pt-1">
-                <button className="flex-1 !text-xs py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors flex items-center justify-center gap-1.5"><Phone size={12} /> Call</button>
-                <button className="flex-1 !text-xs py-2.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5"><MessageCircle size={12} /> Message</button>
+                <button className="flex-1 text-xs py-2.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-lg font-semibold hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors flex items-center justify-center gap-1.5"><Phone size={12} /> Call</button>
+                <button className="flex-1 text-xs py-2.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center justify-center gap-1.5"><MessageCircle size={12} /> Message</button>
             </div>
         </motion.div>
     );

@@ -18,6 +18,7 @@ type DataTableProps<T> = {
     onFilterChange?: (key: string, value: string) => void;
     sortConfig?: { key: string; direction: "asc" | "desc" } | null;
     onSort?: (key: string) => void;
+    emptyStateComponent?: React.ReactNode;
 };
 
 type SortConfig<T> = {
@@ -32,6 +33,7 @@ export default function DataTable<T extends Record<string, any>>({
     onFilterChange: externalOnFilterChange,
     sortConfig: externalSortConfig,
     onSort: externalOnSort,
+    emptyStateComponent,
 }: DataTableProps<T>) {
     const [internalFilters, setInternalFilters] = useState<Record<string, string>>({});
     const [internalSortConfig, setInternalSortConfig] = useState<SortConfig<T>>(null);
@@ -87,10 +89,10 @@ export default function DataTable<T extends Record<string, any>>({
     }, [data, activeFilters, activeSortConfig, columns, externalOnSort]);
 
     return (
-        <div className="w-full bg-white rounded-xl shadow-sm ring-1 ring-gray-200/60 overflow-hidden">
+        <div className="w-full bg-white dark:bg-transparent rounded-xl shadow-sm dark:shadow-none ring-1 ring-gray-200/60 dark:ring-slate-800 overflow-hidden transition-colors">
             <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left whitespace-nowrap">
-                    <thead className="bg-white border-b border-gray-200 sticky top-0 z-10">
+                    <thead className="bg-white dark:bg-slate-900/50 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-10 transition-colors">
                         <tr>
                             {columns.map((col) => {
                                 const isSorted = activeSortConfig && activeSortConfig.key === String(col.accessor);
@@ -104,14 +106,14 @@ export default function DataTable<T extends Record<string, any>>({
                                                 e.preventDefault();
                                                 handleSort(col.accessor);
                                             }}
-                                            className="p-1 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors ml-auto"
+                                            className="p-1 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 focus:outline-none transition-colors ml-auto"
                                             title={`Sort by ${col.header}`}
                                         >
                                             {isSorted ? (
                                                 activeSortConfig?.direction === "asc" ? (
-                                                    <ArrowUpZA size={14} className="text-blue-500" />
+                                                    <ArrowUpZA size={14} className="text-blue-500 dark:text-blue-400" />
                                                 ) : (
-                                                    <ArrowDownAZ size={14} className="text-blue-500" />
+                                                    <ArrowDownAZ size={14} className="text-blue-500 dark:text-blue-400" />
                                                 )
                                             ) : (
                                                 <ArrowUpDown size={14} />
@@ -123,11 +125,11 @@ export default function DataTable<T extends Record<string, any>>({
                                 return (
                                     <th
                                         key={String(col.accessor)}
-                                        className="px-4 py-3 text-left font-medium text-gray-700 align-bottom"
+                                        className="px-4 py-3 text-left font-medium text-gray-700 dark:text-slate-300 align-bottom transition-colors"
                                     >
                                         <div className="flex flex-col gap-2">
                                             {col.filterComponent ? (
-                                                <div className="flex items-center justify-between gap-2 border-b border-gray-200 pb-1 w-full pl-1">
+                                                <div className="flex items-center justify-between gap-2 border-b border-gray-200 dark:border-slate-700/50 pb-1 w-full pl-1 transition-colors">
                                                     {col.filterComponent({
                                                         value: activeFilters[String(col.accessor)] || "",
                                                         onChange: (val) => handleFilterChange(String(col.accessor), val)
@@ -135,11 +137,11 @@ export default function DataTable<T extends Record<string, any>>({
                                                     <SortIcon />
                                                 </div>
                                             ) : col.searchable ? (
-                                                <div className="relative flex items-center group w-full border-b border-gray-200 pb-1 focus-within:border-blue-500 transition-colors">
+                                                <div className="relative flex items-center group w-full border-b border-gray-200 dark:border-slate-700/50 pb-1 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-colors">
                                                     <input
                                                         type="text"
                                                         placeholder={col.header}
-                                                        className="w-full bg-transparent text-sm placeholder:text-gray-700 focus:outline-none focus:placeholder:text-gray-400 font-medium pb-0.5 px-1 transition-all"
+                                                        className="w-full bg-transparent text-sm text-gray-900 dark:text-slate-200 placeholder:text-gray-700 dark:placeholder:text-slate-400 focus:outline-none focus:placeholder:text-gray-400 dark:focus:placeholder:text-slate-500 font-medium pb-0.5 px-1 transition-all"
                                                         value={activeFilters[String(col.accessor)] || ""}
                                                         onChange={(e) =>
                                                             handleFilterChange(
@@ -152,7 +154,7 @@ export default function DataTable<T extends Record<string, any>>({
                                                 </div>
                                             ) : (
                                                 <div className="flex items-center justify-between w-full border-b border-transparent pb-1 px-1">
-                                                    <span className="text-sm font-medium text-gray-700">{col.header}</span>
+                                                    <span className="text-sm font-medium text-gray-700 dark:text-slate-300 transition-colors">{col.header}</span>
                                                     <SortIcon />
                                                 </div>
                                             )}
@@ -163,15 +165,15 @@ export default function DataTable<T extends Record<string, any>>({
                         </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-slate-800/60 transition-colors">
                         {processedData.length > 0 ? (
                             processedData.map((row, index) => (
                                 <tr
                                     key={index}
-                                    className="group hover:bg-blue-50/50 transition-colors duration-200 cursor-default"
+                                    className="group hover:bg-blue-50/50 dark:hover:bg-slate-800/40 transition-colors duration-200 cursor-default"
                                 >
                                     {columns.map((col) => (
-                                        <td key={`cell-${index}-${String(col.accessor)}`} className="p-4 text-gray-700">
+                                        <td key={`cell-${index}-${String(col.accessor)}`} className="p-4 text-gray-700 dark:text-slate-300 transition-colors">
                                             {row[col.accessor]}
                                         </td>
                                     ))}
@@ -179,8 +181,12 @@ export default function DataTable<T extends Record<string, any>>({
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={columns.length} className="p-8 text-center text-gray-500">
-                                    No data found matching your filters.
+                                <td colSpan={columns.length} className="p-0">
+                                    {emptyStateComponent || (
+                                        <div className="p-8 text-center text-gray-500 dark:text-slate-500 transition-colors">
+                                            No data found matching your filters.
+                                        </div>
+                                    )}
                                 </td>
                             </tr>
                         )}

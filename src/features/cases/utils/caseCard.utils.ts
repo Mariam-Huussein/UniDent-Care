@@ -18,8 +18,8 @@ export function timeAgo(dateString: string): string {
 
 export function getStatusConfig(status: string) {
     const s = status?.toLowerCase();
-    if (s === "pending") return { label: "Pending", bg: "bg-amber-50", text: "text-amber-600", dot: "bg-amber-400" };
-    if (s === "approved") return { label: "Approved", bg: "bg-emerald-50", text: "text-emerald-600", dot: "bg-emerald-400" };
-    if (s === "completed") return { label: "Completed", bg: "bg-blue-50", text: "text-blue-600", dot: "bg-blue-400" };
-    return { label: "Available", bg: "bg-violet-50", text: "text-violet-600", dot: "bg-violet-400" };
+    if (s === "pending") return { label: "Pending", bg: "bg-amber-50 dark:bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-400 dark:bg-amber-500" };
+    if (s === "approved") return { label: "Approved", bg: "bg-emerald-50 dark:bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-400 dark:bg-emerald-500" };
+    if (s === "completed") return { label: "Completed", bg: "bg-blue-50 dark:bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", dot: "bg-blue-400 dark:bg-blue-500" };
+    return { label: "Available", bg: "bg-violet-50 dark:bg-violet-500/10", text: "text-violet-600 dark:text-violet-400", dot: "bg-violet-400 dark:bg-violet-500" };
 }

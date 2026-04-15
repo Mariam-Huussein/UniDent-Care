@@ -32,7 +32,7 @@ export default function CaseHeader({ patient }: CaseHeaderProps) {
             <div className="flex items-center justify-between mb-5">
                 <button
                     onClick={() => router.back()}
-                    className="my-btn-outline !flex-none w-10 h-10"
+                    className="my-btn-outline flex-none w-10 h-10"
                     aria-label="Go back"
                 >
                     <ArrowLeft size={18} />
@@ -52,7 +52,7 @@ export default function CaseHeader({ patient }: CaseHeaderProps) {
             {/* Patient info */}
             <div className="flex items-start gap-4">
                 {/* Avatar */}
-                <div className={`shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br ${statusConfig.gradient} flex items-center justify-center shadow-lg`}>
+                <div className={`shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-linear-to-br ${statusConfig.gradient} flex items-center justify-center shadow-lg`}>
                     <span className="text-white font-bold text-lg sm:text-xl">{initials}</span>
                 </div>
 

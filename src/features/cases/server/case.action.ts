@@ -1,16 +1,15 @@
 import axios, { AxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
-import { AvailableCasesResponse, CaseDetailResponse, CaseRequestBody, CaseRequestResponse } from "../types/caseCardProps.types";
-import { CaseTypeResponse } from "@/types/caseTypes";
+import { AvailableCasesResponse, CaseDetailResponse, CaseRequestBody, CaseRequestResponse, CasesQueryParams } from "../types/caseCardProps.types";
 
 const cookieToken = Cookies.get("token");
 
-export async function getAvailableCases(page: number, pageSize: number, token: string, caseType?: string): Promise<AvailableCasesResponse> {
+export async function getAvailableCases(params: CasesQueryParams, token: string): Promise<AvailableCasesResponse> {
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Students/available-cases`,
             method: "GET",
-            params: { page, pageSize, caseType },
+            params,
             headers: {
                 Authorization: `Bearer ${token}`,
             },
