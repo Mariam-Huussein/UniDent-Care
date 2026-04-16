@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const sendRequestSchema = z.object({
-    doctorPublicId: z.string().min(1, "Doctor ID is required"),
+    doctorUsername: z.string().min(1, "Doctor Username is required"),
     description: z.string().min(10, "Description must be at least 10 characters"),
 });
 

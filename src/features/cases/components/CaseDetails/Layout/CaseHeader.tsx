@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Phone, StickyNote, User } from "lucide-react";
+import { ArrowLeft, Phone, StickyNote, User, MapPin, UserCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { PatientCase } from "../../../types/CaseDetails.types";
@@ -26,7 +26,7 @@ export default function CaseHeader({ patient }: CaseHeaderProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut" }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sm:p-6"
+            className="bg-white dark:bg-slate-900 rounded-2xl border border-gray-100 dark:border-slate-800 shadow-sm p-5 sm:p-6"
         >
             {/* Top row: Back + Status */}
             <div className="flex items-center justify-between mb-5">
@@ -58,27 +58,39 @@ export default function CaseHeader({ patient }: CaseHeaderProps) {
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight truncate">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight truncate">
                         {patient.patientName}
                     </h1>
 
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
                         {patient.patientAge > 0 && (
-                            <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                                <User size={14} className="text-gray-400" />
+                            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
+                                <User size={14} className="text-gray-400 dark:text-slate-500" />
                                 {patient.patientAge} years
                             </span>
                         )}
                         {patient.patientPhone && (
-                            <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                                <Phone size={14} className="text-gray-400" />
+                            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
+                                <Phone size={14} className="text-gray-400 dark:text-slate-500" />
                                 {patient.patientPhone}
                             </span>
                         )}
+                        {patient.patientCity && (
+                            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
+                                <MapPin size={14} className="text-gray-400 dark:text-slate-500" />
+                                {patient.patientCity}
+                            </span>
+                        )}
                         {patient.caseType && (
-                            <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                                <StickyNote size={14} className="text-gray-400" />
+                            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
+                                <StickyNote size={14} className="text-gray-400 dark:text-slate-500" />
                                 {patient.caseType}
+                            </span>
+                        )}
+                        {patient.createdByRole && (
+                            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400">
+                                <UserCircle size={14} className="text-gray-400 dark:text-slate-500" />
+                                Created by {patient.createdByRole}
                             </span>
                         )}
                     </div>

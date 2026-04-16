@@ -56,17 +56,17 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
                     {/* Doctor ID */}
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-gray-700">
-                            Doctor ID <span className="text-red-400">*</span>
+                            Doctor Username <span className="text-red-400">*</span>
                         </label>
                         <input
                             type="text"
-                            {...register("doctorPublicId")}
-                            placeholder="Enter doctor's public ID"
+                            {...register("doctorUsername")}
+                            placeholder="Enter doctor's username"
                             className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 placeholder:text-gray-300 
                                        focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
                         />
-                        {errors.doctorPublicId && (
-                            <p className="text-xs text-red-500">{errors.doctorPublicId.message}</p>
+                        {errors.doctorUsername && (
+                            <p className="text-xs text-red-500">{errors.doctorUsername.message}</p>
                         )}
                     </div>
 

@@ -17,7 +17,7 @@ export default function CompletedContent({ patient }: CompletedContentProps) {
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 p-5"
+                className="bg-linear-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-100 p-5"
             >
                 <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
@@ -72,7 +72,7 @@ export default function CompletedContent({ patient }: CompletedContentProps) {
                             {/* Before */}
                             <div className="space-y-2">
                                 <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Before</span>
-                                <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-gray-200">
+                                <div className="relative aspect-4/3 rounded-xl overflow-hidden border border-gray-200">
                                     <img
                                         src={patient.beforeImageUrls[0]}
                                         alt="Before treatment"
@@ -91,7 +91,7 @@ export default function CompletedContent({ patient }: CompletedContentProps) {
                             {/* After */}
                             <div className="space-y-2">
                                 <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">After</span>
-                                <div className="relative aspect-[4/3] rounded-xl overflow-hidden border border-emerald-200">
+                                <div className="relative aspect-4/3 rounded-xl overflow-hidden border border-emerald-200">
                                     <img
                                         src={patient.afterImageUrls[0]}
                                         alt="After treatment"

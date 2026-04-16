@@ -26,7 +26,7 @@ export const useSendRequest = (caseId: string, onClose: () => void) => {
             const response = await sendCaseRequest({
                 patientCasePublicId: caseId,
                 studentPublicId: studentId,
-                doctorPublicId: data.doctorPublicId,
+                doctorUsername: data.doctorUsername,
                 description: data.description,
             });
             if (response.success) {

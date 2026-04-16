@@ -26,7 +26,7 @@ export default function InProgressContent({ patient }: InProgressContentProps) {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-100 p-5 group cursor-pointer hover:shadow-md hover:shadow-amber-100/50 transition-all duration-300"
+                    className="bg-linear-to-r from-amber-50 to-orange-50 rounded-2xl border border-amber-100 p-5 group cursor-pointer hover:shadow-md hover:shadow-amber-100/50 transition-all duration-300"
                 >
                     <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">

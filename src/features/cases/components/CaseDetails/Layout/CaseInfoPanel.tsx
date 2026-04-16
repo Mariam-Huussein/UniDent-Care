@@ -1,29 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-
 import { motion } from "framer-motion";
-import { User, Phone, Calendar, MessageCircle, Activity, CheckCircle, MapPin, Send } from "lucide-react";
+import {
+    User, Calendar, Activity, CheckCircle, Phone, MapPin,
+    GraduationCap, Stethoscope, UserCircle,
+} from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
 import ProgressTracker from "../Tracking/ProgressTracker";
-import StudentCard from "../Shared/StudentCard";
 import InfoCard from "../Shared/InfoCard";
-import SendRequestModal from "../../CaseCard/SendRequestModal";
+import StudentActions from "./StudentActions";
+import DoctorActions from "./DoctorActions";
 
 interface PatientInfoPanelProps {
     patient: PatientCase;
     role: string | null;
+    studentId: string | null;
+    onRefetch: () => void;
 }
 
-export default function CaseInfoPanel({ patient, role }: PatientInfoPanelProps) {
+export default function CaseInfoPanel({ patient, role, studentId, onRefetch }: PatientInfoPanelProps) {
     const sc = getPatientStatusConfig(patient.status);
-    const [showRequestModal, setShowRequestModal] = useState(false);
-
-    const currentUserId = useSelector((state: RootState) => state.auth.user?.publicId || "");
-    const isCurrentStudent = role === "Student" && patient.student?.id === currentUserId;
+    const isStudent = role === "Student";
     const isDoctor = role === "Doctor";
 
     const initials = patient.patientName
@@ -49,7 +47,7 @@ export default function CaseInfoPanel({ patient, role }: PatientInfoPanelProps) 
                     <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight truncate">
                         {patient.patientName}
                     </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{patient.caseType} Case</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{patient.caseType} Case{patient.diagnosisdto?.diagnosisStage ? ` · ${patient.diagnosisdto.diagnosisStage}` : ''}</p>
                 </div>
             </div>
 
@@ -70,86 +68,34 @@ export default function CaseInfoPanel({ patient, role }: PatientInfoPanelProps) 
                     value={patient.status === 'unassigned' ? 'Available' : 'Under Treatment'}
                     color="text-amber-500"
                 />
-                <InfoCard icon={MapPin} label="City" value={patient.patientCity || "Not Provided"} color="text-rose-500" />
-                <InfoCard icon={Calendar} label="Created At" value={new Date(patient.createdAt).toLocaleDateString()} color="text-violet-500" />
                 <InfoCard icon={Phone} label="Phone" value={patient.patientPhone || "Not Provided"} color="text-emerald-500" />
-                <InfoCard icon={MessageCircle} label="WhatsApp" value={patient.patientPhone || "Not Provided"} color="text-emerald-500" />
+                <InfoCard icon={MapPin} label="City" value={patient.patientCity || "Not Provided"} color="text-rose-500" />
+                <InfoCard icon={GraduationCap} label="University" value={patient.universityName || "Not Assigned"} color="text-indigo-500" />
+                <InfoCard icon={Calendar} label="Created At" value={new Date(patient.createdAt).toLocaleDateString()} color="text-violet-500" />
+                <InfoCard icon={UserCircle} label="Created By" value={patient.createdByRole || "Unknown"} color="text-teal-500" />
+                {patient.assignedStudentId && (
+                    <InfoCard icon={Stethoscope} label="Sessions" value={`${patient.totalSessions}`} color="text-cyan-500" />
+                )}
             </div>
 
             {/* Treatment Progress */}
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80">
-                <ProgressTracker currentStep={patient.progressStep} />
+                <ProgressTracker currentStep={patient.progressStep} processStatus={patient.processStatus} />
             </div>
 
             {/* Divider */}
             <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-6" />
 
-            {/* ── Status-specific CTAs ── */}
-
-            {patient.status === "unassigned" && role === "Student" && (
-                <div className="flex gap-3">
-                    <button onClick={() => setShowRequestModal(true)} className="my-btn flex-1 py-3 group">
-                        <Send size={15} className="group-hover:scale-110 transition-transform" />
-                        Request Take Case
-                    </button>
-                </div>
+            {/* Role-Based Actions */}
+            {isStudent && (
+                <StudentActions patient={patient} studentId={studentId} onRefetch={onRefetch} />
             )}
 
-            {/* Send Request Modal */}
-            {showRequestModal && (
-                <SendRequestModal
-                    caseId={patient.id}
-                    patientName={patient.patientName}
-                    caseType={patient.caseType}
-                    onClose={() => setShowRequestModal(false)}
-                />
+            {isDoctor && (
+                <DoctorActions patient={patient} onRefetch={onRefetch} />
             )}
 
-            {/* ── Diagnosis: show assigned student card (Doctor sees it, Student sees if it's them) ── */}
-            {patient.status === "diagnosis" && patient.student && (isDoctor || isCurrentStudent) && (
-                <div className="space-y-4">
-                    <StudentCard student={patient.student} status="diagnosis" />
-                </div>
-            )}
-
-            {/* ── In Progress ── */}
-            {patient.status === "in-progress" && (
-                <div className="space-y-3">
-                    {patient.student && (isDoctor || !isCurrentStudent) && (
-                        <StudentCard student={patient.student} status="in-progress" />
-                    )}
-
-                    {/* Next Session */}
-                    {patient.sessions.find((s) => s.isNext) && (() => {
-                        const next = patient.sessions.find((s) => s.isNext)!;
-                        return (
-                            <div className="rounded-2xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200/60 dark:border-amber-800/50 p-4 space-y-2 backdrop-blur-sm">
-                                <p className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <Calendar size={12} /> Next Session
-                                </p>
-                                <p className="text-sm text-slate-700 dark:text-slate-300 font-medium">{next.description}</p>
-                                <div className="flex gap-2">
-                                    <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-900/30 px-2 py-0.5 rounded-md">
-                                        {new Date(next.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                                    </span>
-                                    <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-900/30 px-2 py-0.5 rounded-md">
-                                        {next.time}
-                                    </span>
-                                </div>
-                            </div>
-                        );
-                    })()}
-
-                    {/* Start Session button */}
-                    {isCurrentStudent && (
-                        <button className="my-btn w-full py-3 group">
-                            <Activity size={15} className="group-hover:scale-110 transition-transform" /> Start Session
-                        </button>
-                    )}
-                </div>
-            )}
-
-            {/* ── Completed ── */}
+            {/* Completed */}
             {patient.status === "completed" && (
                 <div className="space-y-4">
                     <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/50 p-4 space-y-2">
@@ -163,10 +109,6 @@ export default function CaseInfoPanel({ patient, role }: PatientInfoPanelProps) 
                             </p>
                         )}
                     </div>
-                    {/* Doctor sees the student who treated the case */}
-                    {patient.student && isDoctor && (
-                        <StudentCard student={patient.student} status="completed" />
-                    )}
                 </div>
             )}
         </motion.div>
