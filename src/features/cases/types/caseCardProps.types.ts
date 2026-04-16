@@ -47,21 +47,65 @@ export type Cases = CaseCardProps["caseItem"][];
 
 export interface AvailableCasesResponse extends ApiResponse<MetaData> { }
 
-export interface CaseDetailResponse extends ApiResponse<CaseItem> { }
+
+export interface DiagnosisDto {
+    id: string;
+    diagnosisStage: string;
+    caseType: string;
+    notes: string;
+    teethNumbers: number[];
+}
+
+export interface UserFlags {
+    isOwner: boolean;
+    role: string;
+    isAssignedDoctor: boolean;
+    isAssignedStudent: boolean;
+    isAssignedToMe: boolean;
+    hasRequest: boolean;
+    requestId: string;
+    requestStatus: string;
+}
+
+export interface CaseDetailData {
+    id: string;
+    patientId: string;
+    patientName: string;
+    patientAge: number;
+    status: string;
+    processStatus: string;
+    isPublic: boolean;
+    universityId: string;
+    universityName: string;
+    createAt: string;
+    totalSessions: number;
+    hasEvaluatedSession: boolean;
+    pendingRequests: number;
+    assignedStudentId: string;
+    assignedDoctorId: string;
+    diagnosisdto: DiagnosisDto | null;
+    imageUrls: string[];
+    createdById: string;
+    createdByRole: string;
+    userFlags: UserFlags;
+    availableActions: string[];
+}
+
+export interface CaseDetailResponse extends ApiResponse<CaseDetailData> { }
 
 export interface CaseRequestBody {
     patientCasePublicId: string;
     studentPublicId: string;
-    doctorPublicId: string;
+    doctorUsername: string;
     description: string;
 }
 
 export interface CaseRequestData {
     id: string;
-    patientCaseId: string;
+    patientCasePublicId: string;
     patientName: string;
     caseName: string;
-    studentId: string;
+    studentPublicId: string;
     studentName: string;
     university: string;
     level: number;
@@ -73,3 +117,91 @@ export interface CaseRequestData {
 }
 
 export type CaseRequestResponse = ApiResponse<CaseRequestData>;
+
+export type CancelRequestResponse = ApiResponse<string>;
+
+/* ═══ Doctor: Approve / Reject Request ═══ */
+export type ApproveRejectResponse = ApiResponse<boolean>;
+
+export interface CreateSessionBody {
+    studentId: string;
+    patientCaseId: string;
+    sessionDate: string;
+    location: string;
+}
+
+export type CreateSessionResponse = ApiResponse<string>;
+
+/* ═══ Student: My Cases & My Requests ═══ */
+export interface StudentMyCasesQueryParams {
+    caseType?: string;
+    page?: number;
+    pageSize?: number;
+}
+
+export interface StudentMyRequestsQueryParams {
+    status?: string;
+    page?: number;
+    pageSize?: number;
+}
+
+export interface StudentCaseItem {
+    id: string;
+    patientId: string;
+    patientName: string;
+    patientAge: number;
+    status: string;
+    processStatus: string;
+    isPublic: boolean;
+    universityId: string;
+    universityName: string;
+    createAt: string;
+    totalSessions: number;
+    hasEvaluatedSession: boolean;
+    pendingRequests: number;
+    assignedStudentId: string;
+    assignedDoctorId: string;
+    diagnosisdto: DiagnosisDto | null;
+    imageUrls: string[];
+    createdById: string;
+    createdByRole: string;
+    userFlags: UserFlags;
+    availableActions: string[];
+}
+
+export interface StudentMyCasesMetaData {
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    items: StudentCaseItem[];
+}
+
+export interface StudentRequestItem {
+    id: string;
+    patientCasePublicId: string;
+    patientName: string;
+    caseName: string;
+    studentPublicId: string;
+    studentName: string;
+    university: string;
+    level: number;
+    doctorId: string;
+    doctorName: string;
+    description: string;
+    status: string;
+    createAt: string;
+}
+
+export interface StudentMyRequestsMetaData {
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    items: StudentRequestItem[];
+}
+
+export type MyStudentCasesResponse = ApiResponse<StudentMyCasesMetaData>;
+export type MyStudentRequestsResponse = ApiResponse<StudentMyRequestsMetaData>;

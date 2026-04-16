@@ -11,7 +11,7 @@ import CaseDetailsTopBar from "../components/CaseDetails/Layout/CaseDetailsTopBa
 import { useCaseDetails } from "../hooks/useCaseDetails";
 
 export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
-    const { patient, isLoading, status, role } = useCaseDetails(caseId);
+    const { patient, isLoading, status, role, studentId, refetch } = useCaseDetails(caseId);
 
     return (
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
@@ -44,7 +44,7 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
 
                                 {/* RIGHT — Info Panel */}
                                 <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 lg:p-8 transition-colors duration-300">
-                                    <PatientInfoPanel patient={patient} role={role} />
+                                    <PatientInfoPanel patient={patient} role={role} studentId={studentId} onRefetch={refetch} />
                                 </div>
                             </div>
 

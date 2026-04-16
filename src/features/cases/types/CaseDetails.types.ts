@@ -1,3 +1,5 @@
+import { DiagnosisDto, UserFlags } from "./caseCardProps.types";
+
 export type CaseStatus = 'unassigned' | 'diagnosis' | 'in-progress' | 'completed';
 
 export type ToothStatus = 'healthy' | 'needs-treatment' | 'in-progress' | 'treated';
@@ -35,6 +37,7 @@ export interface StudentAssignment {
 
 export interface PatientCase {
     id: string;
+    patientId: string;
     patientName: string;
     patientAge: number;
     patientPhone?: string;
@@ -42,7 +45,11 @@ export interface PatientCase {
     description?: string;
     patientAvatar?: string;
     status: CaseStatus;
+    processStatus: string;
     caseType: string;
+    isPublic: boolean;
+    universityId: string;
+    universityName: string;
     medicalHistory?: string[];
     medications?: string[];
     imageUrls: string[];
@@ -57,4 +64,14 @@ export interface PatientCase {
     feedbackNotes?: string;
     createdAt: string;
     completedAt?: string;
+    totalSessions: number;
+    hasEvaluatedSession: boolean;
+    pendingRequests: number;
+    assignedStudentId: string | null;
+    assignedDoctorId: string | null;
+    diagnosisdto: DiagnosisDto | null;
+    createdById: string;
+    createdByRole: string;
+    userFlags: UserFlags;
+    availableActions: string[];
 }

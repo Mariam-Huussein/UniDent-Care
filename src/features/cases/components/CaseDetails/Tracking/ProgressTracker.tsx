@@ -5,6 +5,7 @@ import { Check, Circle } from "lucide-react";
 
 interface ProgressTrackerProps {
     currentStep: number;
+    processStatus?: string;
 }
 
 const STEPS = [
@@ -14,10 +15,17 @@ const STEPS = [
     { label: "Follow-up", desc: "Post-review" },
 ];
 
-export default function ProgressTracker({ currentStep }: ProgressTrackerProps) {
+export default function ProgressTracker({ currentStep, processStatus }: ProgressTrackerProps) {
     return (
         <div className="space-y-5">
-            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Treatment Progress</h3>
+            <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Treatment Progress</h3>
+                {processStatus && (
+                    <span className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/40">
+                        {processStatus}
+                    </span>
+                )}
+            </div>
 
             <div className="flex items-start">
                 {STEPS.map((step, i) => {
