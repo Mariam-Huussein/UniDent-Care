@@ -9,8 +9,8 @@ import { NAV_LINKS, UserRole } from "@/config/navLinks";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Cookies from "js-cookie";
-import { FaTooth } from "react-icons/fa";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import Logo from "@/components/ui/Logo";
 
 export default function Sidebar() {
     const [mounted, setMounted] = useState(false);
@@ -54,16 +54,20 @@ export default function Sidebar() {
             {/* Desktop Header & Toggle */}
             <div className={`hidden md:flex items-center px-4 mb-6 relative w-full h-8 ${isExpanded ? 'justify-between' : 'justify-center'}`}>
                 {isExpanded ? (
-                    <div className="flex items-center gap-2 transition-opacity duration-300">
-                        <FaTooth className="text-indigo-600 dark:text-indigo-500" size={20} />
-                        <h1 className={`text-lg font-black text-slate-900 dark:text-white tracking-tight truncate ${isRtl ? 'font-arabic' : ''}`}>
-                            UniDent <span className="text-indigo-600 dark:text-indigo-500">Care</span>
-                        </h1>
-                    </div>
+                    <Logo 
+                        showText={true} 
+                        iconClassName="w-12 md:w-16" 
+                        textClassName="text-2xl"
+                        className="transition-opacity duration-300 mt-2"
+                    />
                 ) : (
-                    <FaTooth className="text-indigo-600 dark:text-indigo-500 mx-auto transition-opacity duration-300" size={22} />
+                    <Logo 
+                        showText={false} 
+                        iconClassName="w-8 md:w-10" 
+                        className="w-full justify-center transition-opacity duration-300"
+                    />
                 )}
-                
+
                 <button
                     onClick={() => setIsExpanded(!isExpanded)}
                     className={`absolute top-0 flex items-center justify-center w-6 h-6 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-300 ${isExpanded ? (isRtl ? 'left-2' : 'right-2') : (isRtl ? '-left-3' : '-right-3')} border border-gray-200 dark:border-slate-700 shadow-sm`}
@@ -93,7 +97,7 @@ export default function Sidebar() {
                                 }`}
                             title={!isExpanded ? getLinkName(item.name) : undefined}
                         >
-                            <Icon 
+                            <Icon
                                 size={20}
                                 className={`shrink-0 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'}`}
                             />

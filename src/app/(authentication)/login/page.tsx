@@ -20,7 +20,7 @@ import {
 } from "@/features/auth/services/authService";
 import { login, setUserFromReload } from "@/features/auth/store/authSlice";
 import { LoginResponse } from "@/features/auth/types";
-import { FaTooth } from "react-icons/fa";
+import Logo from "@/components/ui/Logo";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function Login() {
@@ -79,24 +79,20 @@ export default function Login() {
         className="relative z-10 w-full max-w-[450px]"
       >
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 p-8 sm:p-12 transition-all duration-300">
-          <div className="text-center mb-10">
-            <div className="inline-flex relative mb-6 group">
-              <div className="absolute inset-0 bg-blue-400 dark:bg-blue-600 blur-2xl opacity-20 dark:opacity-30 group-hover:opacity-40 transition-opacity duration-500" />
-              <div className="relative w-16 h-16 rounded-[1.25rem] bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-500 dark:to-indigo-600 flex items-center justify-center text-white shadow-xl shadow-blue-200/50 dark:shadow-blue-900/50 transform group-hover:rotate-6 transition-transform duration-300">
-                <motion.div
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                >
-                  <FaTooth size={32} strokeWidth={2.5} />
-                </motion.div>
-              </div>
-              <div className="absolute -right-1 -bottom-1 w-4 h-4 bg-emerald-400 dark:bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full shadow-sm" />
-            </div>
+          <div className="text-center mb-10 flex flex-col items-center">
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="mb-4"
+            >
+              <Logo 
+                iconClassName="w-16 sm:w-24" 
+                textClassName="text-3xl sm:text-4xl" 
+                className="flex-col gap-2"
+              />
+            </motion.div>
 
-            <h2 className={`text-3xl font-black text-slate-900 dark:text-white tracking-tight ${isRtl ? 'font-arabic' : ''}`}>
-              UniDent <span className="text-blue-600 dark:text-blue-400">Care</span>
-            </h2>
             <p className="mt-2 text-slate-500 dark:text-slate-400 font-medium italic">
               {t.loginSubtitle}
             </p>

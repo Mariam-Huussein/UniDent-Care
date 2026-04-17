@@ -28,7 +28,7 @@ import {
   DoctorSignupValues,
 } from "@/features/auth/schemas/doctorSignupSchema";
 import { authService } from "@/features/auth/services/authService";
-import { FaTooth } from "react-icons/fa";
+import Logo from "@/components/ui/Logo";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function DoctorSignup() {
@@ -111,14 +111,15 @@ export default function DoctorSignup() {
         </button>
 
         <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(20,80,80,0.1)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 p-8 sm:p-12 transition-all duration-300">
-          <div className="text-center mb-10">
-            <div className="inline-flex relative mb-4 mt-2">
-              <div className="absolute inset-0 bg-teal-400 blur-xl opacity-20 animate-pulse" />
-              <div className="relative w-14 h-14 bg-teal-600 dark:bg-teal-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-teal-100 dark:shadow-teal-900/50">
-                <FaTooth size={28} />
-              </div>
+          <div className="text-center mb-10 flex flex-col items-center">
+            <div className="mb-4 mt-2 w-full flex justify-center">
+              <Logo 
+                showText={false}
+                iconClassName="w-16 sm:w-20 mb-1" 
+                className="flex-col gap-2"
+              />
             </div>
-            <h2 className={`text-3xl font-black text-slate-900 dark:text-white tracking-tight ${isRtl ? 'font-arabic' : ''}`}>
+            <h2 className={`mt-2 text-2xl font-black text-slate-800 dark:text-slate-200 tracking-tight ${isRtl ? 'font-arabic' : ''}`}>
               {t.createAccountTitle}
             </h2>
           </div>

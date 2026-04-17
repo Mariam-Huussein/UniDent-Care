@@ -24,7 +24,7 @@ export const dictionaries = {
     statsQuality: "Quality Care",
 
     // Auth
-    loginSubtitle: "Your Smile, Our Passion",
+    loginSubtitle: "Tooth Needs Care? UniDent Care",
     emailLabel: "Email Address",
     emailPlaceholder: "Email or Phone number",
     passwordLabel: "Password",

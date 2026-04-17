@@ -27,7 +27,8 @@ import {
   PatientSignupValues,
 } from "@/features/auth/schemas/patientSignupSchema";
 import { authService } from "@/features/auth/services/authService";
-import { FaTooth, FaVenusMars } from "react-icons/fa";
+import { FaVenusMars } from "react-icons/fa";
+import Logo from "@/components/ui/Logo";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function PatientSignup() {
@@ -86,11 +87,15 @@ export default function PatientSignup() {
         </button>
 
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-xl dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 p-8 sm:p-12 transition-all duration-300">
-          <div className="text-center mb-10">
-            <div className="w-14 h-14 bg-blue-600 dark:bg-blue-500 rounded-2xl flex items-center justify-center text-white mx-auto mb-4 shadow-lg shadow-blue-200 dark:shadow-blue-900/50">
-              <FaTooth size={28} />
+          <div className="text-center mb-10 flex flex-col items-center">
+            <div className="mb-4 w-full flex justify-center">
+              <Logo 
+                showText={false}
+                iconClassName="w-16 sm:w-20 mb-1" 
+                className="flex-col gap-2"
+              />
             </div>
-            <h2 className={`text-3xl font-black text-slate-900 dark:text-white ${isRtl ? 'font-arabic' : ''}`}>
+            <h2 className={`mt-2 text-2xl font-black text-slate-800 dark:text-slate-200 ${isRtl ? 'font-arabic' : ''}`}>
               {t.createAccountTitle}
             </h2>
           </div>
