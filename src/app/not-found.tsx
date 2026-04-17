@@ -4,11 +4,13 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Home, ArrowLeft, SearchX } from "lucide-react";
 import { FaTooth } from "react-icons/fa";
+import Navbar from "@/components/ui/Navbar";
+import Footer from "@/components/ui/Footer";
 
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden px-6 transition-colors duration-300">
-
+      <Navbar/>
       {/* Background decorations */}
       <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/4 w-[500px] h-[500px] bg-blue-50 dark:bg-blue-900/10 rounded-full blur-[120px] -z-10 transition-colors duration-300" />
       <div className="absolute bottom-0 left-0 translate-y-1/3 -translate-x-1/4 w-[400px] h-[400px] bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-[100px] -z-10 transition-colors duration-300" />
@@ -75,33 +77,14 @@ export default function NotFound() {
         className="flex flex-col sm:flex-row gap-4 items-center"
       >
         <Link
-          href="/"
-          className="group h-14 px-10 bg-blue-600 dark:bg-blue-500 text-white rounded-2xl font-bold flex items-center gap-3 shadow-xl shadow-blue-200 dark:shadow-blue-900/50 hover:bg-blue-700 dark:hover:bg-blue-600 hover:-translate-y-1 transition-all"
+          href="/dashboard"
+          className="group my-btn px-10"
         >
           <Home size={20} />
           Go Home
         </Link>
-        <button
-          onClick={() => history.back()}
-          className="group h-14 px-10 border-2 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-200 dark:hover:border-slate-700 transition-all"
-        >
-          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          Go Back
-        </button>
       </motion.div>
-
-      {/* Footer brand */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-        className="absolute bottom-8 flex items-center gap-2 grayscale opacity-40 dark:opacity-30"
-      >
-        <FaTooth size={16} className="dark:text-white" />
-        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-          UniDent Care
-        </span>
-      </motion.div>
+      <Footer/>
     </div>
   );
 }

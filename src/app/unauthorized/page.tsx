@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowLeft, ShieldAlert, LogIn } from "lucide-react";
+import { ShieldAlert, LogIn, Home } from "lucide-react";
 import { FaTooth } from "react-icons/fa";
 
 export default function Unauthorized() {
@@ -72,35 +72,22 @@ export default function Unauthorized() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.45, duration: 0.5 }}
-        className="flex flex-col sm:flex-row gap-4 items-center"
+        className="flex flex-col sm:flex-row gap-4 items-center justify-center mt-4 lg:w-[30%] md:w-[50%] w-[70%]"
       >
         <Link
           href="/login"
-          className="group h-14 px-10 bg-blue-600 dark:bg-blue-500 text-white rounded-2xl font-bold flex items-center gap-3 shadow-xl shadow-blue-200 dark:shadow-blue-900/50 hover:bg-blue-700 dark:hover:bg-blue-600 hover:-translate-y-1 transition-all"
+          className="group flex items-center justify-center gap-2 h-12 px-8 rounded-xl my-btn"
         >
-          <LogIn size={20} />
+          <LogIn size={18} className="group-hover:translate-x-1 transition-transform" />
           Sign In
         </Link>
-        <button
-          onClick={() => history.back()}
-          className="group h-14 px-10 border-2 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900 hover:border-slate-200 dark:hover:border-slate-700 transition-all"
+        <Link
+          href="/"
+          className="group flex items-center justify-center gap-2 h-12 px-8 rounded-xl my-btn-outline hover:-translate-y-0.5 transition-all w-full sm:w-auto"
         >
-          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-          Go Back
-        </button>
-      </motion.div>
-
-      {/* Footer brand */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.5 }}
-        className="absolute bottom-8 flex items-center gap-2 grayscale opacity-40 dark:opacity-30"
-      >
-        <FaTooth size={16} className="dark:text-white" />
-        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-          UniDent Care
-        </span>
+          <Home size={18} className="group-hover:-translate-x-1 transition-transform" />
+          Home
+        </Link>
       </motion.div>
     </div>
   );

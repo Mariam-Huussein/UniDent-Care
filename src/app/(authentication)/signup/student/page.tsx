@@ -32,6 +32,7 @@ import {
 } from "@/features/auth/schemas/studentSignupSchema";
 import { authService } from "@/features/auth/services/authService";
 import { StudentSignupPayload } from "@/features/auth/types/studentPayload.Types";
+import Logo from "@/components/ui/Logo";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import SearchableSelect from "@/components/common/SearchableSelect";
 
@@ -125,14 +126,15 @@ export default function StudentSignup() {
         </button>
 
         <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_40px_80px_-15px_rgba(79,70,229,0.1)] dark:shadow-[0_40px_80px_-15px_rgba(0,0,0,0.5)] border border-indigo-50/50 dark:border-slate-800 p-8 sm:p-12 transition-all duration-300">
-          <div className="text-center mb-10">
-            <div className="inline-flex relative mb-4">
-              <div className="absolute inset-0 bg-indigo-400 blur-xl opacity-20 animate-pulse" />
-              <div className="relative w-14 h-14 bg-indigo-600 dark:bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-100 dark:shadow-indigo-900/50">
-                <BookOpen size={28} />
-              </div>
+          <div className="text-center mb-10 flex flex-col items-center">
+            <div className="mb-4 w-full flex justify-center">
+              <Logo 
+                showText={false}
+                iconClassName="w-16 sm:w-20 mb-1" 
+                className="flex-col gap-2"
+              />
             </div>
-            <h2 className={`text-3xl font-black text-slate-900 dark:text-white tracking-tight ${isRtl ? 'font-arabic' : ''}`}>
+            <h2 className={`mt-2 text-2xl font-black text-slate-800 dark:text-slate-200 tracking-tight ${isRtl ? 'font-arabic' : ''}`}>
               {t.createAccountTitle}
             </h2>
           </div>

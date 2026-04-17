@@ -3,9 +3,7 @@ export default function CasesGridSkeleton({ pageSize }: { pageSize: number }) {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             {[...Array(pageSize)].map((_, i) => (
-                <div key={i} className="flex flex-col rounded-2xl border  overflow-hidden animate-pulse
-                 bg-white dark:bg-slate-800
-                  border-gray-100 dark:border-slate-700/60">
+                <div key={i} className="flex flex-col rounded-2xl border overflow-hidden animate-pulse bg-white dark:bg-slate-800 border-gray-100 dark:border-slate-700/60">
                     <div className="w-full h-[140px] bg-gray-100 dark:bg-slate-700" />
                     <div className="flex flex-col justify-between p-4 flex-1">
                         <div>

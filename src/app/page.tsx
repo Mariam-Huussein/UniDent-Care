@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { FaTooth } from "react-icons/fa";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import Navbar from "@/components/ui/Navbar";
+import Footer from "@/components/ui/Footer";
 
 export default function Home() {
   const { t, language } = useLanguage();
@@ -48,39 +50,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col overflow-x-hidden transition-colors duration-300">
-      <nav className="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-950/70 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 dark:shadow-blue-900/50">
-              <FaTooth size={22} />
-            </div>
-            <span className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-              UniDent<span className="text-blue-600 dark:text-blue-400">Care</span>
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600 dark:text-slate-300">
-            <Link
-              href="#features"
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              {t.navFeatures}
-            </Link>
-            <Link
-              href="#about"
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              {t.navAbout}
-            </Link>
-            <Link
-              href="/login"
-              className="px-6 py-2.5 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-xl hover:bg-blue-600 dark:hover:bg-blue-500 hover:text-white transition-all shadow-lg shadow-slate-200 dark:shadow-slate-800"
-            >
-              {t.navSignIn}
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+      <Navbar/>
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[600px] h-[600px] bg-blue-50 dark:bg-blue-900/10 rounded-full blur-[120px] -z-10 transition-colors duration-300" />
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[500px] h-[500px] bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-[100px] -z-10 transition-colors duration-300" />
@@ -102,7 +72,7 @@ export default function Home() {
             className={`text-5xl md:text-7xl font-black text-slate-900 dark:text-white leading-[1.1] mb-8 ${isRtl ? 'font-arabic' : ''}`}
           >
             {t.heroTitle1} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
               {t.heroTitle2}
             </span>
           </motion.h1>
@@ -198,29 +168,7 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <footer className="mt-auto py-12 border-t border-slate-50 dark:border-slate-800/50 bg-slate-50/50 dark:bg-slate-900/50 px-6 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex items-center gap-2 grayscale opacity-50 dark:opacity-40">
-            <FaTooth size={20} className="dark:text-white" />
-            <span className="font-bold dark:text-white">UniDent Care</span>
-          </div>
-          <p className="text-slate-400 text-sm font-medium">
-            © {new Date().getFullYear()} UniDent Care. {t.footerRights}
-          </p>
-          <div className="flex gap-6 text-slate-400 text-sm font-medium">
-            <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">
-              {t.footerPrivacy}
-            </Link>
-            <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">
-              {t.footerTerms}
-            </Link>
-            <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">
-              {t.footerContact}
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer/>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { ROUTE_PERMISSIONS } from './config/permissions';
 
 const publicRoutes = ['/login', '/signup', '/forget-password', '/'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
     const token = request.cookies.get('token')?.value;
     const userRole = request.cookies.get('user_role')?.value as UserRole;
     const { pathname } = request.nextUrl;
@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
     );
 
     if (!token && !isPublicRoute) {
-        return NextResponse.redirect(new URL('/login', request.url));
+        return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 
     if (token && userRole && isPublicRoute && (pathname === '/login' || pathname === '/signup' || pathname === '/')) {
@@ -39,7 +39,7 @@ export function middleware(request: NextRequest) {
                     response.cookies.delete('user_role');
                     return response;
                 }
-                return NextResponse.redirect(new URL('/dashboard', request.url));
+                return NextResponse.redirect(new URL('/forbidden', request.url));
             }
         }
     }
@@ -59,6 +59,6 @@ export const config = {
         '/add-case/:path*',
         '/login',
         '/signup',
-        '/'
+        '/',
     ],
 };
