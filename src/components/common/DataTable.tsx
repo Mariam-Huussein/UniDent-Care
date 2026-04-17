@@ -6,6 +6,7 @@ import { ArrowDownAZ, ArrowUpZA, ArrowUpDown } from "lucide-react";
 export type Column<T> = {
     header: string;
     accessor: keyof T;
+    render?: (val: any, row: T) => React.ReactNode;
     sortable?: boolean;
     searchable?: boolean;
     filterComponent?: (props: { value: string; onChange: (val: string) => void }) => React.ReactNode;
@@ -174,7 +175,7 @@ export default function DataTable<T extends Record<string, any>>({
                                 >
                                     {columns.map((col) => (
                                         <td key={`cell-${index}-${String(col.accessor)}`} className="p-4 text-gray-700 dark:text-slate-300 transition-colors">
-                                            {row[col.accessor]}
+                                            {col.render ? col.render(row[col.accessor], row) : row[col.accessor] as React.ReactNode}
                                         </td>
                                     ))}
                                 </tr>

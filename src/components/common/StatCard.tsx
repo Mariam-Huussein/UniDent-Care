@@ -7,7 +7,6 @@ interface StatCardProps {
   color: string;
   bgColor: string;
   loading?: boolean;
-  /** Optional progress percentage (0–100). Shows a progress bar when provided. */
   progress?: number;
 }
 

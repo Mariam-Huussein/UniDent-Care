@@ -72,7 +72,7 @@ export default function CaseTypeDropdown({
             </button>
 
             {isOpen && (
-                <div className={`fixed z-50 w-1.8 max-w-lg min-w-40 mt-1.5 md:w-full md:max-w-fit bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/5 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${variant === 'default' ? 'w-full max-w-fit' : ''}`} >
+                <div className={`fixed z-80 w-1.8 max-w-lg min-w-40 mt-1.5 md:w-full md:max-w-fit bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/5 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${variant === 'default' ? 'w-full max-w-fit' : ''}`} >
                     <div className="p-2 border-b border-gray-100 dark:border-slate-700">
                         <div className="relative">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 dark:text-slate-400" />
