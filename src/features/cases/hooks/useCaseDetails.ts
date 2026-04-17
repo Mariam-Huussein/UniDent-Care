@@ -88,6 +88,7 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                 };
 
                 setPatient(mappedPatient);
+                console.log(mappedPatient);
             } else {
                 toast.error(response.message || "Failed to load case details.");
             }

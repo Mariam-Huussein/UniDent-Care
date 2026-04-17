@@ -2,6 +2,8 @@ import { ApiResponse } from "@/types/api";
 
 export interface CaseCardProps {
     caseItem: CaseItem;
+    hideRequestButton?: boolean;
+    customBadge?: React.ReactNode;
 }
 
 export interface CaseItem {
