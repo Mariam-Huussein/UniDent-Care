@@ -21,7 +21,7 @@ export default function Profile() {
   const { t } = useLanguage();
   const user = useSelector((state: RootState) => state.auth.user);
   const role = useSelector((state: RootState) => state.auth.role);
-
+    console.log("User data in Profile page:", user);
   if (!user || !role) {
     return (
       <div className="flex h-[60vh] items-center justify-center">

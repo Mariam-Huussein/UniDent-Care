@@ -1,434 +1,549 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ClipboardPlus,
-  FileText,
-  Stethoscope,
-  AlertCircle,
+  Send,
   Loader2,
+  Bot,
+  User,
+  Paperclip,
   CheckCircle2,
-  Search,
-  ChevronDown,
   X,
-  Check,
-  Sparkles,
-  ImageIcon,
+  Image as ImageIcon
 } from "lucide-react";
 
 import { RootState } from "@/store";
-import {
-  addCaseSchema,
-  AddCaseFormValues,
-} from "@/features/cases/schemas/addCaseSchema";
-import { createCase } from "@/features/cases/services/caseService";
+import { createCaseAi } from "@/features/cases/services/caseService";
 import { getCaseTypes } from "@/server/caseTypes.action";
-import { CaseType } from "@/features/cases/types/case.types";
 import Cookies from "js-cookie";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useRouter } from "next/navigation";
 
-export default function AddCase() {
-  const patientId = useSelector((state: RootState) => state.auth.user?.publicId) || Cookies.get("user_id");
-  const { t, language } = useLanguage();
+// Localized object type
+interface Localized {
+  en: string;
+  ar: string;
+}
+
+type ChatStepType = "text" | "choice" | "file";
+
+interface ChatStep {
+  field: string;
+  question: Localized;
+  type: ChatStepType;
+  choices?: { label: Localized; value: any }[];
+}
+
+interface Message {
+  id: string;
+  sender: "bot" | "user";
+  content: Localized | string | React.ReactNode;
+  isLocalized?: boolean;
+  type?: ChatStepType;
+  choices?: { label: Localized; value: any }[];
+  field?: string;
+}
+
+// Local dictionary for dental specialties since API currently lacks nameArabic
+const specialtyTranslations: Record<string, string> = {
+  "Orthodontics": "تقويم الأسنان",
+  "Endodontics": "علاج الجذور",
+  "Periodontics": "علاج اللثة",
+  "Oral Surgery": "جراحة الفم",
+  "Pediatric Dentistry": "طب أسنان الأطفال",
+  "Restorative Dentistry": "طب الأسنان الترميمي",
+  "Fixed Prosthodontics": "التركيبات الثابتة",
+  "Removable Prosthodontics": "التركيبات المتحركة",
+  "Oral Medicine": "طب الفم",
+  "Diagnosis": "التشخيص",
+  "Oral Radiology": "أشعة الفم",
+  "General Dentistry": "طب الأسنان العام",
+  "Conservative": "العلاج التحفظي",
+  "Conservative Dentistry": "العلاج التحفظي",
+  "Oral and Maxillofacial Surgery": "جراحة الفم والوجة والفكين",
+  "Oral Medicine and Periodontology": "طب الفم وعلاج اللثة",
+  "Pediatric Dentistry and Dental Public Health": "طب أسنان الأطفال والصحة العامة",
+  "Oral Pathology": "أمراض الفم",
+  "Oral Biology": "بيولوجيا الفم",
+  "Dental Materials": "خواص المواد السنية",
+  "Oral Radiology and Diagnosis": "أشعة الفم والتشخيص",
+  "Preventive Dentistry": "طب الأسنان الوقائي",
+  "Dental Implants": "زراعة الأسنان",
+};
+
+export default function AddCaseChatbot() {
+  const patientId = useSelector((state: RootState) => state.auth.user?.publicId) || Cookies.get("user_id") || "";
+  const { language } = useLanguage();
   const isRtl = language === "ar";
+  const router = useRouter();
+
+  // Translations for layout and core messages
+  const tUI = {
+    title: { en: "AI Case Assistant", ar: "مساعد الحالات الذكي" },
+    desc: { en: "Smart interactive case creation", ar: "إنشاء حالة تفاعلي ذكي" },
+    submitting: { en: "Submitting your case to the AI...", ar: "جاري الإرسال للذكاء الاصطناعي..." },
+    successMessage: { en: "Excellent! Your case has been successfully submitted to our AI system.", ar: "ممتاز! تم إرسال حالتك بنجاح." },
+    errorMessage: { en: "Oops, something went wrong while submitting your case. Please try again.", ar: "عذراً، حدث خطأ أثناء إرسال حالتك. يرجى المحاولة مرة أخرى." },
+    redirecting: { en: "Redirecting...", ar: "جاري التحويل..." },
+    attachPhotos: { en: "Attach Photos", ar: "إرفاق صور" },
+    send: { en: "Send", ar: "إرسال" },
+    selectPrompt: { en: "Please select an option from the chat above 👆", ar: "يرجى تحديد خيار من المحادثة أعلاه 👆" },
+    skip: { en: "Skip", ar: "تخطي" },
+    notesPlaceholder: { en: "Type your notes here...", ar: "اكتب ملاحظاتك هنا..." },
+    uploadedLabel: (count: number) => ({
+      en: `Uploaded ${count} images`,
+      ar: `تم رفع ${count} صور`
+    }),
+  };
+
+  const [script, setScript] = useState<ChatStep[]>([
+    {
+      field: "Title",
+      question: { 
+        en: "Hello! I am your AI assistant. Let's create your case. What is the main subject of your dental issue?", 
+        ar: "مرحباً! أنا مساعدك الذكي. لنقم بإنشاء حالتك. ما هو الموضوع الرئيسي لمشكلتك؟" 
+      },
+      type: "choice",
+      choices: [
+        { label: { en: "Tooth Pain", ar: "ألم في الأسنان" }, value: "Tooth Pain" },
+        { label: { en: "Routine Checkup", ar: "فحص دوري" }, value: "Routine Checkup" },
+        { label: { en: "Cosmetic / Whitening", ar: "تجميل / تبييض" }, value: "Cosmetic / Whitening" },
+        { label: { en: "Bleeding Gums", ar: "نزيف اللثة" }, value: "Bleeding Gums" },
+        { label: { en: "Other", ar: "أخرى" }, value: "Other" },
+      ]
+    },
+    {
+      field: "CaseTypeId",
+      question: { 
+        en: "What specialty or category fits your case best?", 
+        ar: "ما هو التخصص أو الفئة الأنسب لحالتك؟" 
+      },
+      type: "choice",
+      choices: [], 
+    },
+    {
+      field: "IsPublic",
+      question: { 
+        en: "Would you like this case to be visible to all university students for educational purposes? (Your personal info is protected)", 
+        ar: "هل ترغب في أن تكون هذه الحالة مرئية لجميع طلاب الجامعة لأغراض تعليمية؟ (بياناتك الشخصية محمية)" 
+      },
+      type: "choice",
+      choices: [
+        { label: { en: "Yes, make it public", ar: "نعم، اجعلها عامة" }, value: true },
+        { label: { en: "No, keep it private", ar: "لا، اجعلها خاصة" }, value: false },
+      ],
+    },
+    {
+      field: "Images",
+      question: { 
+        en: "Please upload any relevant x-rays or photos of your teeth (Optional).", 
+        ar: "الرجاء رفع أي صور أو أشعة للأسنان (اختياري)." 
+      },
+      type: "file",
+    },
+    {
+      field: "Description",
+      question: { 
+        en: "Finally, would you like to write any notes or describe the symptoms in more detail?", 
+        ar: "أخيراً، هل ترغب في كتابة أي ملاحظة أو وصف إضافي للأعراض؟" 
+      },
+      type: "text",
+    },
+  ]);
+
+  const [stepIndex, setStepIndex] = useState(0);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [payload, setPayload] = useState<any>({ PatientId: patientId });
   
-  const [isOpen, setIsOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [caseTypes, setCaseTypes] = useState<CaseType[]>([]);
-  const [isLoadingTypes, setIsLoadingTypes] = useState(false);
-  const [selectedTypeName, setSelectedTypeName] = useState("");
-  const [images, setImages] = useState<File[]>([]);
+  const [inputText, setInputText] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      const updatedFiles = [...images, ...newFiles];
-      setImages(updatedFiles);
-      setValue("Images", updatedFiles, { shouldValidate: true });
+  // Helper to resolve localized content
+  const tMsg = (content: Localized | string | React.ReactNode, isLocalized?: boolean) => {
+    if (isLocalized && content && typeof content === "object" && "en" in content) {
+      return (content as Localized)[language as keyof Localized];
     }
+    return content as React.ReactNode;
   };
-
-  const handleRemoveFile = (indexToRemove: number) => {
-    const updatedFiles = images.filter((_, index) => index !== indexToRemove);
-    setImages(updatedFiles);
-    setValue("Images", updatedFiles, { shouldValidate: true });
-  };
-
-  const form = useForm<AddCaseFormValues>({
-    resolver: zodResolver(addCaseSchema),
-    defaultValues: { PatientId: patientId },
-  });
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = form;
-  const currentCaseTypeId = watch("CaseTypeId");
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  useEffect(() => {
+    if (patientId) {
+      setPayload((prev: any) => ({ ...prev, PatientId: patientId }));
+    }
+  }, [patientId]);
+
+  // Initial load
+  useEffect(() => {
+    const initializeChat = async () => {
+      try {
+        const res = await getCaseTypes(1, 40, "");
+        const items = (res as any).data?.items || (res as any).items || [];
+        
+        // Map types with localized labels, using local mapping for Arabic if missing
+        const types = items.map((item: any) => {
+          const enName = (item.name || "").trim();
+          
+          // Case-insensitive lookup
+          const arMapping = Object.entries(specialtyTranslations).find(
+            ([key]) => key.toLowerCase() === enName.toLowerCase()
+          )?.[1];
+          
+          const arName = item.nameArabic || arMapping || enName;
+          
+          return {
+            label: { en: enName, ar: arName },
+            value: item.publicId,
+          };
+        });
+
+        setScript((prev) => {
+          const newScript = [...prev];
+          newScript[1].choices = types.length > 0 ? types : [{ label: { en: "General Dentistry", ar: "طب الأسنان العام" }, value: "00000000-0000-0000-0000-000000000000" }];
+          
+          // Start the chat once types are ready
+          if (messages.length === 0) {
+            setMessages([{
+              id: "start",
+              sender: "bot",
+              content: newScript[0].question,
+              isLocalized: true,
+              type: newScript[0].type,
+              field: newScript[0].field,
+              choices: newScript[0].choices,
+            }]);
+          }
+          return newScript;
+        });
+      } catch (err) {
+        console.error("Failed to load case types", err);
+        if (messages.length === 0) {
+            setMessages([{
+              id: "start-err",
+              sender: "bot",
+              content: script[0].question,
+              isLocalized: true,
+              type: script[0].type,
+              field: script[0].field,
+              choices: script[0].choices,
+            }]);
+        }
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    initializeChat();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    const timeOut = setTimeout(() => setDebouncedSearch(search), 400);
-    return () => clearTimeout(timeOut);
-  }, [search]);
+  const handleNextStep = async (val: any, labelObj?: Localized) => {
+    if (isSubmitting || completed) return;
 
-  useEffect(() => {
-    if (patientId) setValue("PatientId", patientId);
-  }, [patientId, setValue]);
+    const currentStep = script[stepIndex];
+    let displayContent: Localized | string | React.ReactNode = val;
+    let isLocalized = false;
 
-  useEffect(() => {
-    loadCaseTypes(debouncedSearch);
-  }, [debouncedSearch]);
-
-  const loadCaseTypes = async (searchValue?: string) => {
-    try {
-      setIsLoadingTypes(true);
-      const res = await getCaseTypes(1, 20, searchValue);
-      setCaseTypes(
-        ((res as any).data?.items || (res as any).items || []).map(
-           (item: any) => ({
-            id: item.publicId,
-            name: isRtl && item.nameArabic ? item.nameArabic : item.name,
-          })
-        ),
-      );
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoadingTypes(false);
+    if (currentStep.type === "choice") {
+      displayContent = labelObj || { en: String(val), ar: String(val) };
+      isLocalized = true;
+    } else if (currentStep.type === "file") {
+      displayContent = files.length > 0 ? tUI.uploadedLabel(files.length) : { en: "Skipped", ar: "تم التخطي" };
+      isLocalized = true;
+    } else if (currentStep.type === "text") {
+        if (!val || val.trim() === "") {
+            displayContent = { en: "Skipped", ar: "تم التخطي" };
+            isLocalized = true;
+            val = "";
+        }
     }
-  };
 
-  const handleSelectType = (type: CaseType) => {
-    setValue("CaseTypeId", type.id, { shouldValidate: true });
-    setSelectedTypeName(type.name);
-    setIsOpen(false);
-    setSearch("");
-  };
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString() + "_u",
+        sender: "user",
+        content: displayContent,
+        isLocalized
+      },
+    ]);
 
-  const onSubmit = async (values: AddCaseFormValues) => {
-    const toastId = toast.loading(t.addCaseSubmitting);
-    try {
-      const res = await createCase(values);
-      if (res.data?.success) {
-        toast.success(t.addCaseSuccess, { id: toastId });
-        form.reset({
-          Title: "",
-          Description: "",
-          CaseTypeId: "",
-          Images: [],
-        });
-        setSelectedTypeName("");
-        setImages([]);
+    const newPayload = { ...payload, [currentStep.field]: val };
+    setPayload(newPayload);
+
+    setIsTyping(true);
+    setInputText("");
+
+    setTimeout(async () => {
+      if (stepIndex + 1 < script.length) {
+        const nextStep = script[stepIndex + 1];
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString() + "_b",
+            sender: "bot",
+            content: nextStep.question,
+            isLocalized: true,
+            type: nextStep.type,
+            choices: nextStep.choices,
+            field: nextStep.field,
+          },
+        ]);
+        setStepIndex(stepIndex + 1);
+        setIsTyping(false);
       } else {
-        toast.error(res.data?.message || t.addCaseErrorCreation, {
-          id: toastId,
-        });
+        setIsTyping(false);
+        await submitCase(newPayload);
       }
-    } catch (error: any) {
-      toast.error(t.addCaseErrorUnexpected, { id: toastId });
+    }, 800);
+  };
+
+  const submitCase = async (finalPayload: any) => {
+    setIsSubmitting(true);
+    try {
+      const res = await createCaseAi({
+        PatientId: finalPayload.PatientId,
+        Title: finalPayload.Title,
+        Description: finalPayload.Description || "",
+        CaseTypeId: finalPayload.CaseTypeId,
+        IsPublic: finalPayload.IsPublic,
+        UniversityId: finalPayload.UniversityId,
+        Images: finalPayload.Images,
+      });
+
+      if (res.data?.success || res.status === 201 || res.status === 200) {
+        setCompleted(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: "final-success",
+            sender: "bot",
+            content: tUI.successMessage,
+            isLocalized: true,
+          },
+        ]);
+        toast.success(isRtl ? "تمت الإضافة بنجاح" : "Case added successfully!");
+        setTimeout(() => router.push("/my-cases"), 2000);
+      } else {
+        throw new Error(res.data?.message || (isRtl ? tUI.errorMessage.ar : tUI.errorMessage.en));
+      }
+    } catch (err: any) {
+      toast.error(err.message || (isRtl ? tUI.errorMessage.ar : tUI.errorMessage.en));
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: "final-err",
+          sender: "bot",
+          content: tUI.errorMessage,
+          isLocalized: true,
+        },
+      ]);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const isInputPhase = !isTyping && !isSubmitting && !completed && messages[messages.length - 1]?.sender === "bot";
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 overflow-hidden transition-colors duration-300" dir={isRtl ? 'rtl' : 'ltr'}>
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-400/20 dark:bg-blue-600/10 rounded-full blur-[120px] animate-pulse" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" />
+    <div className="relative w-full flex items-center justify-center overflow-hidden transition-colors duration-300 py-2 sm:py-6 h-[calc(100vh-9.5rem)] lg:h-[calc(100vh-14rem)]" dir={isRtl ? 'rtl' : 'ltr'}>
+      <div className="absolute top-0 right-1/4 w-96 h-96 bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
+      <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-purple-400/20 dark:bg-purple-600/10 rounded-full blur-[120px] animate-pulse pointer-events-none" />
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="relative w-full max-w-2xl mx-auto"
-      >
-        <div className="bg-white/80 dark:bg-slate-900/80 rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/40 dark:border-slate-800/60 backdrop-blur-xl overflow-hidden">
-          <div className="h-1.5 w-full bg-linear-to-r from-blue-500 via-indigo-600 to-purple-500" />
-
-          <div className="pt-10 pb-6 px-6 sm:px-10 text-center">
-            <div className="inline-flex relative mb-5 group">
-              <div className="absolute inset-0 bg-indigo-400 dark:bg-indigo-600 blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500 rounded-full" />
-              <div className="relative w-16 h-16 bg-indigo-600 dark:bg-indigo-500 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50 transform group-hover:-translate-y-1 transition-transform duration-300 rotate-3 group-hover:rotate-6">
-                <ClipboardPlus size={32} />
-              </div>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white tracking-tight">
-              {t.addCaseTitle}
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base mt-2 font-medium">
-              {t.addCaseDesc}
-            </p>
+      <div className="relative w-full max-w-2xl h-full flex flex-col bg-white/80 dark:bg-slate-900/80 rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-white/40 dark:border-slate-800/60 backdrop-blur-xl overflow-hidden">
+        
+        <div className="flex-none p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
+          <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+            <Bot size={24} className="text-white" />
           </div>
+          <div>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white tracking-tight">{tMsg(tUI.title, true)}</h1>
+            <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400">{tMsg(tUI.desc, true)}</p>
+          </div>
+        </div>
 
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="px-6 sm:px-10 pb-10 space-y-6 sm:space-y-7"
-          >
-            {/* Subject */}
-            <div className="group space-y-2.5">
-              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
-                <FileText
-                  size={16}
-                  className="text-slate-400 dark:text-slate-500 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors"
-                />
-                {t.addCaseSubject}
-              </label>
-              <input
-                {...register("Title")}
-                placeholder={t.addCaseSubjectPlaceholder}
-                className={`w-full bg-slate-50/50 dark:bg-slate-950/50 border-2 ${errors.Title ? "border-red-300 dark:border-red-500/50 focus:border-red-500" : "border-slate-100 dark:border-slate-800 focus:border-blue-500 dark:focus:border-blue-500/50"} rounded-2xl px-5 py-3.5 sm:py-4 outline-none transition-all duration-300 placeholder:text-slate-400 dark:placeholder:text-slate-600 font-bold text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:focus:shadow-[0_8px_30px_rgb(0,0,0,0.2)]`}
-              />
-              <AnimatePresence>
-                {errors.Title && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-1.5 ${isRtl ? 'mr-2' : 'ml-2'}`}
-                  >
-                    <AlertCircle size={14} /> {errors.Title.message}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Specialty */}
-            <div className="space-y-2.5 relative" ref={dropdownRef}>
-              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
-                <Stethoscope size={16} className="text-indigo-500 dark:text-indigo-400" />
-                {t.addCaseSpecialty}
-              </label>
-              <div className="relative">
-                <div
-                  onClick={() => setIsOpen(!isOpen)}
-                  className={`w-full flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50 border-2 cursor-pointer transition-all duration-300 ${isOpen ? "border-indigo-500 dark:border-indigo-500/50 bg-white dark:bg-slate-900 ring-4 ring-indigo-50 dark:ring-indigo-900/20" : "border-slate-100 dark:border-slate-800"} rounded-2xl px-5 py-3.5 sm:py-4`}
-                >
-                  <span
-                    className={`font-bold ${selectedTypeName ? "text-slate-800 dark:text-white" : "text-slate-400 dark:text-slate-500"}`}
-                  >
-                    {selectedTypeName || t.addCaseSpecialtyPlaceholder}
-                  </span>
-                  <ChevronDown
-                    className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 ${isOpen ? "rotate-180 text-indigo-500" : ""}`}
-                    size={20}
-                  />
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-6 hide-scrollbar">
+          <style dangerouslySetInnerHTML={{ __html: `
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
+            .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          `}} />
+          {messages.map((msg, idx) => (
+            <motion.div
+              key={msg.id + idx}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className={`flex w-full ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div className={`flex gap-3 max-w-[85%] ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                <div className={`w-8 h-8 rounded-full flex shrink-0 items-center justify-center mt-auto ${msg.sender === "user" ? "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300" : "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400"}`}>
+                  {msg.sender === "user" ? <User size={16} /> : <Bot size={16} />}
                 </div>
 
-                <AnimatePresence>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute z-50 w-full mt-3 bg-white dark:bg-slate-900 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-slate-100 dark:border-slate-800 overflow-hidden"
-                    >
-                      <div className="p-3 bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-100 dark:border-slate-800">
-                        <div className="relative flex items-center">
-                          <Search
-                            className={`absolute ${isRtl ? 'right-4' : 'left-4'} text-slate-400 dark:text-slate-500`}
-                            size={16}
-                          />
-                          <input
-                            autoFocus
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={t.addCaseSpecialtyFilter}
-                            className={`w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl py-2.5 text-sm outline-none focus:ring-2 ring-indigo-500/20 dark:ring-indigo-500/40 text-slate-800 dark:text-white font-medium ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'}`}
-                          />
-                        </div>
-                      </div>
-                      <div className="max-h-60 overflow-y-auto p-2 custom-scrollbar">
-                        {isLoadingTypes ? (
-                          <div className="py-12 flex flex-col items-center gap-3 text-slate-400 dark:text-slate-500">
-                            <Loader2 className="animate-spin" size={24} />
-                            <span className="text-sm font-bold tracking-tight">
-                              {t.addCaseSpecialtyUpdating}
-                            </span>
-                          </div>
-                        ) : (
-                          caseTypes.map((type) => (
-                            <div
-                              key={type.id}
-                              onClick={() => handleSelectType(type)}
-                              className={`flex items-center justify-between px-4 py-3.5 rounded-xl cursor-pointer transition-all mb-1 ${currentCaseTypeId === type.id ? "bg-indigo-600 dark:bg-indigo-500 text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/50" : "hover:bg-indigo-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300"}`}
+                <div className={`p-4 rounded-2xl ${
+                  msg.sender === "user" 
+                    ? "bg-slate-800 dark:bg-indigo-600 text-white rounded-br-sm shadow-md" 
+                    : "bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm text-slate-700 dark:text-slate-200 rounded-bl-sm"
+                }`}>
+                  <div className="text-sm sm:text-[15px] font-medium leading-relaxed whitespace-pre-wrap">
+                    {tMsg(msg.content, msg.isLocalized)}
+                  </div>
+
+                  {msg.sender === "bot" && msg.type === "choice" && idx === messages.length - 1 && isInputPhase && msg.choices && (
+                    <motion.div initial={{opacity: 0, y: 5}} animate={{opacity: 1, y: 0}} transition={{delay: 0.3}} className="mt-4 flex flex-col gap-2">
+                        {msg.choices.map((choice: any, cIdx: number) => (
+                            <button
+                                key={cIdx}
+                                onClick={() => handleNextStep(choice.value, choice.label)}
+                                className={`px-4 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-700 dark:hover:bg-slate-600 text-indigo-700 dark:text-indigo-300 font-bold text-sm transition-all border border-indigo-100 dark:border-slate-600 hover:scale-[1.02] active:scale-[0.98] ${isRtl ? 'text-right' : 'text-left'}`}
                             >
-                              <span className="font-bold text-sm tracking-tight">
-                                {type.name}
-                              </span>
-                              {currentCaseTypeId === type.id && (
-                                <Check size={18} strokeWidth={3} />
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
+                                {tMsg(choice.label, true)}
+                            </button>
+                        ))}
                     </motion.div>
                   )}
-                </AnimatePresence>
-                <AnimatePresence>
-                  {errors.CaseTypeId && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }}
-                      className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-2 absolute -bottom-7 ${isRtl ? 'mr-2' : 'ml-2'}`}
-                    >
-                      <AlertCircle size={14} /> {errors.CaseTypeId.message}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+                </div>
               </div>
-            </div>
+            </motion.div>
+          ))}
 
-            {/* Symptoms / Description */}
-            <div className="space-y-2.5">
-              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
-                <Sparkles size={16} className="text-amber-500" />
-                {t.addCaseSymptoms}
-              </label>
-              <textarea
-                {...register("Description")}
-                placeholder={t.addCaseSymptomsPlaceholder}
-                className={`w-full min-h-[160px] bg-slate-50/50 dark:bg-slate-950/50 border-2 ${errors.Description ? "border-red-300 dark:border-red-500/50 focus:border-red-500" : "border-slate-100 dark:border-slate-800 focus:border-amber-400 dark:focus:border-amber-500/50"} focus:bg-white dark:focus:bg-slate-900 rounded-2xl px-5 py-4 outline-none transition-all duration-300 resize-none font-bold placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-800 dark:text-white focus:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:focus:shadow-[0_8px_30px_rgb(0,0,0,0.2)]`}
-              />
-              <AnimatePresence>
-                {errors.Description && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-1.5 ${isRtl ? 'mr-2' : 'ml-2'}`}
-                  >
-                    <AlertCircle size={14} /> {errors.Description.message}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Images */}
-            <div className="space-y-2.5">
-              <label className={`flex items-center gap-2 text-xs sm:text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider ${isRtl ? 'mr-1' : 'ml-1'}`}>
-                <ImageIcon size={16} className="text-blue-500" />
-                {t.addCaseImages}
-              </label>
-
-              <label
-                htmlFor="fileInput"
-                className="w-full bg-slate-50/50 dark:bg-slate-900/40 border-2 border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500/60 border-dashed rounded-3xl px-5 py-10 flex flex-col items-center gap-4 cursor-pointer transition-all duration-300 group hover:bg-slate-50 dark:hover:bg-slate-900/80"
-              >
-                <div className="p-4 bg-indigo-100/50 dark:bg-indigo-900/30 rounded-full group-hover:scale-110 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-900/50 transition-all duration-300 shadow-sm text-indigo-600 dark:text-indigo-400">
-                  <ClipboardPlus size={32} strokeWidth={2} />
+          {isTyping && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+              <div className="flex gap-3 max-w-[85%] flex-row">
+                <div className="w-8 h-8 rounded-full flex shrink-0 items-center justify-center mt-auto bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400">
+                  <Bot size={16} />
                 </div>
-                <div className="text-center">
-                  <p className="text-slate-700 dark:text-slate-300 font-bold text-base">
-                    {t.addCaseImagesDrag}
-                  </p>
-                  <p className="text-slate-400 dark:text-slate-500 text-sm mt-1.5 font-medium">
-                    {t.addCaseImagesOr}{" "}
-                    <span className="text-indigo-600 dark:text-indigo-400 font-black hover:underline cursor-pointer">
-                      {t.addCaseImagesClick}
-                    </span>{" "}
-                    {t.addCaseImagesUpload}
-                  </p>
+                <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm text-slate-400 flex items-center gap-1.5 rounded-bl-sm h-[52px]">
+                  <motion.div className="w-1.5 h-1.5 bg-indigo-400 rounded-full" animate={{y: [0, -4, 0]}} transition={{duration: 0.6, repeat: Infinity, delay: 0}} />
+                  <motion.div className="w-1.5 h-1.5 bg-indigo-400 rounded-full" animate={{y: [0, -4, 0]}} transition={{duration: 0.6, repeat: Infinity, delay: 0.15}} />
+                  <motion.div className="w-1.5 h-1.5 bg-indigo-400 rounded-full" animate={{y: [0, -4, 0]}} transition={{duration: 0.6, repeat: Infinity, delay: 0.3}} />
                 </div>
-                <input
-                  id="fileInput"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </label>
+              </div>
+            </motion.div>
+          )}
 
-              {images.length > 0 && (
-                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {images.map((file, idx) => (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      key={idx}
-                      className="relative flex items-center justify-between p-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-sm rounded-xl overflow-hidden group"
-                    >
-                      <div className="absolute inset-0 bg-blue-50 dark:bg-blue-900/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      <div
-                        className="relative z-10 flex-1 truncate text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mx-2"
-                        title={file.name}
-                      >
-                        {file.name}
-                      </div>
+          {isSubmitting && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center my-6">
+                <div className="flex items-center gap-2 px-6 py-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full font-bold text-sm border border-indigo-100 dark:border-indigo-800">
+                    <Loader2 size={18} className="animate-spin" /> {tMsg(tUI.submitting, true)}
+                </div>
+            </motion.div>
+          )}
+
+          {completed && (
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex justify-center my-6">
+                <div className="flex items-center gap-2 px-6 py-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full font-bold text-sm border border-emerald-100 dark:border-emerald-800">
+                    <CheckCircle2 size={18} /> {tMsg(tUI.redirecting, true)}
+                </div>
+            </motion.div>
+          )}
+          <div ref={messagesEndRef} className="h-2" />
+        </div>
+
+        <div className="flex-none p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800/60 bg-white dark:bg-slate-900">
+          <AnimatePresence mode="wait">
+            {isInputPhase && messages[messages.length - 1]?.type === "text" && (
+                <motion.form 
+                  key="text-input"
+                  initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: 10}} 
+                  onSubmit={(e) => { e.preventDefault(); handleNextStep(inputText.trim() || ""); }} 
+                  className="flex gap-2 relative flex-col sm:flex-row"
+                >
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    placeholder={tMsg(tUI.notesPlaceholder, true) as string}
+                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-5 py-3.5 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 font-medium text-slate-800 dark:text-white focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50"
+                    autoFocus
+                  />
+                  <div className="flex shrink-0 gap-2">
                       <button
                         type="button"
-                        onClick={() => handleRemoveFile(idx)}
-                        className="relative z-10 p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
+                        onClick={() => handleNextStep("")}
+                        className="p-3.5 px-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors font-bold text-sm"
                       >
-                        <X size={16} strokeWidth={2.5} />
+                        {tMsg(tUI.skip, true)}
                       </button>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-              <AnimatePresence>
-                {errors.Images && (
-                  <motion.p
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className={`text-xs font-bold text-red-500 dark:text-red-400 flex items-center gap-1.5 mt-1.5 ${isRtl ? 'mr-2' : 'ml-2'}`}
-                  >
-                    <AlertCircle size={14} /> {String(errors.Images.message)}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </div>
+                      <button
+                        type="submit"
+                        disabled={!inputText.trim()}
+                        className="w-14 h-[52px] flex shrink-0 items-center justify-center bg-indigo-600 disabled:bg-indigo-400 dark:disabled:bg-indigo-800 hover:bg-indigo-700 text-white rounded-xl transition-colors aspect-square"
+                      >
+                        <Send size={18} className={isRtl ? 'rotate-180 -ml-1' : 'ml-1'} />
+                      </button>
+                  </div>
+                </motion.form>
+            )}
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="relative w-full group overflow-hidden bg-slate-900 dark:bg-indigo-600 text-white py-4 sm:py-5 rounded-2xl font-black text-lg transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-200 dark:hover:shadow-indigo-900/50 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 cursor-pointer border border-transparent dark:border-indigo-500/50"
-            >
-              <div className="absolute inset-0 bg-linear-to-r from-indigo-600 to-blue-600 opacity-0 group-hover:opacity-100 dark:group-hover:opacity-0 transition-opacity duration-500" />
-              <div className="absolute inset-0 bg-linear-to-r from-indigo-500 to-blue-500 opacity-0 dark:opacity-0 dark:group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10 flex items-center justify-center gap-3">
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="animate-spin" size={24} />
-                    <span>{t.addCaseSubmitting}</span>
-                  </>
-                ) : (
-                  <>
-                    <span>{t.addCaseSubmit}</span>
-                    <CheckCircle2
-                      size={20}
-                      className="group-hover:scale-110 group-hover:rotate-12 transition-transform"
-                      strokeWidth={2.5}
-                    />
-                  </>
-                )}
-              </div>
-            </button>
-          </form>
+            {isInputPhase && messages[messages.length - 1]?.type === "choice" && (
+                <motion.div key="choice-input" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: 10}} className="flex items-center justify-center p-2">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{tMsg(tUI.selectPrompt, true)}</p>
+                </motion.div>
+            )}
+
+            {isInputPhase && messages[messages.length - 1]?.type === "file" && (
+                <motion.div key="file-input" initial={{opacity: 0, y: 10}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: 10}} className="flex flex-col gap-3">
+                    <div className="flex gap-2 relative flex-col sm:flex-row">
+                        <label className="flex-1 flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 border-dashed rounded-xl px-5 py-3.5 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900/80 transition-colors text-slate-600 dark:text-slate-400 font-bold text-sm">
+                            <Paperclip size={18} /> 
+                            <span>{tMsg(tUI.attachPhotos, true)} ({files.length})</span>
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    if (e.target.files) setFiles(prev => [...prev, ...Array.from(e.target.files as FileList)]);
+                                }}
+                            />
+                        </label>
+                        <div className="flex shrink-0 gap-2">
+                            {files.length === 0 && (
+                                <button
+                                    onClick={() => handleNextStep(files)}
+                                    className="p-3.5 px-6 flex items-center justify-center bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl transition-colors font-bold text-sm"
+                                >
+                                    {tMsg(tUI.skip, true)}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => handleNextStep(files)}
+                                disabled={files.length === 0}
+                                className={`px-6 h-[52px] flex items-center justify-center gap-2 rounded-xl transition-colors font-bold ${
+                                    files.length === 0 ? "bg-indigo-400 dark:bg-indigo-800 text-white cursor-not-allowed opacity-50" : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                                }`}
+                            >
+                                {tMsg(tUI.send, true)} <Send size={16} className={isRtl ? 'rotate-180 -ml-1' : ''} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {files.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {files.map((file, idx) => (
+                                <div key={idx} className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                    <span className="truncate max-w-[100px]">{file.name}</span>
+                                    <button onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))} className="text-slate-400 hover:text-red-500 transition-colors"><X size={14} /></button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </motion.div>
+
+      </div>
     </div>
   );
 }
