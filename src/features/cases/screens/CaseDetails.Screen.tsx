@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import DentalImageGallery from "../components/CaseDetails/Clinical/DentalImageGallery";
-import PatientInfoPanel from "../components/CaseDetails/Layout/CaseInfoPanel";
+import CaseInfoPanel from "../components/CaseDetails/Layout/CaseInfoPanel";
 import PatientDetailTabs from "../components/CaseDetails/Tabs/CaseDetailTabs";
 import PatientDetailsSkeleton from "../components/CaseDetails/Layout/CaseDetailsSkeleton";
 import Odontogram from "../components/CaseDetails/Clinical/Odontogram";
@@ -35,7 +35,6 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
                             transition={{ duration: 0.25 }}
                             className="space-y-6"
                         >
-                            {/* ── Split Layout: Images (L) + Info Panel (R) ── */}
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-start">
                                 {/* LEFT — Image Gallery */}
                                 <div className="lg:col-span-5">
@@ -44,7 +43,7 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
 
                                 {/* RIGHT — Info Panel */}
                                 <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 lg:p-8 transition-colors duration-300">
-                                    <PatientInfoPanel patient={patient} role={role} studentId={studentId} onRefetch={refetch} />
+                                    <CaseInfoPanel patient={patient} role={role} studentId={studentId} onRefetch={refetch} />
                                 </div>
                             </div>
 

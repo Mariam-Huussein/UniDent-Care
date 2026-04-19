@@ -34,9 +34,11 @@ export const useFilterCases = (cases: CaseItem[]) => {
         let result = cases.filter((c) => {
             const nameFilter = filters["patientName"];
             const typeFilter = filters["caseType"];
+            const genderFilter = filters["gender"];
 
             if (nameFilter && !c.patientName.toLowerCase().includes(nameFilter.toLowerCase())) return false;
             if (typeFilter && !(c.caseType?.name || "").toLowerCase().includes(typeFilter.toLowerCase())) return false;
+            if (genderFilter && c.gender !== undefined && c.gender !== parseInt(genderFilter)) return false;
             return true;
         });
 

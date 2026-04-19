@@ -27,7 +27,7 @@ const authSlice = createSlice({
             state.token = action.payload.token;
             state.role = action.payload.roles[0];
             state.isAuthenticated = true;
-            state.uinversalId = action.payload.uinversalId;
+            state.uinversalId = action.payload.universityId;
 
             Cookies.set("token", action.payload.token, {
                 expires: 7,
@@ -41,7 +41,7 @@ const authSlice = createSlice({
                 sameSite: "strict",
             });
 
-            Cookies.set("uinversal_id", action.payload.uinversalId, {
+            Cookies.set("university_id", action.payload.universityId, {
                 expires: 7,
                 secure: true,
                 sameSite: "strict",
@@ -72,7 +72,7 @@ const authSlice = createSlice({
             Cookies.remove("token");
             Cookies.remove("user_role");
             Cookies.remove("user_id");
-            Cookies.remove("uinversal_id");
+            Cookies.remove("university_id");
             window.location.href = "/login";
         },
     },

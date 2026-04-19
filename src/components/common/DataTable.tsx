@@ -92,7 +92,7 @@ export default function DataTable<T extends Record<string, any>>({
     return (
         <div className="w-full bg-white dark:bg-transparent rounded-xl shadow-sm dark:shadow-none ring-1 ring-gray-200/60 dark:ring-slate-800 overflow-hidden transition-colors">
             <div className="overflow-x-auto">
-                <table className="w-full text-sm text-left whitespace-nowrap">
+                <table className="w-full md:min-w-max text-sm text-left md:whitespace-nowrap">
                     <thead className="bg-white dark:bg-slate-900/50 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-10 transition-colors">
                         <tr>
                             {columns.map((col) => {
@@ -126,9 +126,9 @@ export default function DataTable<T extends Record<string, any>>({
                                 return (
                                     <th
                                         key={String(col.accessor)}
-                                        className="px-4 py-3 text-left font-medium text-gray-700 dark:text-slate-300 align-bottom transition-colors"
+                                        className="px-3.5 py-2.5 text-left font-medium text-gray-700 dark:text-slate-300 align-bottom transition-colors"
                                     >
-                                        <div className="flex flex-col gap-2">
+                                        <div className="flex flex-col gap-1.5">
                                             {col.filterComponent ? (
                                                 <div className="flex items-center justify-between gap-2 border-b border-gray-200 dark:border-slate-700/50 pb-1 w-full pl-1 transition-colors">
                                                     {col.filterComponent({
@@ -138,7 +138,7 @@ export default function DataTable<T extends Record<string, any>>({
                                                     <SortIcon />
                                                 </div>
                                             ) : col.searchable ? (
-                                                <div className="relative flex items-center group w-full border-b border-gray-200 dark:border-slate-700/50 pb-1 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-colors">
+                                                <div className="relative flex items-center group w-full min-w-[120px] border-b border-gray-200 dark:border-slate-700/50 pb-1 focus-within:border-blue-500 dark:focus-within:border-blue-400 transition-colors">
                                                     <input
                                                         type="text"
                                                         placeholder={col.header}
@@ -174,7 +174,10 @@ export default function DataTable<T extends Record<string, any>>({
                                     className="group hover:bg-blue-50/50 dark:hover:bg-slate-800/40 transition-colors duration-200 cursor-default"
                                 >
                                     {columns.map((col) => (
-                                        <td key={`cell-${index}-${String(col.accessor)}`} className="p-4 text-gray-700 dark:text-slate-300 transition-colors">
+                                        <td 
+                                            key={`cell-${index}-${String(col.accessor)}`} 
+                                            className="px-3.5 py-[11px] text-gray-700 dark:text-slate-300 transition-colors"
+                                        >
                                             {col.render ? col.render(row[col.accessor], row) : row[col.accessor] as React.ReactNode}
                                         </td>
                                     ))}

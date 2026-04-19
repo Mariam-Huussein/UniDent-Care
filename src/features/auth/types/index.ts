@@ -38,7 +38,7 @@ export interface AuthData<TUser = User> {
     token: string;
     roles: string[];
     publicId: string;
-    uinversalId: string;
+    universityId: string;
     user: TUser;
 }
 
