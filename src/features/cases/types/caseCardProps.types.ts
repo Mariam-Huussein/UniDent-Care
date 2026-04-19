@@ -4,6 +4,7 @@ export interface CaseCardProps {
     caseItem: CaseItem;
     hideRequestButton?: boolean;
     customBadge?: React.ReactNode;
+    navigationPath?: string;
 }
 
 export interface CaseItem {

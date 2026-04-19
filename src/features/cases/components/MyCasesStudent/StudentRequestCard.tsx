@@ -47,7 +47,7 @@ export function StudentRequestCard({ item, index }: { item: StudentRequestItem; 
             {new Date(item.createAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </div>
           <Link
-            href={`/cases/${item.patientCasePublicId}`}
+            href={`/my-cases/${item.patientCasePublicId}`}
             className="group flex items-center gap-1 text-[11px] font-bold text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 transition-colors bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-lg"
           >
             View Details <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />

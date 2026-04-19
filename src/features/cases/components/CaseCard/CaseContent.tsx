@@ -38,7 +38,7 @@ export default function CaseContent({ caseItem }: CaseContentProps) {
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">
                     <PiTooth size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
-                    <span className="font-medium">{caseItem.diagnosisdto.map((diagnosis) => diagnosis.caseType).join(", ") || "Uncategorized"}</span>
+                    <span className="font-medium">{caseItem.diagnosisdto?.map((diagnosis) => diagnosis.caseType).join(", ") || "Uncategorized"}</span>
                 </div>
 
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">
