@@ -16,10 +16,21 @@ export const useAvailableCases = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 9;
 
-    const queryParams: CasesQueryParams = useMemo(() => ({
-        Page: currentPage,
-        PageSize: pageSize,
-    }), [currentPage, pageSize]);
+    // API filters - sent to backend
+    const [apiFilters, setApiFilters] = useState<Record<string, string>>({});
+
+    const queryParams: CasesQueryParams = useMemo(() => {
+        const params: CasesQueryParams = {
+            Page: currentPage,
+            PageSize: pageSize,
+        };
+
+        if (apiFilters.patientName) params.PatientName = apiFilters.patientName;
+        if (apiFilters.caseType) params.CaseType = apiFilters.caseType;
+        if (apiFilters.gender) params.Gender = parseInt(apiFilters.gender) as 0 | 1;
+
+        return params;
+    }, [currentPage, pageSize, apiFilters]);
 
     const { data, isPending, isError, refetch } = useQuery({
         queryKey: ["availableCases", queryParams],
@@ -40,12 +51,24 @@ export const useAvailableCases = () => {
     const hasNextPage = data?.data?.hasNextPage ?? false;
 
     // Unified client-side filter + sort (memoized — won't re-run on viewMode toggle)
-    const { filters, handleFilterChange, clearFilters, sortConfig, handleSort, hasActiveFilters, filteredAndSortedCases } = useFilterCases(cases);
+    const { filters: clientFilters, handleFilterChange: handleClientFilterChange, clearFilters: clearClientFilters, sortConfig, handleSort, hasActiveFilters: clientHasActiveFilters, filteredAndSortedCases } = useFilterCases(cases);
+
+    const handleFilterChange = (key: string, value: string) => {
+        setApiFilters((prev) => ({ ...prev, [key]: value }));
+        setCurrentPage(1); // Reset to first page when filtering
+    };
+
+    const clearFilters = () => {
+        setApiFilters({});
+        setCurrentPage(1);
+    };
+
+    const hasActiveFilters = Object.values(apiFilters).some((v) => v !== "") || clientHasActiveFilters;
 
     return {
         cases,
         loading: isPending,
-        filters,
+        filters: apiFilters,
         handleFilterChange,
         clearFilters,
         sortConfig,

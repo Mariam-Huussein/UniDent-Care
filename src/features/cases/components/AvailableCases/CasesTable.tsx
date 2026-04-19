@@ -7,6 +7,7 @@ import SendRequestModal from "../CaseCard/SendRequestModal";
 import CaseTypeDropdown from "./CaseTypeDropdown";
 import EmptyState from "./EmptyState";
 import { SortConfig } from "../../hooks/useFilterCases";
+import SelectItems from "@/components/common/SelectItems";
 
 interface CasesTableProps {
     cases: CaseItem[];
@@ -25,22 +26,56 @@ interface CasesTableProps {
     onPageChange: (page: number) => void;
 }
 
+const getGenderLabel = (gender?: 0 | 1): string => {
+    if (gender === 0) return "Male";
+    if (gender === 1) return "Female";
+    return "Unknown";
+};
+
+const GENDER_OPTIONS = [
+  { value: "", label: "All Genders" },
+  { value: "0", label: "Male" },
+  { value: "1", label: "Female" },
+];
+
 export default function CasesTable({
     cases, loading, filters, onFilterChange, clearFilters, hasActiveFilters,
     sortConfig, onSort,
     hasPreviousPage, hasNextPage, currentPage, totalPages, pageSize, onPageChange
 }: CasesTableProps) {
     const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const gender = filters["gender"] !== undefined && filters["gender"] !== null ? String(filters["gender"]) : "";
+
+  const selectedGenderLabel = GENDER_OPTIONS.find(opt => opt.value === gender)?.label || "All Genders";
 
     const columns: Column<CaseItem>[] = [
         { header: "Patient", accessor: "patientName", sortable: true, searchable: true },
         { header: "Age", accessor: "patientAge", sortable: true },
+        { header: "Gender", accessor: "gender",
+            searchable: true,
+            filterComponent: ({ value, onChange }) => (
+            <div className="sm:w-48 min-w-[140px] shrink-0 relative z-30">
+              <SelectItems
+                value={selectedGenderLabel}
+                onChange={(selectedLabel) => {
+                  const selectedOption = GENDER_OPTIONS.find(opt => opt.label === selectedLabel);
+                  onFilterChange("gender", selectedOption ? selectedOption.value : "");
+                }}
+                options={GENDER_OPTIONS.map(opt => opt.label)}
+                placeholder="All Genders"
+                variant="inline"
+              />
+            </div>
+            )
+
+
+         },
         {
             header: "Case Type",
             accessor: "caseType",
             searchable: true,
             filterComponent: ({ value, onChange }) => (
-                <div className="w-full relative group">
+                <div className="w-full min-w-[140px] relative group">
                     <CaseTypeDropdown
                         selectedCaseType={value}
                         setSelectedCaseType={onChange}
@@ -56,7 +91,8 @@ export default function CasesTable({
 
     const tableData = cases.map((c) => ({
         ...c,
-        caseType: c.caseType?.name || "N/A",
+        caseType: c.diagnosisdto?.map((d) => d.caseType).join(", ") || "Uncategorized",
+        gender: c.gender !== undefined ? getGenderLabel(c.gender) : "Unknown",
         createAt: new Date(c.createAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
         status: (
             <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border transition-colors ${c.status === "Available"

@@ -8,9 +8,7 @@ import {
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { CaseRequestData } from "../../../types/caseCardProps.types";
-import {
-    getCaseRequestById, approveRequest, rejectRequest,
-} from "../../../server/case.action";
+import { approveRequest, getCaseRequestById, rejectRequest } from "@/features/cases/server/caseRequest.action";
 
 interface DoctorActionsProps {
     patient: PatientCase;

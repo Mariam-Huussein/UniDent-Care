@@ -56,14 +56,14 @@ export default function Sidebar() {
                 {isExpanded ? (
                     <Logo 
                         showText={true} 
-                        iconClassName="w-12 md:w-16" 
+                        iconClassName="w-10 md:w-14" 
                         textClassName="text-2xl"
-                        className="transition-opacity duration-300 mt-2"
+                        className="mt-2"
                     />
                 ) : (
                     <Logo 
                         showText={false} 
-                        iconClassName="w-8 md:w-10" 
+                        iconClassName="w-8 md:w-12" 
                         className="w-full justify-center transition-opacity duration-300"
                     />
                 )}

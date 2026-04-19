@@ -27,6 +27,8 @@ const mapPatientCaseToCaseItem = (item: PatientCaseItem): CaseItem => ({
     totalSessions: item.totalSessions,
     pendingRequests: item.pendingRequests,
     imageUrls: item.imageUrls,
+    gender: undefined,
+    diagnosisdto: item.diagnosisdto ? [item.diagnosisdto] : null,
 });
 
 export default function MyCasesPatientScreen() {
@@ -90,7 +92,7 @@ export default function MyCasesPatientScreen() {
             header: "",
             accessor: "id",
             render: (val) => (
-                <Link href={`/cases/${val}`} className="my-btn-outline px-3 py-1.5 text-xs float-right">
+                <Link href={`/my-cases/${val}`} className="my-btn-outline px-3 py-1.5 text-xs float-right">
                     View Details
                 </Link>
             )
@@ -215,6 +217,7 @@ export default function MyCasesPatientScreen() {
                                             <CaseCard 
                                                 caseItem={mapPatientCaseToCaseItem(item)} 
                                                 hideRequestButton={true}
+                                                navigationPath="/my-cases"
                                                 customBadge={
                                                     <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-full p-0.5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-none ring-1 ring-white/50 dark:ring-slate-700">
                                                         <span className={`shrink-0 flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>

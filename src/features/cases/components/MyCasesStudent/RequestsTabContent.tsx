@@ -79,7 +79,7 @@ export function RequestsTabContent({
       header: "", 
       accessor: "patientCasePublicId",
       render: (val) => (
-        <Link href={`/cases/${val}`} className="group flex items-center justify-end gap-1 text-[12px] font-bold text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 transition-colors">
+        <Link href={`/my-cases/${val}`} className="group flex items-center justify-end gap-1 text-[12px] font-bold text-indigo-500 dark:text-indigo-400 hover:text-indigo-600 transition-colors">
           Review Case <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" />
         </Link>
       )

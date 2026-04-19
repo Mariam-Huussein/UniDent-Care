@@ -4,6 +4,7 @@ export interface CaseCardProps {
     caseItem: CaseItem;
     hideRequestButton?: boolean;
     customBadge?: React.ReactNode;
+    navigationPath?: string;
 }
 
 export interface CaseItem {
@@ -14,9 +15,11 @@ export interface CaseItem {
     caseType: CaseType | null;
     status: string;
     createAt: string;
-    totalSessions: number;
-    pendingRequests: number;
+    gender: 0 | 1 | undefined;
+    diagnosisdto: DiagnosisDto[] | null;
     imageUrls: string[];
+    totalSessions?: number;
+    pendingRequests?: number;
 }
 
 export interface CaseType {
@@ -133,6 +136,25 @@ export interface CreateSessionBody {
 }
 
 export type CreateSessionResponse = ApiResponse<string>;
+
+/* ═══ Doctor Search ═══ */
+export interface DoctorSearchResult {
+    publicId: string;
+    username: string;
+    fullName: string;
+    specialty?: string;
+}
+
+export interface DoctorSearchMetaData {
+    items: DoctorSearchResult[];
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+}
+
+export type DoctorSearchResponse = ApiResponse<DoctorSearchMetaData>;
 
 /* ═══ Student: My Cases & My Requests ═══ */
 export interface StudentMyCasesQueryParams {

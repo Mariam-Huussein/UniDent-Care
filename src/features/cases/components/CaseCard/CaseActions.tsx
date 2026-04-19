@@ -10,16 +10,17 @@ interface CaseActionsProps {
     patientName: string;
     caseType?: string;
     hideRequestButton?: boolean;
+    navigationPath?: string;
 }
 
-export default function CaseActions({ caseId, patientName, caseType, hideRequestButton }: CaseActionsProps) {
+export default function CaseActions({ caseId, patientName, caseType, hideRequestButton, navigationPath = "/cases" }: CaseActionsProps) {
     const router = useRouter();
     const [showModal, setShowModal] = useState(false);
 
     return (
         <>
             <div className={`flex items-center gap-2 mt-3 ${hideRequestButton ? 'justify-center w-full' : ''}`}>
-                <button className={`my-btn-outline group/view ${hideRequestButton ? 'w-full' : ''}`} onClick={() => router.push(`/cases/${caseId}`)}>
+                <button className={`my-btn-outline group/view ${hideRequestButton ? 'w-full' : ''}`} onClick={() => router.push(`${navigationPath}/${caseId}`)}>
                     <Eye size={15} className="group-hover/view:animate-pulse group-hover/view:animate-duration-1000 transition-all duration-300" />
                     View Details
                 </button>

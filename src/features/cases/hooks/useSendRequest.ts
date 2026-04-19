@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import toast from "react-hot-toast";
-import { sendCaseRequest } from "../server/case.action";
-import { sendRequestSchema, SendRequestFormValues } from "../schemas/sendRequestSchema";
+import { sendCaseRequest } from "@/features/cases/server/caseRequest.action";
+import { sendRequestSchema, SendRequestFormValues } from "@/features/cases/schemas/sendRequestSchema";
 
 export const useSendRequest = (caseId: string, onClose: () => void) => {
     const studentId = useSelector((state: RootState) => state.auth.user?.publicId || "");
@@ -15,10 +15,14 @@ export const useSendRequest = (caseId: string, onClose: () => void) => {
         register,
         handleSubmit,
         formState: { errors, isValid },
+        watch,
+        setValue,
     } = useForm<SendRequestFormValues>({
         resolver: zodResolver(sendRequestSchema),
         mode: "onChange",
     });
+
+    const doctorUsername = watch("doctorUsername");
 
     const onSubmit = async (data: SendRequestFormValues) => {
         setLoading(true);
@@ -48,5 +52,7 @@ export const useSendRequest = (caseId: string, onClose: () => void) => {
         errors,
         isValid,
         loading,
+        doctorUsername,
+        setValue,
     };
 };

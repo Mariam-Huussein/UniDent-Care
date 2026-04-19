@@ -28,20 +28,14 @@ export default function Logo({
           src={logoLight}
           alt="UniDent Care Logo"
           priority
-          className="object-contain dark:hidden drop-shadow-sm w-full h-auto"
-        />
-        <Image
-          src={logoDark}
-          alt="UniDent Care Logo"
-          priority
-          className="object-contain hidden dark:block drop-shadow-sm w-full h-auto"
+          className="object-contain drop-shadow-sm w-full h-auto"
         />
       </div>
 
       {showText && (
         <h1 className={`${textClassName} font-extrabold tracking-tight whitespace-nowrap flex items-end gap-0.2 ${isRtl ? 'font-arabic' : ''}`}>
           <span>
-            <span className="bg-clip-text text-transparent bg-linear-to-r from-slate-800 to-indigo-600 dark:from-white dark:to-slate-200">
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-slate-800 to-indigo-600 dark:from-slate-100 dark:to-indigo-300">
               Uni
             </span>
             <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-blue-400">
