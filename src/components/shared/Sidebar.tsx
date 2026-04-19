@@ -82,7 +82,7 @@ export default function Sidebar() {
                     const Icon = item.icon;
                     // Because link paths might match exactly or be prefixes (like /cases vs /cases/123) we'll do an exact match for dashboard, profile, settings, and prefix for cases
                     let isActive = pathname === item.path;
-                    if (item.path !== '/' && item.path !== '/dashboard' && pathname.startsWith(item.path)) {
+                    if (item.path !== '/' && item.path !== '/dashboard' && pathname?.startsWith(item.path)) {
                         isActive = true;
                     }
 

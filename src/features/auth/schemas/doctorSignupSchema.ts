@@ -15,7 +15,7 @@ export const doctorSignupSchema = z.object({
         .regex(/[A-Z]/, "Must contain at least one uppercase letter")
         .regex(/[0-9]/, "Must contain at least one digit"),
     specialty: z.string().min(2, "Specialty is required"),
-    universityId: z.string().min(7, "University ID must be at least 7 characters")
+    universityId: z.string().min(1, "Please select a university")
 });
 
 export type DoctorSignupValues = z.infer<typeof doctorSignupSchema>;

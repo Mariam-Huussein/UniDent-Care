@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,9 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   BookOpen,
+  Search,
   Phone,
   AtSign,
 } from "lucide-react";
@@ -32,6 +34,7 @@ import { authService } from "@/features/auth/services/authService";
 import { StudentSignupPayload } from "@/features/auth/types/studentPayload.Types";
 import Logo from "@/components/ui/Logo";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import SearchableSelect from "@/components/common/SearchableSelect";
 
 export default function StudentSignup() {
   const router = useRouter();
@@ -42,6 +45,8 @@ export default function StudentSignup() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<StudentSignupValues>({
     resolver: zodResolver(studentSignupSchema),
@@ -56,6 +61,15 @@ export default function StudentSignup() {
       password: "",
     }
   });
+
+  const selectedUniversityId = watch("universityId");
+
+  const { data: universitiesData, isLoading: isLoadingUniversities } = useQuery({
+    queryKey: ["universities-lookup"],
+    queryFn: authService.getUniversitiesLookup,
+  });
+
+  const universities = universitiesData?.data || [];
 
   const signupMutation = useMutation({
     mutationFn: (data: StudentSignupPayload) => authService.registerStudent(data),
@@ -191,31 +205,29 @@ export default function StudentSignup() {
               {errors.phone && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.phone.message}</p>}
             </motion.div>
 
-            <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>University</label>
+            <motion.div variants={itemVariants} className="space-y-1.5 md:col-span-2">
+              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{isRtl ? "الجامعة" : "University"}</label>
               <div className="relative group">
-                <BookOpen className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
-                <input
-                  {...register("university")}
-                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.university ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
-                  placeholder="Cairo University"
-                />
-              </div>
-              {errors.university && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.university.message}</p>}
-            </motion.div>
-
-            <motion.div variants={itemVariants} className="space-y-1.5">
-              <label className={`text-sm font-bold text-slate-700 dark:text-slate-300 ${isRtl ? 'mr-1' : 'ml-1'}`}>{t.universityIdLabel}</label>
-              <div className="relative group">
-                <IdCard className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors`} size={18} />
-                <input
-                  {...register("universityId")}
-                  className={`w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white border-2 ${errors.universityId ? "border-red-200 dark:border-red-900/50" : "border-slate-50 dark:border-slate-800 focus:border-indigo-500 dark:focus:border-indigo-400"} rounded-2xl ${isRtl ? 'pr-11 pl-4' : 'pl-11 pr-4'} py-3.5 outline-none transition-all focus:bg-white dark:focus:bg-slate-900 placeholder:text-slate-400 dark:placeholder:text-slate-600`}
-                  placeholder="ID Number"
-                  dir="ltr"
+                <BookOpen className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 group-focus-within:text-indigo-600 dark:group-focus-within:text-indigo-400 transition-colors z-20`} size={18} />
+                <SearchableSelect
+                  options={universities.map(u => ({ id: u.id, label: u.name }))}
+                  value={selectedUniversityId}
+                  onChange={(id) => {
+                    const univ = universities.find(u => u.id === id);
+                    setValue("universityId", id as string);
+                    if (univ) {
+                      setValue("university", univ.name);
+                    }
+                  }}
+                  placeholder={isRtl ? "اختر الجامعة" : "Select University"}
+                  searchPlaceholder={isRtl ? "ابحث عن الجامعة..." : "Search for university..."}
+                  isRtl={isRtl}
+                  error={errors.universityId?.message}
+                  accentColor="indigo"
                 />
               </div>
               {errors.universityId && <p className={`text-[11px] font-bold text-red-500 dark:text-red-400 ${isRtl ? 'mr-1' : 'ml-1'}`}>{errors.universityId.message}</p>}
+              {isLoadingUniversities && <p className="text-[10px] text-indigo-500 animate-pulse px-2">Loading universities...</p>}
             </motion.div>
 
             <motion.div variants={itemVariants} className="space-y-1.5 md:col-span-2">

@@ -15,6 +15,8 @@ import {
     MyStudentRequestsResponse,
     StudentMyCasesQueryParams,
     StudentMyRequestsQueryParams,
+    PatientMyCasesQueryParams,
+    MyPatientCasesResponse,
 } from "../types/caseCardProps.types";
 
 const cookieToken = Cookies.get("token");
@@ -106,6 +108,23 @@ export async function getStudentMyRequests(params: StudentMyRequestsQueryParams)
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to fetch my requests");
+    }
+}
+
+export async function getPatientMyCases(patientId: string, params: PatientMyCasesQueryParams): Promise<MyPatientCasesResponse> {
+    try {
+        const options: AxiosRequestConfig = {
+            url: `https://dental-hup1.runasp.net/api/Cases/patient/${patientId}`,
+            method: "GET",
+            params,
+            headers: {
+                Authorization: `Bearer ${cookieToken}`,
+            },
+        };
+        const response = await axios.request(options);
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || "Failed to fetch patient cases");
     }
 }
 

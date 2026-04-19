@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +18,8 @@ export default function ResetPasswordPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
+  const token = searchParams?.get("token");
+  const email = searchParams?.get("email");
 
   const {
     register,

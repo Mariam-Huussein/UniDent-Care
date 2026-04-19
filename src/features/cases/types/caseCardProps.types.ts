@@ -228,3 +228,24 @@ export interface StudentMyRequestsMetaData {
 
 export type MyStudentCasesResponse = ApiResponse<StudentMyCasesMetaData>;
 export type MyStudentRequestsResponse = ApiResponse<StudentMyRequestsMetaData>;
+
+/* ═══ Patient: My Cases ═══ */
+export interface PatientMyCasesQueryParams {
+    search?: string;
+    status?: string;
+    page?: number;
+    pageSize?: number;
+}
+
+export interface PatientCaseItem extends StudentCaseItem { }
+
+export interface PatientMyCasesMetaData {
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    items: PatientCaseItem[];
+}
+
+export type MyPatientCasesResponse = ApiResponse<PatientMyCasesMetaData>;
