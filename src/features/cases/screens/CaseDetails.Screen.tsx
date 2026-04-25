@@ -5,15 +5,15 @@ import DentalImageGallery from "../components/CaseDetails/Clinical/DentalImageGa
 import CaseInfoPanel from "../components/CaseDetails/Layout/CaseInfoPanel";
 import PatientDetailTabs from "../components/CaseDetails/Tabs/CaseDetailTabs";
 import PatientDetailsSkeleton from "../components/CaseDetails/Layout/CaseDetailsSkeleton";
-import Odontogram from "../components/CaseDetails/Clinical/Odontogram";
-import ActivityTimeline from "../components/CaseDetails/Tracking/ActivityTimeline";
 import CaseDetailsTopBar from "../components/CaseDetails/Layout/CaseDetailsTopBar";
 import { useCaseDetails } from "../hooks/useCaseDetails";
+import { CaseProvider } from "../context/CaseContext";
 
 export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
     const { patient, isLoading, status, role, studentId, refetch } = useCaseDetails(caseId);
 
     return (
+        <CaseProvider caseData={patient} caseId={caseId} isLoading={isLoading} refetch={refetch}>
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
             <div className="max-w-[1200px] mx-auto space-y-6">
 
@@ -43,42 +43,22 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
 
                                 {/* RIGHT — Info Panel */}
                                 <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 lg:p-8 transition-colors duration-300">
-                                    <CaseInfoPanel patient={patient} role={role} studentId={studentId} onRefetch={refetch} />
+                                    <CaseInfoPanel role={role} onRefetch={refetch} />
                                 </div>
                             </div>
 
-                            {/* ── In Progress: Split View (Odontogram L + Timeline/Progress R) ── */}
-                            {status === "in-progress" && (
                                 <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.15 }}
-                                    className="grid grid-cols-1 lg:grid-cols-5 gap-6"
                                 >
-                                    {/* LEFT — Odontogram (larger) */}
-                                    <div className="relative lg:col-span-3 p-5 sm:p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-colors duration-300">
-                                        <div className="relative z-10 w-full">
-                                            <Odontogram teeth={patient.teeth} readonly={true} status={status} />
-                                        </div>
-                                    </div>
-
-                                    {/* RIGHT — Timeline */}
-                                    <div className="lg:col-span-2 space-y-5">
-                                        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] p-5 sm:p-6 transition-colors duration-300">
-                                            <ActivityTimeline events={patient.timeline} />
-                                        </div>
-                                    </div>
+                                    <PatientDetailTabs />
                                 </motion.div>
-                            )}
-
-                            {/* ── Other states: Bottom Tabs ── */}
-                            {status !== "in-progress" && (
-                                <PatientDetailTabs patient={patient} />
-                            )}
                         </motion.div>
                     </AnimatePresence>
                 )}
             </div>
         </div>
+        </CaseProvider>
     );
 }

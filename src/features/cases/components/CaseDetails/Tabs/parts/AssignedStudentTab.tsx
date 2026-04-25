@@ -1,5 +1,5 @@
 import { StudentAssignment } from "@/features/cases/types/CaseDetails.types";
-import DetailCard from "../Shared/DetailCard";
+import DetailCard from "../../Shared/DetailCard";
 
 interface AssignedStudentTabProps {
     student: StudentAssignment;

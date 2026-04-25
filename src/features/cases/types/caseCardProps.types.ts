@@ -79,6 +79,10 @@ export interface CaseDetailData {
     patientAge: number;
     status: string;
     processStatus: string;
+    phone: string;
+    city: string;
+    nationalId: string;
+    gender: string | null;
     isPublic: boolean;
     universityId: string;
     universityName: string;
@@ -128,14 +132,6 @@ export type CancelRequestResponse = ApiResponse<string>;
 /* ═══ Doctor: Approve / Reject Request ═══ */
 export type ApproveRejectResponse = ApiResponse<boolean>;
 
-export interface CreateSessionBody {
-    studentId: string;
-    patientCaseId: string;
-    sessionDate: string;
-    location: string;
-}
-
-export type CreateSessionResponse = ApiResponse<string>;
 
 /* ═══ Doctor Search ═══ */
 export interface DoctorSearchResult {
@@ -250,3 +246,4 @@ export interface PatientMyCasesMetaData {
 }
 
 export type MyPatientCasesResponse = ApiResponse<PatientMyCasesMetaData>;
+

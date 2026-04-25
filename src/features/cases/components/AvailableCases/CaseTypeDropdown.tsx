@@ -6,6 +6,7 @@ import { getCaseTypes } from "@/server/caseTypes.action";
 interface CaseTypeDropdownProps {
     selectedCaseType: string;
     setSelectedCaseType: (value: string) => void;
+    onCaseTypeSelect?: (name: string, id: string) => void;
     variant?: "default" | "inline";
     placeholder?: string;
 }
@@ -13,6 +14,7 @@ interface CaseTypeDropdownProps {
 export default function CaseTypeDropdown({
     selectedCaseType,
     setSelectedCaseType,
+    onCaseTypeSelect,
     variant = "default",
     placeholder = "All Types"
 }: CaseTypeDropdownProps) {
@@ -62,10 +64,13 @@ export default function CaseTypeDropdown({
         setIsOpen(true);
     };
 
-    const handleSelect = (name: string) => {
+    const handleSelect = (name: string, id: string = "") => {
         const isAllTypes = name === "All Types";
         setSelectedCaseType(isAllTypes ? "" : name);
         setSearchInput(isAllTypes ? "" : name);
+        if (onCaseTypeSelect) {
+            onCaseTypeSelect(isAllTypes ? "" : name, isAllTypes ? "" : id);
+        }
         setIsOpen(false);
     };
 
@@ -164,7 +169,7 @@ export default function CaseTypeDropdown({
                             {filteredTypes.map((item) => (
                                 <li
                                     key={item.publicId}
-                                    onClick={() => handleSelect(item.name)}
+                                    onClick={() => handleSelect(item.name, item.publicId)}
                                     className={`px-4 py-2.5 cursor-pointer transition-colors ${selectedCaseType === item.name
                                         ? "bg-blue-50 dark:bg-indigo-500/20 text-blue-700 dark:text-indigo-300 font-medium"
                                         : "text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700/50 hover:text-gray-900 dark:hover:text-slate-100"

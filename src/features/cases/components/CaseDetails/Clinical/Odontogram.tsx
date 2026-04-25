@@ -1,255 +1,137 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import dynamic from "next/dynamic";
+import { useState, useEffect, useMemo } from "react";
 import type { ToothConditionGroup, ToothDetail } from "react-odontogram";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { Info } from "lucide-react";
-import { ToothData } from "../../../types/CaseDetails.types";
-import { getToothStatusColor } from "../../../utils/CaseDetails.utils";
 import "react-odontogram/style.css";
 
-const ReactOdontogram = dynamic(() => import("react-odontogram"), { ssr: false });
+import { ToothData } from "../../../types/CaseDetails.types";
+import { DiagnosisDto } from "../../../types/caseCardProps.types";
+import ToothInfoPanel, { ToothPanelData } from "./OdontogramParts/ToothInfoPanel";
+import { buildConditions, buildDiagnosedTeethMap } from "@/features/cases/utils/odontogram.utils";
+import OdontogramHeader from "./OdontogramParts/Odontogramheader";
+import OdontogramChart from "./OdontogramParts/Odontogramchart";
+import DiagnosisPlanPanel from "./OdontogramParts/Diagnosisplanpanel";
+
 
 interface OdontogramProps {
     teeth: ToothData[];
     readonly?: boolean;
     status?: string;
+    diagnosisdto?: DiagnosisDto | null;
+    assignedStudentName?: string | null;
+    assignedDoctorName?: string | null;
 }
 
-/* Map our tooth data → react-odontogram's ToothConditionGroup[] format */
-function buildConditions(teeth: ToothData[]): ToothConditionGroup[] {
-    const groups: Record<string, { teeth: string[]; outlineColor: string; fillColor: string; label: string }> = {};
-
-    for (const t of teeth) {
-        const colors = getToothStatusColor(t.status);
-        const key = t.status;
-        if (!groups[key]) {
-            groups[key] = { teeth: [], outlineColor: colors.stroke, fillColor: colors.fill, label: colors.label };
-        }
-        groups[key].teeth.push(`teeth-${t.number}`);
-    }
-
-    return Object.values(groups);
-}
-
-export default function Odontogram({ teeth, readonly = false, status }: OdontogramProps) {
-    const role = useSelector((state: RootState) => state.auth.role);
-    const userId = useSelector((state: RootState) => state.auth.user?.publicId || "");
-
-    const [selected, setSelected] = useState<ToothDetail[]>([]);
+export default function Odontogram({
+    teeth,
+    readonly = false,
+    status,
+    diagnosisdto,
+    assignedStudentName,
+    assignedDoctorName,
+}: OdontogramProps) {
+    const [selected, setSelected]     = useState<ToothDetail[]>([]);
     const [localTeeth, setLocalTeeth] = useState<ToothData[]>(teeth);
+    const [panelData, setPanelData]   = useState<ToothPanelData | null>(null);
+    const [chartKey, setChartKey]     = useState(0);
 
-    useEffect(() => {
-        setLocalTeeth(teeth);
-    }, [teeth]);
+    useEffect(() => { setLocalTeeth(teeth); }, [teeth]);
 
-    const conditions = buildConditions(localTeeth);
-    const teethMap = new Map(localTeeth.map((t) => [t.number, t]));
+    // ── Derived ────────────────────────────────────────────────────────────
+
+    const isDiagnosisActive = status === "Diagnosis" && !readonly;
+    const isUnassigned      = status === "Unassigned";
+    const hasDiagnosisData  = !!diagnosisdto && (diagnosisdto.teethNumbers?.length ?? 0) > 0;
+
+    const showRightPanel = isDiagnosisActive || hasDiagnosisData;
+
+    const conditions: ToothConditionGroup[] = useMemo(
+        () => (isDiagnosisActive ? buildConditions(localTeeth) : []),
+        [isDiagnosisActive, localTeeth]
+    );
+
+    const teethMap = useMemo(
+        () => new Map(localTeeth.map((t) => [t.number, t])),
+        [localTeeth]
+    );
+
+    const diagnosedTeethMap = useMemo(
+        () => buildDiagnosedTeethMap(diagnosisdto, assignedStudentName, assignedDoctorName),
+        [diagnosisdto, assignedStudentName, assignedDoctorName]
+    );
+
+    // ── Handlers ───────────────────────────────────────────────────────────
 
     const handleUpdateTooth = (num: number, updates: Partial<ToothData>) => {
         setLocalTeeth((prev) => {
-            const hasTooth = prev.some((t) => t.number === num);
-            if (hasTooth) {
-                return prev.map((t) => t.number === num ? { ...t, ...updates } : t);
-            }
+            const exists = prev.some((t) => t.number === num);
+            if (exists) return prev.map((t) => t.number === num ? { ...t, ...updates } : t);
             return [...prev, { number: num, status: "needs-treatment", ...updates } as ToothData];
         });
     };
-    const isAssignedStudent = false; 
 
-    const isDiagnosisActive = status === "diagnosis" && !readonly;
-    const isUnassigned = status === "unassigned";
+    const handleRemoveTooth = (fdiNum: number) => {
+        setSelected((prev) => prev.filter((p) => Number(p.notations.fdi) !== fdiNum));
+        setLocalTeeth((prev) => {
+            const originalTooth = teeth.find(t => t.number === fdiNum);
+            if (originalTooth) {
+                return prev.map(t => t.number === fdiNum ? originalTooth : t);
+            } else {
+                return prev.filter(t => t.number !== fdiNum);
+            }
+        });
+        setChartKey(k => k + 1);
+    };
 
+    const handleClearAll = () => {
+        setSelected([]);
+        setLocalTeeth(teeth);
+        setChartKey(k => k + 1);
+    };
+
+    const handleToothClick = (toothNum: number) => {
+        const data = diagnosedTeethMap.get(toothNum);
+        setPanelData((prev) =>
+            prev?.toothNumber === toothNum ? null : (data ?? null)
+        );
+    };
+
+    // ── Render ─────────────────────────────────────────────────────────────
     return (
-        <div className={`grid grid-cols-1 ${isDiagnosisActive ? "lg:grid-cols-[1fr_380px]" : ""} gap-6 lg:gap-8`}>
-            {/* Inject Global Styles for Selected Teeth Outlines */}
-            {selected.length > 0 && (
-                <style>{`
-                    ${selected.map(s => `g[id="${s.notations.fdi}"] path, g[id="${s.notations.fdi}"] polygon, g[id="tooth-${s.notations.fdi}"] path`).join(", ")} {
-                        stroke-dasharray: 4, 3 !important;
-                        stroke-width: 1.5px !important;
-                    }
-                `}</style>
-            )}
+        <div className={`grid grid-cols-1 gap-6 lg:gap-8 ${showRightPanel ? "lg:grid-cols-[1fr_340px]" : ""}`}>
 
-            {/* Left Column: Chart Area */}
+            {/* ── Left: Header + Chart ── */}
             <div className="space-y-4">
-                {/* Header + Legend */}
-                <div className="flex items-center justify-between flex-wrap gap-3">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
-                            <Info size={18} className="text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <div>
-                            <h3 className="text-sm font-semibold text-slate-800 dark:text-white">
-                                {readonly ? "Diagnosis Chart" : "Interactive Odontogram"}
-                            </h3>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                                {readonly ? "Chart is view-only prior to diagnosis" : "Click any tooth for details"}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-4 flex-wrap">
-                        {(["healthy", "needs-treatment", "in-progress", "treated"] as const).map((s) => {
-                            const c = getToothStatusColor(s);
-                            return (
-                                <div key={s} className="flex items-center gap-1.5">
-                                    <div
-                                        className="w-3.5 h-3.5 rounded border shadow-sm"
-                                        style={{ background: c.fill, borderColor: c.stroke }}
-                                    />
-                                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{c.label}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* Odontogram Chart */}
-                <div className={`relative rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 max-w-[450px] mx-auto overflow-x-auto odontogram-wrapper transition-all duration-300 ${isUnassigned ? "pointer-events-none opacity-60 grayscale20" : ""}`}>
-                    <ReactOdontogram
-                        notation="FDI"
-                        showTooltip
-                        teethConditions={conditions}
-                        onChange={(sel: ToothDetail[]) => {
-                            setTimeout(() => setSelected(sel), 0);
-                        }}
-                        showLabels
-                        layout="circle"
-                        tooltip={{
-                            placement: "top",
-                            content: (detail) => {
-                                if (!detail) return null;
-                                const toothNum = Number(detail.notations.fdi);
-                                const t = teethMap.get(toothNum);
-                                const statusLabel = t ? getToothStatusColor(t.status).label : "Healthy";
-                                return (
-                                    <div className="text-center px-1">
-                                        <div className="font-bold text-sm mb-1">Tooth #{detail.notations.fdi}</div>
-                                        <div className="flex items-center justify-center gap-1.5 opacity-90">
-                                            <div
-                                                className="w-2 h-2 rounded-full"
-                                                style={{ backgroundColor: t ? getToothStatusColor(t.status).stroke : "#cbd5e1" }}
-                                            />
-                                            <span className="text-xs">{statusLabel}</span>
-                                        </div>
-                                        {t?.treatmentType && (
-                                            <div className="mt-1.5 pt-1.5 border-t border-white/20 text-[10px] opacity-80">
-                                                {t.treatmentType}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            },
-                        }}
-                    />
-                </div>
+                <OdontogramHeader readonly={readonly} />
+                <OdontogramChart
+                    key={chartKey}
+                    conditions={conditions}
+                    teethMap={teethMap}
+                    diagnosedTeethMap={diagnosedTeethMap}
+                    selected={selected}
+                    isUnassigned={isUnassigned}
+                    isDiagnosisActive={isDiagnosisActive}
+                    onSelectionChange={setSelected}
+                    onToothClick={handleToothClick}
+                />
             </div>
 
-            {/* Right Column: Interactive Diagnosis Form List */}
-            {isDiagnosisActive && (
-                <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] flex flex-col min-h-[400px] max-h-[600px] lg:max-h-[calc(100vh-250px)]">
-                    <div className="mb-4 flex items-center justify-between">
-                        <div>
-                            <h3 className="text-sm font-bold text-slate-800 dark:text-white">Diagnosis Plan</h3>
-                            <p className="text-[11px] text-slate-400 dark:text-slate-500">Selected teeth: {selected.length}</p>
-                        </div>
-                        {selected.length > 0 && (
-                            <button onClick={() => setSelected([])} className="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 font-medium">Clear All</button>
-                        )}
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto patient-details-scrollbar pr-1 space-y-4">
-                        {selected.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                                <div className="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center mb-3">
-                                    <Info size={20} className="text-indigo-400 dark:text-indigo-500" />
-                                </div>
-                                <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300">No teeth selected</h4>
-                                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">Click on the chart to select teeth and formulate a diagnosis plan.</p>
-                            </div>
-                        ) : (
-                            selected.map((selTooth) => {
-                                const fdiNum = Number(selTooth.notations.fdi);
-                                const t = teethMap.get(fdiNum) || { number: fdiNum, status: "healthy" } as ToothData;
-
-                                return (
-                                    <div key={fdiNum} className="bg-white dark:bg-slate-800/50 border text-left border-slate-100 dark:border-slate-700 rounded-xl p-4 shadow-sm hover:border-indigo-200 dark:hover:border-indigo-500/30 transition-all">
-                                        {/* Header */}
-                                        <div className="flex items-center justify-between mb-3">
-                                            <div className="flex items-center gap-2">
-                                                <div
-                                                    className="w-7 h-7 rounded-md flex items-center justify-center border shadow-sm shrink-0"
-                                                    style={{ background: getToothStatusColor(t.status).fill, borderColor: getToothStatusColor(t.status).stroke }}
-                                                >
-                                                    <span className="text-xs font-bold" style={{ color: getToothStatusColor(t.status).stroke }}>{fdiNum}</span>
-                                                </div>
-                                                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">Tooth #{fdiNum}</span>
-                                            </div>
-                                            <button
-                                                onClick={() => setSelected(prev => prev.filter(p => Number(p.notations.fdi) !== fdiNum))}
-                                                className="text-[10px] text-slate-400 hover:text-red-500 dark:hover:text-red-400 font-medium px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                            >
-                                                Remove
-                                            </button>
-                                        </div>
-
-                                        {/* Status Select */}
-                                        <div className="space-y-3">
-                                            <div>
-                                                <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status</label>
-                                                <select
-                                                    className="w-full text-xs text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/40 focus:border-indigo-500 transition-all cursor-pointer"
-                                                    value={t.status}
-                                                    onChange={(e) => handleUpdateTooth(fdiNum, { status: e.target.value as any })}
-                                                >
-                                                    <option value="healthy">Healthy</option>
-                                                    <option value="needs-treatment">Needs Treatment</option>
-                                                    <option value="in-progress">In Progress</option>
-                                                    <option value="treated">Treated</option>
-                                                </select>
-                                            </div>
-
-                                            {/* Extra Fields if Unhealthy */}
-                                            {t.status !== 'healthy' && (
-                                                <motion.div
-                                                    initial={{ opacity: 0, height: 0 }}
-                                                    animate={{ opacity: 1, height: 'auto' }}
-                                                    className="space-y-3 overflow-hidden"
-                                                >
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Treatment Type</label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="e.g. Root Canal, Extraction, Composite Filling"
-                                                            className="w-full text-xs text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/40 focus:border-indigo-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                                                            value={t.treatmentType || ""}
-                                                            onChange={(e) => handleUpdateTooth(fdiNum, { treatmentType: e.target.value })}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Clinical Notes</label>
-                                                        <textarea
-                                                            placeholder="Add specific details, surfaces (e.g. MOD), or observations..."
-                                                            rows={2}
-                                                            className="w-full text-xs text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 bg-white dark:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/40 focus:border-indigo-500 transition-all resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                                                            value={t.notes || ""}
-                                                            onChange={(e) => handleUpdateTooth(fdiNum, { notes: e.target.value })}
-                                                        />
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </div>
+            {/* ── Right: edit plan OR view info ── */}
+            {showRightPanel && (
+                isDiagnosisActive ? (
+                    <DiagnosisPlanPanel
+                        selected={selected}
+                        teethMap={teethMap}
+                        onClearAll={handleClearAll}
+                        onRemoveTooth={handleRemoveTooth}
+                        onUpdateTooth={handleUpdateTooth}
+                    />
+                ) : (
+                    <ToothInfoPanel
+                        data={panelData}
+                        onClose={() => setPanelData(null)}
+                    />
+                )
             )}
         </div>
     );

@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CaseStatus } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
+import { useCase } from "@/features/cases/context/CaseContext";
 
 interface CaseDetailsTopBarProps {
     currentStatus: CaseStatus;
@@ -14,7 +15,7 @@ interface CaseDetailsTopBarProps {
 export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDetailsTopBarProps) {
     const router = useRouter();
     const cfg = getPatientStatusConfig(currentStatus);
-
+    const {caseData} = useCase();
     return (
         <motion.div
             initial={{ opacity: 0, y: -12 }}

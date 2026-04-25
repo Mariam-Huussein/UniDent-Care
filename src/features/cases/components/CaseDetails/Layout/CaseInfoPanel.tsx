@@ -4,25 +4,32 @@ import { motion } from "framer-motion";
 import {
     User, Calendar, Activity, CheckCircle, Phone, MapPin,
     GraduationCap, Stethoscope, UserCircle,
+    ClipboardList,
+    BookUser,
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
 import ProgressTracker from "../Tracking/ProgressTracker";
 import InfoCard from "../Shared/InfoCard";
 import StudentActions from "./StudentActions";
-import DoctorActions from "./DoctorActions";
+import DoctorActions from "./DoctorActions/DoctorActions";
+import { useCase } from "@/features/cases/context/CaseContext";
+import { useEffect } from "react";
 
 interface PatientInfoPanelProps {
-    patient: PatientCase;
     role: string | null;
-    studentId: string | null;
     onRefetch: () => void;
 }
 
-export default function CaseInfoPanel({ patient, role, studentId, onRefetch }: PatientInfoPanelProps) {
+export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps) {
+    const { caseData, creatorData, doctorOwnerData, studentOwnerData, refetchUserData, refetchSessions, refetchDoctorRequests } = useCase();
+    const patient = caseData as PatientCase;
     const sc = getPatientStatusConfig(patient.status);
-    const isStudent = role === "Student";
-    const isDoctor = role === "Doctor";
+    useEffect(() => {
+        refetchUserData();
+        refetchSessions();
+        refetchDoctorRequests();
+    }, [refetchUserData, refetchSessions, refetchDoctorRequests]);
 
     const initials = patient.patientName
         .split(" ")
@@ -62,19 +69,21 @@ export default function CaseInfoPanel({ patient, role, studentId, onRefetch }: P
             {/* Info Grid */}
             <div className="grid grid-cols-2 gap-3">
                 <InfoCard icon={User} label="Age" value={`${patient.patientAge} years`} color="text-blue-500" />
-                <InfoCard
-                    icon={Activity}
-                    label="Status"
-                    value={patient.status === 'unassigned' ? 'Available' : 'Under Treatment'}
-                    color="text-amber-500"
-                />
-                <InfoCard icon={Phone} label="Phone" value={patient.patientPhone || "Not Provided"} color="text-emerald-500" />
-                <InfoCard icon={MapPin} label="City" value={patient.patientCity || "Not Provided"} color="text-rose-500" />
+                <InfoCard icon={Phone} label="Phone" value={patient.phone || "Not Provided"} color="text-emerald-500" />
+                <InfoCard icon={MapPin} label="City" value={patient.city || "Not Provided"} color="text-rose-500" />
                 <InfoCard icon={GraduationCap} label="University" value={patient.universityName || "Not Assigned"} color="text-indigo-500" />
                 <InfoCard icon={Calendar} label="Created At" value={new Date(patient.createdAt).toLocaleDateString()} color="text-violet-500" />
-                <InfoCard icon={UserCircle} label="Created By" value={patient.createdByRole || "Unknown"} color="text-teal-500" />
-                {patient.assignedStudentId && (
-                    <InfoCard icon={Stethoscope} label="Sessions" value={`${patient.totalSessions}`} color="text-cyan-500" />
+                <InfoCard icon={ClipboardList} label="Total Sessions" value={`${patient.sessions}` || "0"} color="text-violet-500" />
+                {
+                    patient.createdByRole?.toLowerCase() !== "patient" && creatorData && (
+                        <InfoCard icon={UserCircle} label="Created By" value={creatorData?.data?.fullName || "Unknown"} color="text-teal-500" />
+                    )
+                }
+                {patient.assignedStudentId && studentOwnerData && (
+                    <InfoCard icon={BookUser} label="Assigned Student" value={studentOwnerData?.data?.fullName || "Unknown"} color="text-cyan-500" />
+                )}
+                {patient.assignedDoctorId && doctorOwnerData && (
+                    <InfoCard icon={Stethoscope} label="Supervising Doctor" value={doctorOwnerData?.data?.fullName || "Unknown"} color="text-cyan-500" />
                 )}
             </div>
 
@@ -82,21 +91,21 @@ export default function CaseInfoPanel({ patient, role, studentId, onRefetch }: P
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80">
                 <ProgressTracker currentStep={patient.progressStep} processStatus={patient.processStatus} />
             </div>
-
             {/* Divider */}
             <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-6" />
 
             {/* Role-Based Actions */}
-            {isStudent && (
-                <StudentActions patient={patient} studentId={studentId} onRefetch={onRefetch} />
+            {patient.userFlags?.isAssignedStudent && role === "Student" && (
+                <StudentActions patient={patient} onRefetch={onRefetch} />
             )}
 
-            {isDoctor && (
+            {patient.userFlags?.isAssignedDoctor && role === "Doctor" && (
                 <DoctorActions patient={patient} onRefetch={onRefetch} />
             )}
 
+
             {/* Completed */}
-            {patient.status === "completed" && (
+            {patient.status === "Completed" && (
                 <div className="space-y-4">
                     <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/50 p-4 space-y-2">
                         <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">

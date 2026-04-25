@@ -1,13 +1,15 @@
 import { DiagnosisDto, UserFlags } from "./caseCardProps.types";
 
-export type CaseStatus = 'unassigned' | 'diagnosis' | 'in-progress' | 'completed';
+export type CaseStatus = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled' | 'UnderReview' | 'Rejected' | 'Diagnosis' ;
 
 export type ToothStatus = 'healthy' | 'needs-treatment' | 'in-progress' | 'treated';
+export type DiagnosisStage = 'BasicClinic' | 'AI' | '';
 
 export interface ToothData {
     number: number;
     status: ToothStatus;
     treatmentType?: string;
+    caseTypeId?: string;
     notes?: string;
 }
 
@@ -40,14 +42,16 @@ export interface PatientCase {
     patientId: string;
     patientName: string;
     patientAge: number;
-    patientPhone?: string;
-    patientCity?: string;
+    phone?: string;
     description?: string;
     patientAvatar?: string;
     status: CaseStatus;
     processStatus: string;
     caseType: string;
     isPublic: boolean;
+    city: string;
+    nationalId: string;
+    gender: string | null;
     universityId: string;
     universityName: string;
     medicalHistory?: string[];

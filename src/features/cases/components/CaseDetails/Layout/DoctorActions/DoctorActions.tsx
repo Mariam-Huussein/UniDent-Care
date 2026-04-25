@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 import {
     Send, GraduationCap, Loader2, CheckCheck, X, ClipboardCheck, Star,
 } from "lucide-react";
-import { PatientCase } from "../../../types/CaseDetails.types";
-import { CaseRequestData } from "../../../types/caseCardProps.types";
+import { PatientCase } from "../../../../types/CaseDetails.types";
+import { CaseRequestData } from "../../../../types/caseCardProps.types";
 import { approveRequest, getCaseRequestById, rejectRequest } from "@/features/cases/server/caseRequest.action";
 
 interface DoctorActionsProps {

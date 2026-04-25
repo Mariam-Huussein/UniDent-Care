@@ -4,60 +4,20 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { CaseStatus, PatientCase } from "../../../types/CaseDetails.types";
+import { PatientCase, ToothStatus } from "../../../types/CaseDetails.types";
 import Odontogram from "../Clinical/Odontogram";
 import ActivityTimeline from "../Tracking/ActivityTimeline";
-import ProgressTracker from "../Tracking/ProgressTracker";
-import MedicalInfoTab from "./MedicalInfoTab";
-import AssignedStudentTab from "./AssignedStudentTab";
-import BeforeAfterTab from "./BeforeAfterTab";
+import MedicalInfoTab from "./parts/MedicalInfoTab";
+import AssignedStudentTab from "./parts/AssignedStudentTab";
+import BeforeAfterTab from "./parts/BeforeAfterTab";
+import { useCase } from "@/features/cases/context/CaseContext";
+import { getTabsForStatus } from "@/features/cases/utils/CaseDetails.utils";
 
-interface PatientDetailTabsProps {
-    patient: PatientCase;
-}
 
-type TabDef = { key: string; label: string };
-
-function getTabsForStatus(status: CaseStatus): TabDef[] {
-    switch (status) {
-        case "unassigned":
-            return [
-                { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
-            ];
-        case "diagnosis":
-            return [
-                { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
-            ];
-        case "in-progress":
-            return [
-                { key: "odontogram", label: "Odontogram" },
-                { key: "progress", label: "Progress" },
-                { key: "medical", label: "Medical Info" },
-                { key: "timeline", label: "Timeline" },
-            ];
-        case "completed":
-            return [
-                { key: "odontogram", label: "Odontogram" },
-                { key: "beforeAfter", label: "Before & After" },
-                { key: "medical", label: "Medical Info" },
-                { key: "timeline", label: "Timeline" },
-                { key: "feedback", label: "Feedback" },
-            ];
-        default:
-            return [
-                { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
-            ];
-    }
-}
-
-export default function PatientDetailTabs({ patient }: PatientDetailTabsProps) {
+export default function PatientDetailTabs() {
     const role = useSelector((state: RootState) => state.auth.role);
-    const userId = useSelector((state: RootState) => state.auth.user?.publicId || "");
-    const isCurrentStudent = role === "Student" && patient.student?.id === userId;
-    const isDoctor = role === "Doctor";
+    const { caseData, doctorOwnerData, studentOwnerData } = useCase();
+    const patient = caseData as PatientCase;
 
     const tabs = getTabsForStatus(patient.status);
     const [activeTab, setActiveTab] = useState(tabs[0].key);
@@ -112,8 +72,20 @@ export default function PatientDetailTabs({ patient }: PatientDetailTabsProps) {
                             transition={{ duration: 0.2 }}
                         >
                             {activeTab === "student" && patient.student && <AssignedStudentTab student={patient.student} />}
-                            {activeTab === "odontogram" && <Odontogram teeth={patient.teeth} readonly={patient.status !== "diagnosis" || !(isDoctor || isCurrentStudent)} status={patient.status} />}
-                            {activeTab === "progress" && <ProgressTracker currentStep={patient.progressStep} />}
+                            {activeTab === "odontogram" &&
+                                <Odontogram 
+                                    teeth={patient?.diagnosisdto?.teethNumbers?.map(num => ({
+                                        number: num,
+                                        status: patient?.diagnosisdto?.diagnosisStage as ToothStatus,
+                                        notes: patient.diagnosisdto?.notes || "",
+                                    })) || []} 
+                                    readonly={true} 
+                                    status={patient?.diagnosisdto?.diagnosisStage}
+                                    diagnosisdto={patient.diagnosisdto}
+                                    assignedStudentName={studentOwnerData?.data?.fullName}
+                                    assignedDoctorName={doctorOwnerData?.data?.fullName}
+                                />
+                            }
                             {activeTab === "medical" && <MedicalInfoTab medicalHistory={patient.medicalHistory} medications={patient.medications} />}
                             {activeTab === "timeline" && <ActivityTimeline events={patient.timeline} />}
 
@@ -123,13 +95,6 @@ export default function PatientDetailTabs({ patient }: PatientDetailTabsProps) {
                                     afterImageUrls={patient.afterImageUrls}
                                     defaultImageUrls={patient.imageUrls}
                                 />
-                            )}
-
-                            {activeTab === "feedback" && (
-                                <div>
-                                    <h3 className="text-base font-semibold text-slate-800 dark:text-white mb-3">Feedback & Notes</h3>
-                                    <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{patient.feedbackNotes || "No feedback."}</p>
-                                </div>
                             )}
                         </motion.div>
                     </AnimatePresence>
