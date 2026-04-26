@@ -96,7 +96,6 @@ export default function Odontogram({
         );
     };
 
-    // ── Render ─────────────────────────────────────────────────────────────
     return (
         <div className={`grid grid-cols-1 gap-6 lg:gap-8 ${showRightPanel ? "lg:grid-cols-[1fr_340px]" : ""}`}>
 

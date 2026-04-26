@@ -23,6 +23,13 @@ export function proxy(request: NextRequest) {
     }
 
     if (token && userRole) {
+        const isSessionRoute = pathname.startsWith('/my-cases/') && pathname.includes('/session');
+        if (isSessionRoute) {
+            if (userRole.toLowerCase() !== 'student') {
+                return NextResponse.redirect(new URL('/forbidden', request.url));
+            }
+            return NextResponse.next();
+        }
         const restrictedPath = Object.keys(ROUTE_PERMISSIONS)
             .find(route => pathname.startsWith(route));
 

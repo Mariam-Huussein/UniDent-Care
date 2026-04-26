@@ -99,7 +99,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                 <StudentActions patient={patient} onRefetch={onRefetch} />
             )}
 
-            {patient.userFlags?.isAssignedDoctor && role === "Doctor" && (
+            {(patient.userFlags?.isAssignedDoctor || patient.userFlags?.hasRequest) && role === "Doctor" && (
                 <DoctorActions patient={patient} onRefetch={onRefetch} />
             )}
 

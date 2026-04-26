@@ -5,10 +5,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { PatientCase } from "../types/CaseDetails.types";
 import { DoctorRequestItem, SessionItem } from "../types/Sessions.types";
-import { getCaseSessions, getDoctorCaseRequests } from "../server/sessions.action";
+import { getCaseSessions } from "../server/sessions.action";
+import { getDoctorMyCaseRequests } from "../server/caseRequest.action";
 import { getDoctorById, getStudentById } from "@/server/getUsers.action";
 import { DoctorDataResponse, StudentDataResponse } from "@/types/getUser.type";
-import { getTokens } from "@/utils/sharedHelper";
+import { getTokensAndUserId } from "@/utils/sharedHelper";
+import toast from "react-hot-toast";
 
 interface CaseContextType {
   caseData: PatientCase | null;
@@ -24,6 +26,8 @@ interface CaseContextType {
   sessionsTotalPages: number;
   sessionsTotalCount: number;
   refetchSessions: () => void;
+  scheduledSession: SessionItem | null;
+  getSessionById: (sessionId: string) => SessionItem | undefined;
 
   doctorRequests: DoctorRequestItem[];
   doctorRequestsLoading: boolean;
@@ -48,7 +52,7 @@ interface CaseProviderProps {
 
 export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }: CaseProviderProps) => {
   const role = useSelector((state: RootState) => state.auth.role);
-  const userId = useSelector((state: RootState) => state.auth.user?.publicId) || getTokens().cookieUserId;
+  const userId = useSelector((state: RootState) => state.auth.user?.publicId) || getTokensAndUserId().userId;
 
   // ── Sessions state ──
   const [sessions, setSessions] = useState<SessionItem[]>([]);
@@ -72,7 +76,7 @@ export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }:
     if (!caseId) return;
     setSessionsLoading(true);
     try {
-      const res = await getCaseSessions(caseId, { page: sessionsPage, pageSize: 10 });
+      const res = await getCaseSessions(caseId, { page: sessionsPage, pageSize: 100 });
       if (res.success && res.data) {
         setSessions(res.data.items);
         setSessionsTotalPages(res.data.totalPages);
@@ -85,43 +89,65 @@ export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }:
     }
   }, [caseId, sessionsPage]);
 
+  // ── Derived: scheduled session ──
+  const scheduledSession = sessions.find(
+    (s) => s.status?.toLowerCase() === "scheduled"
+  ) || null;
+
+  // ── Helper: find session by ID ──
+  const getSessionById = useCallback(
+    (sessionId: string) => sessions.find(
+      (s) => s.id.toLowerCase() === sessionId.toLowerCase()
+    ),
+    [sessions]
+  );
+
+  const hasRequest = caseData?.userFlags?.hasRequest;
+
   // ── Fetch doctor requests ──
   const fetchDoctorRequests = useCallback(async () => {
-    if (role !== "Doctor" || !caseData?.userFlags?.hasRequest || !userId) return;
+    if (role !== "Doctor" || !hasRequest || !userId || !caseId) return;
     setDoctorRequestsLoading(true);
     try {
-      const res = await getDoctorCaseRequests(userId, { page: 1, pageSize: 20 });
+      const res = await getDoctorMyCaseRequests(userId, { page: 1, pageSize: 20, sortDirection: "desc" });
       if (res.success && res.data) {
-        // Filter only requests for this specific case
+        // Filter only requests for this specific case (case-insensitive UUID match)
         const filtered = res.data.items.filter(
-          (r) => r.patientCasePublicId === caseId
+          (r) => String(r.patientCasePublicId).toLowerCase() === String(caseId).toLowerCase()
         );
         setDoctorRequests(filtered);
       }
     } catch (err) {
       console.error("Failed to fetch doctor requests:", err);
+      toast.error("Failed to Find doctor requests");
     } finally {
       setDoctorRequestsLoading(false);
     }
-  }, [role, userId, caseId]);
+  }, [role, userId, caseId, hasRequest]);
+
+  const assignedDoctorId = caseData?.assignedDoctorId;
+  const assignedStudentId = caseData?.assignedStudentId;
+  const createdById = caseData?.createdById;
+  const createdByRole = caseData?.createdByRole;
 
   // ── Fetch info owner case data ──
   const fetchInfoOwnerCaseData = useCallback(async () => {
     if (!userId || !role || !caseId) return;
     setInfoOwnerDataLoading(true);
     try {
-        const AssignedDoctorData = await getDoctorById(caseData?.assignedDoctorId || "");
+        const AssignedDoctorData = assignedDoctorId ? await getDoctorById(assignedDoctorId) : null;
         setDoctorOwnerData(AssignedDoctorData);
-        const AssignedStudentData = await getStudentById(caseData?.assignedStudentId || "");
+        
+        const AssignedStudentData = assignedStudentId ? await getStudentById(assignedStudentId) : null;
         setStudentOwnerData(AssignedStudentData);
+        
         let CreatedUser: DoctorDataResponse | StudentDataResponse | null = null;
-        const createdById = caseData?.createdById || "";
-        if (caseData?.createdByRole === "Doctor") {
-            CreatedUser = await getDoctorById(createdById);
-        } else if (caseData?.createdByRole === "Student") {
-            CreatedUser = await getStudentById(createdById);
-        } else {
-            CreatedUser = null;
+        if (createdById) {
+            if (createdByRole === "Doctor") {
+                CreatedUser = await getDoctorById(createdById);
+            } else if (createdByRole === "Student") {
+                CreatedUser = await getStudentById(createdById);
+            }
         }
         setCreatorData(CreatedUser);
 
@@ -130,7 +156,7 @@ export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }:
     } finally {
       setInfoOwnerDataLoading(false);
     }
-  }, [userId, role, caseId]);
+  }, [userId, role, caseId, assignedDoctorId, assignedStudentId, createdById, createdByRole]);
 
   useEffect(() => {
     if (caseId && !isLoading) {
@@ -164,6 +190,8 @@ export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }:
         sessionsTotalPages,
         sessionsTotalCount,
         refetchSessions: fetchSessions,
+        scheduledSession,
+        getSessionById,
         doctorRequests,
         doctorRequestsLoading,
         doctorOwnerData,

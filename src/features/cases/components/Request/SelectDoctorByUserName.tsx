@@ -11,7 +11,7 @@ interface DoctorSelectProps {
     placeholder?: string;
 }
 
-export default function DoctorSelect({
+export default function SelectDoctorByUserName({
     value,
     onChange,
     onSearch,

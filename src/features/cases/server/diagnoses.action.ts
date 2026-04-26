@@ -1,7 +1,7 @@
 "use server";
 
 import axios, { AxiosRequestConfig } from "axios";
-import { getTokens } from "@/utils/sharedHelper";
+import { getTokensAndUserId } from "@/utils/sharedHelper";
 
 export interface CreateDiagnosisPayload {
     patientCaseId: string;
@@ -14,7 +14,7 @@ export interface CreateDiagnosisPayload {
 }
 
 export async function submitDiagnoses(payload: CreateDiagnosisPayload) {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = await getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Diagnoses`,

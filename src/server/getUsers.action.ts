@@ -1,10 +1,10 @@
 import { DoctorDataResponse, PatientDataResponse, StudentDataResponse } from "@/types/getUser.type";
 import axios, { AxiosRequestConfig } from "axios";
-import { getTokens } from "@/utils/sharedHelper";
+import { getTokensAndUserId } from "@/utils/sharedHelper";
 
 
 export async function getStudentById(id: string): Promise<StudentDataResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = await getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Students/${id}`,
@@ -21,7 +21,7 @@ export async function getStudentById(id: string): Promise<StudentDataResponse> {
 }
 
 export async function getDoctorById(id: string): Promise<DoctorDataResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = await getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Doctors/${id}`,
@@ -38,7 +38,7 @@ export async function getDoctorById(id: string): Promise<DoctorDataResponse> {
 }
 
 export async function getPatientById(id: string): Promise<PatientDataResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = await getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Patients/${id}`,

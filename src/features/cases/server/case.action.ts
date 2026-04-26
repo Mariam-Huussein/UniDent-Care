@@ -11,10 +11,10 @@ import {
     PatientMyCasesQueryParams,
     MyPatientCasesResponse,
 } from "../types/caseCardProps.types";
-import { getTokens } from "@/utils/sharedHelper";
+import { getTokensAndUserId } from "@/utils/sharedHelper";
 
 export async function getAvailableCases(params: CasesQueryParams): Promise<AvailableCasesResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Students/available-cases`,
@@ -32,7 +32,7 @@ export async function getAvailableCases(params: CasesQueryParams): Promise<Avail
 }
 
 export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Cases/${caseId}`,
@@ -48,9 +48,8 @@ export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
     }
 }
 
-
 export async function getStudentMyCases(params: StudentMyCasesQueryParams): Promise<MyStudentCasesResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Students/my-cases`,
@@ -68,7 +67,7 @@ export async function getStudentMyCases(params: StudentMyCasesQueryParams): Prom
 }
 
 export async function getStudentMyRequests(params: StudentMyRequestsQueryParams): Promise<MyStudentRequestsResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Students/my-requests`,
@@ -86,7 +85,7 @@ export async function getStudentMyRequests(params: StudentMyRequestsQueryParams)
 }
 
 export async function getPatientMyCases(patientId: string, params: PatientMyCasesQueryParams): Promise<MyPatientCasesResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = getTokensAndUserId();
     try {
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Cases/patient/${patientId}`,
@@ -104,7 +103,7 @@ export async function getPatientMyCases(patientId: string, params: PatientMyCase
 }
 
 export async function searchDoctorsByUsername(username: string, universityId: string): Promise<DoctorSearchResponse> {
-    const { cookieToken } = getTokens();
+    const { token: cookieToken } = getTokensAndUserId();
     try {
         const queryParams: Record<string, string> = {
             universityId: universityId,

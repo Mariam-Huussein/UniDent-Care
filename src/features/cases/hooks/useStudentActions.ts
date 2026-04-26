@@ -1,15 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 import { PatientCase } from "../types/CaseDetails.types";
 import { cancelCaseRequest } from "../server/caseRequest.action";
-import { createSession, getSessionsByCase, updateSessionStatus } from "../server/sessions.action";
-import { SessionBookingData, SessionItem } from "../types/Sessions.types";
+import { createSession } from "../server/sessions.action";
+import { SessionBookingData } from "../types/Sessions.types";
+import { useCase } from "../context/CaseContext";
 
 export function useStudentActions(
     patient: PatientCase,
     onRefetch: () => void
 ) {
+    const router = useRouter();
+    const { scheduledSession, refetchSessions } = useCase();
     const studentId = Cookies.get("user_id");
     const [cancelLoading, setCancelLoading] = useState(false);
     const [sessionLoading, setSessionLoading] = useState(false);
@@ -18,9 +22,7 @@ export function useStudentActions(
     const [showSessionForm, setShowSessionForm] = useState(false);
     const [showRequestModal, setShowRequestModal] = useState(false);
 
-    // ── Scheduled session state ──
-    const [scheduledSession, setScheduledSession] = useState<SessionItem | null>(null);
-    const [sessionsLoading, setSessionsLoading] = useState(false);
+    // ── Start Now modal state ──
     const [showStartNowModal, setShowStartNowModal] = useState(false);
     const [startNowLoading, setStartNowLoading] = useState(false);
 
@@ -29,29 +31,6 @@ export function useStudentActions(
     const hasRequest = userFlags?.hasRequest ?? false;
     const requestId = userFlags?.requestId ?? "";
     const requestStatus = userFlags?.requestStatus ?? "";
-
-    // ── Fetch sessions to detect "Scheduled" status ──
-    const fetchSessions = useCallback(async () => {
-        if (!patient.id || !isAssignedToMe) return;
-        setSessionsLoading(true);
-        try {
-            const res = await getSessionsByCase(patient.id, 1, 50);
-            if (res.success && res.data?.items) {
-                const scheduled = res.data.items.find(
-                    (s) => s.status?.toLowerCase() === "scheduled"
-                );
-                setScheduledSession(scheduled || null);
-            }
-        } catch (err) {
-            console.error("Failed to fetch sessions:", err);
-        } finally {
-            setSessionsLoading(false);
-        }
-    }, [patient.id, isAssignedToMe]);
-
-    useEffect(() => {
-        fetchSessions();
-    }, [fetchSessions]);
 
     const handleCancelRequest = async () => {
         if (!requestId || !studentId) {
@@ -95,7 +74,7 @@ export function useStudentActions(
                 toast.success("Session created successfully");
                 setShowSessionForm(false);
                 onRefetch();
-                fetchSessions();
+                refetchSessions();
             } else {
                 toast.error(res.message || "Failed to create session");
             }
@@ -107,26 +86,14 @@ export function useStudentActions(
         }
     };
 
-    // ── Start Now: update session status to "InProgress" ──
+    // ── Start Now: navigate to the start-session page ──
+    // Status is NOT changed here. The student will mark it as "Done" via "End Session" button.
     const handleStartNow = async () => {
         if (!scheduledSession) return;
         setStartNowLoading(true);
         try {
-            const res = await updateSessionStatus(scheduledSession.id, {
-                sessionId: scheduledSession.id,
-                status: "InProgress",
-            });
-            if (res.success) {
-                toast.success("Session started successfully");
-                setShowStartNowModal(false);
-                setScheduledSession(null);
-                onRefetch();
-                fetchSessions();
-            } else {
-                toast.error(res.message || "Failed to start session");
-            }
-        } catch (err: any) {
-            toast.error(err.message || "Failed to start session");
+            setShowStartNowModal(false);
+            router.push(`/my-cases/${patient.id}/start-session/${scheduledSession.id}`);
         } finally {
             setStartNowLoading(false);
         }
@@ -149,7 +116,6 @@ export function useStudentActions(
 
         // ── Scheduled session ──
         scheduledSession,
-        sessionsLoading,
         showStartNowModal, setShowStartNowModal,
         startNowLoading,
         handleStartNow,

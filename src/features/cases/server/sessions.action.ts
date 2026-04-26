@@ -1,12 +1,10 @@
 import axios, { AxiosRequestConfig } from "axios";
-import Cookies from "js-cookie";
 import { CaseSessionsResponse, CreateSessionBody, CreateSessionResponse, DoctorRequestsResponse, UpdateSessionStatusBody, UpdateSessionStatusResponse } from "../types/Sessions.types";
-
-const cookieToken = Cookies.get("token");
-
+import { getTokensAndUserId } from "@/utils/sharedHelper";
 
 export async function createSession(body: CreateSessionBody): Promise<CreateSessionResponse> {
     try {
+        const { token: cookieToken } = await getTokensAndUserId();
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Sessions`,
             method: "POST",
@@ -40,6 +38,7 @@ export async function getSessionsByCase(
     pageSize: number = 10
 ): Promise<CaseSessionsResponse> {
     try {
+        const { token: cookieToken } = await getTokensAndUserId();
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Sessions/case/${caseId}`,
             method: "GET",
@@ -60,6 +59,7 @@ export async function updateSessionStatus(
     body: UpdateSessionStatusBody
 ): Promise<UpdateSessionStatusResponse> {
     try {
+        const { token: cookieToken } = await getTokensAndUserId();
         const options: AxiosRequestConfig = {
             url: `https://dental-hup1.runasp.net/api/Sessions/${sessionId}/status`,
             method: "PATCH",
@@ -85,37 +85,20 @@ export async function updateSessionStatus(
 }
 
 export async function getCaseSessions(
-  caseId: string,
-  params?: { page?: number; pageSize?: number }
+    caseId: string,
+    params?: { page?: number; pageSize?: number }
 ): Promise<CaseSessionsResponse> {
-  try {
-    const options: AxiosRequestConfig = {
-      url: `https://dental-hup1.runasp.net/api/Sessions/case/${caseId}`,
-      method: "GET",
-      params,
-      headers: { Authorization: `Bearer ${cookieToken}` },
-    };
-    const response = await axios.request(options);
-    return response.data;
-  } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to fetch sessions");
-  }
-}
-
-export async function getDoctorCaseRequests(
-  doctorId: string,
-  params?: { status?: number; page?: number; pageSize?: number; Sort?: string }
-): Promise<DoctorRequestsResponse> {
-  try {
-    const options: AxiosRequestConfig = {
-      url: `https://dental-hup1.runasp.net/api/CaseRequests/doctor/${doctorId}`,
-      method: "GET",
-      params,
-      headers: { Authorization: `Bearer ${cookieToken}` },
-    };
-    const response = await axios.request(options);
-    return response.data;
-  } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to fetch doctor requests");
-  }
+    try {
+        const { token: cookieToken } = await getTokensAndUserId();
+        const options: AxiosRequestConfig = {
+            url: `https://dental-hup1.runasp.net/api/Sessions/case/${caseId}`,
+            method: "GET",
+            params,
+            headers: { Authorization: `Bearer ${cookieToken}` },
+        };
+        const response = await axios.request(options);
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || "Failed to fetch sessions");
+    }
 }

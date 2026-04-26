@@ -5,12 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { getAvailableCases } from "../server/case.action";
 import { CasesQueryParams } from "../types/caseCardProps.types";
-import Cookies from "js-cookie";
 import { useFilterCases } from "./useFilterCases";
+import { getTokensAndUserId } from "@/utils/sharedHelper";
 
 
 export const useAvailableCases = () => {
-    const token = (useSelector((state: RootState) => state.auth.token) || Cookies.get("token")) as string;
+    const token = (useSelector((state: RootState) => state.auth.token) || getTokensAndUserId().token) as string;
 
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
     const [currentPage, setCurrentPage] = useState(1);
@@ -34,7 +34,7 @@ export const useAvailableCases = () => {
 
     const { data, isPending, isError, refetch } = useQuery({
         queryKey: ["availableCases", queryParams],
-        queryFn: () => getAvailableCases(queryParams, token),
+        queryFn: () => getAvailableCases(queryParams),
         enabled: !!token,
         placeholderData: (prev) => prev,
     });

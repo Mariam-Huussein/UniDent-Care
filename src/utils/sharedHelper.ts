@@ -1,10 +1,10 @@
 import Cookies from "js-cookie";
 
-export function getTokens() {
-    const cookieToken = Cookies.get("token");
-    const cookieUserId = Cookies.get("user_id");
+export function getTokensAndUserId() {
+    const token = Cookies.get("token");
+    const userId = Cookies.get("user_id");
     return {
-        cookieToken,
-        cookieUserId,
+        token,
+        userId,
     };
 }

@@ -77,3 +77,22 @@ export interface SessionBookingData {
     endTime: string;   // "HH:MM:SS"
     location: string;
 }
+
+/* ═══ Session Notes ═══ */
+export interface SessionNoteBody {
+    sessionId: string;
+    note: string;
+    isPrivate: boolean;
+    imageUrl?: string;
+}
+
+export type SessionNoteResponse = ApiResponse<string>;
+
+/** Local representation of a note added during the session */
+export interface SessionNoteItem {
+    id: string;
+    note: string;
+    isPrivate: boolean;
+    imageUrl?: string;
+    createdAt: string;
+}
