@@ -1,7 +1,6 @@
 "use server";
 
-import axios, { AxiosRequestConfig } from "axios";
-import { getTokensAndUserId } from "@/utils/sharedHelper";
+import axiosInstance from "@/utils/api";
 
 export interface CreateDiagnosisPayload {
     patientCaseId: string;
@@ -14,18 +13,8 @@ export interface CreateDiagnosisPayload {
 }
 
 export async function submitDiagnoses(payload: CreateDiagnosisPayload) {
-    const { token: cookieToken } = await getTokensAndUserId();
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Diagnoses`,
-            method: "POST",
-            data: payload,
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-                "Content-Type": "application/json",
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.post(`/Diagnoses`, payload);
         return { success: true, data: response.data };
     } catch (error: any) {
         console.error("Submit Diagnoses Error:", error.response?.data || error.message);

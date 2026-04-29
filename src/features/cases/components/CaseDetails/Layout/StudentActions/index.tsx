@@ -23,6 +23,9 @@ export default function StudentActions({ patient, onRefetch }: StudentActionsPro
         showStartNowModal, setShowStartNowModal,
         startNowLoading,
         handleStartNow,
+        showCancelSessionModal, setShowCancelSessionModal,
+        cancelSessionLoading,
+        handleCancelSession,
     } = useStudentActions(patient, onRefetch);
 
     return (
@@ -53,6 +56,10 @@ export default function StudentActions({ patient, onRefetch }: StudentActionsPro
                     onToggleStartNowModal={setShowStartNowModal}
                     onStartNow={handleStartNow}
                     startNowLoading={startNowLoading}
+                    showCancelSessionModal={showCancelSessionModal}
+                    onToggleCancelSessionModal={setShowCancelSessionModal}
+                    onCancelSession={handleCancelSession}
+                    cancelSessionLoading={cancelSessionLoading}
                 />
             )}
 

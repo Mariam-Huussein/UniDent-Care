@@ -9,20 +9,12 @@ import {
 import { getTokensAndUserId } from "@/utils/sharedHelper";
 import { ApiResponse } from "@/types/api";
 import { DoctorRequestsResponse } from "../types/Sessions.types";
+import axiosInstance from "@/utils/api";
 
 
 export async function sendCaseRequest(body: CaseRequestBody): Promise<CaseRequestResponse> {
     try {
-        const { token: cookieToken } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/CaseRequests`,
-            method: "POST",
-            data: body,
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.post(`/CaseRequests`, body);
         return response.data;
     } catch (error: any) {
         const data = error.response?.data;
@@ -36,15 +28,8 @@ export async function sendCaseRequest(body: CaseRequestBody): Promise<CaseReques
 
 export async function cancelCaseRequest(requestId: string): Promise<CancelRequestResponse> {
     try {
-        const { token: cookieToken, userId: cookieUserId } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/CaseRequests/${requestId}/${cookieUserId}`,
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const { userId: cookieUserId } = await getTokensAndUserId();
+        const response = await axiosInstance.delete(`/CaseRequests/${requestId}/${cookieUserId}`);
         return response.data;
     } catch (error: any) {
         const data = error.response?.data;
@@ -58,15 +43,9 @@ export async function cancelCaseRequest(requestId: string): Promise<CancelReques
 
 export async function getAllCaseRequestsForDoctor(): Promise<CaseRequestResponse> {
     try {
-        const { token: cookieToken, userId: cookieUserId } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/CaseRequests/requests/${cookieUserId}`,
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const { userId: cookieUserId } = await getTokensAndUserId();
+
+        const response = await axiosInstance.get(`/CaseRequests/requests/${cookieUserId}`);
         return response.data;
     } catch (error: any) {
         const data = error.response?.data;
@@ -76,15 +55,7 @@ export async function getAllCaseRequestsForDoctor(): Promise<CaseRequestResponse
 
 export async function getCaseRequestById(requestId: string): Promise<CaseRequestResponse> {
     try {
-        const { token: cookieToken } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/CaseRequests/${requestId}`,
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/CaseRequests/${requestId}`);
         return response.data;
     } catch (error: any) {
         const data = error.response?.data;
@@ -94,15 +65,7 @@ export async function getCaseRequestById(requestId: string): Promise<CaseRequest
 
 export async function approveRequest(requestId: string): Promise<ApproveRejectResponse> {
     try {
-        const { token: cookieToken } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Doctors/requests/${requestId}/approve`,
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.post(`/Doctors/requests/${requestId}/approve`);
         return response.data;
     } catch (error: any) {
         const data = error.response?.data;
@@ -116,15 +79,7 @@ export async function approveRequest(requestId: string): Promise<ApproveRejectRe
 
 export async function rejectRequest(requestId: string): Promise<ApproveRejectResponse> {
     try {
-        const { token: cookieToken } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Doctors/requests/${requestId}/reject`,
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.post(`/Doctors/requests/${requestId}/reject`);
         return response.data;
     } catch (error: any) {
         const data = error.response?.data;
@@ -138,15 +93,7 @@ export async function rejectRequest(requestId: string): Promise<ApproveRejectRes
 
 export async function getCaseRequestsByCaseId(caseId: string): Promise<ApiResponse<CaseRequestData[]>> {
     try {
-        const { token: cookieToken } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/CaseRequests/case/${caseId}`,
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/CaseRequests/case/${caseId}`);
         return response.data;
     } catch (error: any) {
         const data = error.response?.data;
@@ -160,14 +107,7 @@ export async function getDoctorMyCaseRequests(
     params: { status?: number; page?: number; pageSize?: number; sortDirection?: string } = { page: 1, pageSize: 20, sortDirection: "desc" }
 ): Promise<DoctorRequestsResponse> {
     try {
-        const { token: cookieToken } = await getTokensAndUserId();
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Doctors/my-requests`,
-            method: "GET",
-            params,
-            headers: { Authorization: `Bearer ${cookieToken}` },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/Doctors/my-requests`)
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to fetch doctor requests");

@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { PatientCase } from "../types/CaseDetails.types";
 import { cancelCaseRequest } from "../server/caseRequest.action";
-import { createSession } from "../server/sessions.action";
+import { cancelSession, createSession } from "../server/sessions.action";
 import { SessionBookingData } from "../types/Sessions.types";
 import { useCase } from "../context/CaseContext";
 
@@ -25,6 +25,10 @@ export function useStudentActions(
     // ── Start Now modal state ──
     const [showStartNowModal, setShowStartNowModal] = useState(false);
     const [startNowLoading, setStartNowLoading] = useState(false);
+
+    // ── Cancel Session modal state ──
+    const [showCancelSessionModal, setShowCancelSessionModal] = useState(false);
+    const [cancelSessionLoading, setCancelSessionLoading] = useState(false);
 
     const { userFlags } = patient;
     const isAssignedToMe = userFlags?.isAssignedToMe ?? false;
@@ -99,6 +103,27 @@ export function useStudentActions(
         }
     };
 
+    // ── Cancel Session ──
+    const handleCancelSession = async () => {
+        if (!scheduledSession) return;
+        setCancelSessionLoading(true);
+        try {
+            const res = await cancelSession(scheduledSession.id);
+            if (res.success) {
+                toast.success("Session cancelled successfully");
+                setShowCancelSessionModal(false);
+                refetchSessions();
+                onRefetch();
+            } else {
+                toast.error(res.message || "Failed to cancel session");
+            }
+        } catch (err: any) {
+            toast.error(err.message || "Failed to cancel session");
+        } finally {
+            setCancelSessionLoading(false);
+        }
+    };
+
     return {
         showRequestModal, setShowRequestModal,
         showSessionForm, setShowSessionForm,
@@ -119,5 +144,10 @@ export function useStudentActions(
         showStartNowModal, setShowStartNowModal,
         startNowLoading,
         handleStartNow,
+
+        // ── Cancel session ──
+        showCancelSessionModal, setShowCancelSessionModal,
+        cancelSessionLoading,
+        handleCancelSession,
     };
 }

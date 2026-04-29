@@ -18,7 +18,7 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL('/unauthorized', request.url));
     }
 
-    if (token && userRole && isPublicRoute && (pathname === '/login' || pathname === '/signup' || pathname === '/')) {
+    if (token && userRole && isPublicRoute && (pathname === '/login' || pathname === '/signup')) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 

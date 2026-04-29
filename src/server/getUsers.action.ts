@@ -1,19 +1,10 @@
 import { DoctorDataResponse, PatientDataResponse, StudentDataResponse } from "@/types/getUser.type";
-import axios, { AxiosRequestConfig } from "axios";
-import { getTokensAndUserId } from "@/utils/sharedHelper";
+import axiosInstance from "@/utils/api";
 
 
 export async function getStudentById(id: string): Promise<StudentDataResponse> {
-    const { token: cookieToken } = await getTokensAndUserId();
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Students/${id}`,
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`Students/${id}`)
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to Find Student");
@@ -21,16 +12,8 @@ export async function getStudentById(id: string): Promise<StudentDataResponse> {
 }
 
 export async function getDoctorById(id: string): Promise<DoctorDataResponse> {
-    const { token: cookieToken } = await getTokensAndUserId();
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Doctors/${id}`,
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`Doctors/${id}`);
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to Find Doctor");
@@ -38,16 +21,8 @@ export async function getDoctorById(id: string): Promise<DoctorDataResponse> {
 }
 
 export async function getPatientById(id: string): Promise<PatientDataResponse> {
-    const { token: cookieToken } = await getTokensAndUserId();
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Patients/${id}`,
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`Patients/${id}`);
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to Find Patient");

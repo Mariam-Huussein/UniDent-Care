@@ -158,7 +158,7 @@ function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: stri
                         try {
                             const res = await updateSessionStatus(sessionId, {
                                 sessionId,
-                                status: "1", // 1 represents "Done" in the backend enum (0=Scheduled, 1=Done, 2=Cancelled, 3=Expired)
+                                status: "Cancelled", // (0=Scheduled, 1=Done, 2=Cancelled, 3=Expired)
                             });
                             if (res.success) {
                                 toast.success("Session completed successfully");

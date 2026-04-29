@@ -86,13 +86,21 @@ export interface SessionNoteBody {
     imageUrl?: string;
 }
 
-export type SessionNoteResponse = ApiResponse<string>;
+export type AddSessionNoteResponse = ApiResponse<string>;
+
+export type GetSessionNotesResponse = ApiResponse<GetSessionNoteItem[]>;
 
 /** Local representation of a note added during the session */
 export interface SessionNoteItem {
     id: string;
     note: string;
     isPrivate: boolean;
+    imageUrl?: string;
+    createdAt: string;
+}
+export interface GetSessionNoteItem {
+    id: string;
+    note: string;
     imageUrl?: string;
     createdAt: string;
 }

@@ -2,10 +2,9 @@
 
 import { motion } from "framer-motion";
 import {
-    User, Calendar, Activity, CheckCircle, Phone, MapPin,
+    User, Calendar, CheckCircle, Phone, MapPin,
     GraduationCap, Stethoscope, UserCircle,
-    ClipboardList,
-    BookUser,
+    ClipboardList, BookUser, Clock,
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
@@ -22,7 +21,7 @@ interface PatientInfoPanelProps {
 }
 
 export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps) {
-    const { caseData, creatorData, doctorOwnerData, studentOwnerData, refetchUserData, refetchSessions, refetchDoctorRequests } = useCase();
+    const { caseData, creatorData, doctorOwnerData, studentOwnerData, refetchUserData, refetchSessions, refetchDoctorRequests, scheduledSession } = useCase();
     const patient = caseData as PatientCase;
     const sc = getPatientStatusConfig(patient.status);
     useEffect(() => {
@@ -84,6 +83,19 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                 )}
                 {patient.assignedDoctorId && doctorOwnerData && (
                     <InfoCard icon={Stethoscope} label="Supervising Doctor" value={doctorOwnerData?.data?.fullName || "Unknown"} color="text-cyan-500" />
+                )}
+                {scheduledSession && (
+                    <InfoCard
+                        icon={Clock}
+                        label="Next Session"
+                        value={new Date(scheduledSession.scheduledAt).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
+                        color="text-blue-500"
+                    />
                 )}
             </div>
 

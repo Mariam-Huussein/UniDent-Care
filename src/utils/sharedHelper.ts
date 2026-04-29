@@ -8,3 +8,10 @@ export function getTokensAndUserId() {
         userId,
     };
 }
+
+export function removeUserData() {
+    Cookies.remove("token");
+    Cookies.remove("user_id");
+    Cookies.remove("university_id");
+    Cookies.remove("user_role");
+}

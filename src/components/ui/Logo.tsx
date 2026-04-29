@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import logoLight from "@/assets/images/logoLight.png";
-import logoDark from "@/assets/images/logoDark.png";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface LogoProps {
