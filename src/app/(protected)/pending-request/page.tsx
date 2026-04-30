@@ -26,6 +26,7 @@ import {
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import Cookies from "js-cookie";
 import { doctorDashboardService, CaseRequest, PaginatedRequests } from "@/features/dashboard/services/doctorDashboardService";
+import Link from "next/link";
 
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -285,13 +286,13 @@ export default function PendingCasesPage() {
                                         ) : (
                                             <div className="flex-1" />
                                         )}
-                                        <button
-                                            onClick={() => setSelectedRequest(req)}
+                                        <Link
+                                            href={`pending-request/${req.patientCasePublicId}`}
                                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border border-transparent hover:border-indigo-200 dark:hover:border-indigo-800 transition-all"
                                         >
                                             Full Details
                                             {isRtl ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
                             </motion.div>

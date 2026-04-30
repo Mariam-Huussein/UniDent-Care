@@ -185,7 +185,7 @@ export default function MyStudentPage() {
                                 {/* Student Info Header */}
                                 <div className="p-5 flex items-center gap-4 border-b border-slate-100 dark:border-slate-800">
                                     {/* Avatar */}
-                                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md shadow-indigo-200 dark:shadow-indigo-900/40">
+                                    <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md shadow-indigo-200 dark:shadow-indigo-900/40">
                                         {getInitials(student.studentName)}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -234,7 +234,7 @@ export default function MyStudentPage() {
                                                         {req.status}
                                                     </span>
                                                     <Link
-                                                        href={`/my-student/${req.id}`}
+                                                        href={`/my-students-cases/${req.patientCasePublicId}`}
                                                         className="p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                                                         title="View Details"
                                                     >
