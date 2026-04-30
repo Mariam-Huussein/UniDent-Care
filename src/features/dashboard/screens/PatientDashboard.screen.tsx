@@ -5,11 +5,11 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import api from "@/utils/api";
 import { motion } from "framer-motion";
-import { StatsCards } from "@/features/dashboard/components/patient/StatsCards";
 import { UpcomingAppointments } from "@/features/dashboard/components/patient/UpcomingAppointments";
 import { RecentCases } from "@/features/dashboard/components/patient/RecentCases";
 import { DashboardCharts } from "@/features/dashboard/components/patient/DashboardCharts";
-import { generatePatientDashboardData, DashboardData } from "@/services/PatientDashboardAnalytics";
+import PatientCalendarWidget from "@/features/dashboard/components/patient/PatientCalendarWidget";
+import { generatePatientDashboardData, DashboardData, SessionDto } from "@/services/PatientDashboardAnalytics";
 import { containerVariants, itemVariants } from "@/lib/animations";
 import { Loader2 } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -18,6 +18,7 @@ export default function PatientDashboardScreen() {
   const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
   const { t, language } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
+  const [rawSessions, setRawSessions] = useState<SessionDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function PatientDashboardScreen() {
            upcomingSessions = sessions.filter((s:any) => s.status === 'Scheduled');
         }
 
+        setRawSessions(sessions);
         const dashboardData = generatePatientDashboardData(cases, sessions, upcomingSessions, allDiagnoses);
         setData(dashboardData);
 
@@ -94,16 +96,26 @@ export default function PatientDashboardScreen() {
       animate="visible"
     >
       <motion.div variants={itemVariants}>
-        <StatsCards kpis={data.kpis} progress={data.progress} />
-      </motion.div>
-
-      <motion.div variants={itemVariants}>
         <DashboardCharts charts={data.charts} />
       </motion.div>
 
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <UpcomingAppointments upcomingSessions={data.upcomingSessions} />
         <RecentCases recentActivity={data.recentActivity} />
+      </motion.div>
+
+      {/* Schedule Calendar */}
+      <motion.div variants={itemVariants} className="w-full">
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-linear-to-r from-blue-500/10 to-indigo-500/10 rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition duration-1000" />
+          <div className="relative w-full rounded-2xl p-2 md:p-6 overflow-hidden">
+            <div className="overflow-x-auto lg:overflow-visible">
+              <div className="min-w-[800px] lg:min-w-full min-h-[650px]">
+                <PatientCalendarWidget sessions={rawSessions} />
+              </div>
+            </div>
+          </div>
+        </div>
       </motion.div>
     </motion.div>
   );

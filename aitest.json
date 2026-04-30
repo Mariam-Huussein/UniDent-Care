@@ -1,0 +1,11 @@
+{
+    "reply": "string",
+    "diagnosis_status": "pending",
+    "diagnosis": [
+        {
+            "tooth_number": [],
+            "CaseTypeId": "string",
+            "note": "string"
+        }
+    ]
+}
