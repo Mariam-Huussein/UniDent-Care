@@ -29,6 +29,8 @@ export const createCaseAi = (data: {
     CaseTypeId: string;
     IsPublic?: boolean;
     UniversityId?: string;
+    CreatedById: string;
+    CreatedByRole: string;
     Images?: File[];
 }) => {
     const formData = new FormData();
@@ -36,6 +38,8 @@ export const createCaseAi = (data: {
     formData.append("Title", data.Title);
     formData.append("Description", data.Description);
     formData.append("CaseTypeId", data.CaseTypeId);
+    formData.append("CreatedById", data.CreatedById);
+    formData.append("CreatedByRole", data.CreatedByRole);
 
     if (data.IsPublic !== undefined) {
         formData.append("IsPublic", data.IsPublic.toString());
@@ -50,6 +54,6 @@ export const createCaseAi = (data: {
         });
     }
 
-    return api.post("/Cases", formData);
+    return api.post("/Cases/ai/create", formData);
 };
 //   Cases/ai/create
