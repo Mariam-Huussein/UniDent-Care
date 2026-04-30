@@ -72,7 +72,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                 <InfoCard icon={MapPin} label="City" value={patient.city || "Not Provided"} color="text-rose-500" />
                 <InfoCard icon={GraduationCap} label="University" value={patient.universityName || "Not Assigned"} color="text-indigo-500" />
                 <InfoCard icon={Calendar} label="Created At" value={new Date(patient.createdAt).toLocaleDateString()} color="text-violet-500" />
-                <InfoCard icon={ClipboardList} label="Total Sessions" value={`${patient.sessions}` || "0"} color="text-violet-500" />
+                <InfoCard icon={ClipboardList} label="Total Sessions" value={`${patient.totalSessions}` || "0"} color="text-violet-500" />
                 {
                     patient.createdByRole?.toLowerCase() !== "patient" && creatorData && (
                         <InfoCard icon={UserCircle} label="Created By" value={creatorData?.data?.fullName || "Unknown"} color="text-teal-500" />
@@ -107,11 +107,11 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
             <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-6" />
 
             {/* Role-Based Actions */}
-            {patient.userFlags?.isAssignedStudent && role === "Student" && (
+            {(patient.userFlags?.isAssignedStudent || patient.userFlags?.hasRequest || !patient.assignedStudentId) && role === "Student" && (
                 <StudentActions patient={patient} onRefetch={onRefetch} />
             )}
 
-            {(patient.userFlags?.isAssignedDoctor || patient.userFlags?.hasRequest) && role === "Doctor" && (
+            {(patient.userFlags?.isAssignedDoctor || patient.userFlags?.hasRequest ) && role === "Doctor" && (
                 <DoctorActions patient={patient} onRefetch={onRefetch} />
             )}
 

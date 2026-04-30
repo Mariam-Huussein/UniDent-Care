@@ -24,6 +24,137 @@
     .my-btn-danger-outline {
         @apply flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-2.5 rounded-xl border-2 border-red-600/50 dark:border-rose-400/50 bg-transparent text-red-600 dark:text-rose-400 text-xs sm:text-[13px] font-semibold transition-all duration-300 cursor-pointer hover:bg-linear-to-r hover:from-red-600 hover:to-rose-700 hover:dark:from-rose-600 hover:dark:to-red-700 hover:text-white hover:shadow-md hover:shadow-red-200 hover:dark:shadow-rose-500/20;
     }
+
+    /* FullCalendar Custom Styles */
+    .calendar-container {
+        --fc-border-color: rgba(226, 232, 240, 0.6);
+        --fc-button-text-color: #475569;
+        --fc-button-bg-color: transparent;
+        --fc-button-border-color: transparent;
+        --fc-button-hover-bg-color: rgba(79, 70, 229, 0.05);
+        --fc-event-bg-color: transparent;
+        --fc-event-border-color: transparent;
+        --fc-today-bg-color: rgba(79, 70, 229, 0.02);
+    }
+
+    .dark .calendar-container {
+        --fc-border-color: rgba(30, 41, 59, 0.5);
+        --fc-button-text-color: #cbd5e1;
+        --fc-button-hover-bg-color: rgba(79, 70, 229, 0.15);
+    }
+
+    .calendar-container .fc {
+        font-family: inherit;
+        border: none !important;
+    }
+
+    .calendar-container .fc-theme-standard td,
+    .calendar-container .fc-theme-standard th {
+        border: 1px solid rgba(226, 232, 240, 0.3) !important;
+    }
+
+    .calendar-container .fc-scrollgrid {
+        border: none !important;
+    }
+
+    .calendar-container .fc-col-header-cell {
+        padding: 12px 0;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        /* slate-400 */
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--fc-border-color) !important;
+        border-inline: none !important;
+        border-top: none !important;
+    }
+
+    .calendar-container .fc-event {
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        background-color: rgba(79, 70, 229, 0.1) !important;
+        border: none !important;
+        border-left: 3px solid #4f46e5 !important;
+        /* indigo-600 */
+        margin: 2px;
+        padding: 2px 4px;
+    }
+
+    .calendar-container[dir="rtl"] .fc-event {
+        border-left: none !important;
+        border-right: 3px solid #4f46e5 !important;
+    }
+
+    .calendar-container .fc-event:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+        background-color: rgba(79, 70, 229, 0.15) !important;
+    }
+
+    .calendar-container .fc-toolbar {
+        background: rgba(248, 250, 252, 0.8);
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem !important;
+        border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+
+    .dark .calendar-container .fc-toolbar {
+        background: rgba(30, 41, 59, 0.4);
+        border-color: rgba(71, 85, 105, 0.3);
+    }
+
+    .calendar-container .fc-toolbar-title {
+        font-size: 1.25rem !important;
+        font-weight: 800 !important;
+        color: #1e293b;
+        letter-spacing: -0.02em;
+        position: relative;
+        padding: 0.2rem 1rem;
+    }
+
+    .calendar-container .fc-toolbar-title::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 3px;
+        background: #4f46e5;
+        border-radius: 10px;
+    }
+
+    .calendar-container .fc {
+        background: transparent !important;
+    }
+
+    .calendar-container .fc-daygrid-day-number {
+        color: #475569;
+        font-weight: 500;
+        padding: 8px !important;
+    }
+
+    .dark .calendar-container .fc-daygrid-day-number {
+        color: #94a3b8;
+    }
+
+    /* تصميم الزراير (Month, Week, Today) */
+    .calendar-container .fc-button {
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 6px 12px !important;
+        color: #4f46e5 !important;
+        font-size: 0.85rem !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .calendar-container .fc-button-primary:not(:disabled).fc-button-active {
+        background-color: rgba(79, 70, 229, 0.1) !important;
+    }
 }
 
 .case-card-swiper .swiper-pagination {
@@ -61,6 +192,14 @@
     background: #cbd5e1;
 }
 
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border: none !important;
+}
+
+.fc-timegrid-slot {
+    border-bottom: 1px dashed rgba(226, 232, 240, 0.6) !important;
+}
 
 /*====================== shadcn =========================*/
 @theme inline {
@@ -164,7 +303,7 @@
     --secondary-foreground: oklch(0.985 0 0);
     --ring: oklch(0.556 0 0); 
     */
-    --primary: oklch(0.623 0.214 259.81); 
+    --primary: oklch(0.623 0.214 259.81);
     --primary-foreground: oklch(0.985 0 0);
     --background: oklch(0.141 0.018 259.81);
     --card: oklch(0.18 0.02 259.81);

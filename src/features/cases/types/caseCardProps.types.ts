@@ -170,6 +170,10 @@ export interface StudentCaseItem {
     patientId: string;
     patientName: string;
     patientAge: number;
+    phone: string;
+    city: string;
+    nationalId: string;
+    gender: string | null;
     status: string;
     processStatus: string;
     isPublic: boolean;

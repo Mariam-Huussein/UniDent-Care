@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import {
     X, Stethoscope, GraduationCap, FileText,
-    Tag, AlertCircle, CheckCircle2, MousePointerClick,
+    Tag, AlertCircle, MousePointerClick, Activity,
 } from "lucide-react";
 import PersonRow from "./PersonRow";
 import InfoRow from "./InfoRow";
@@ -28,17 +28,17 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
             {data ? (
                 <motion.div
                     key="panel"
-                    initial={{ opacity: 0, x: 18 }}
+                    initial={{ opacity: 0, x: 16 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 18 }}
+                    exit={{ opacity: 0, x: 16 }}
                     transition={{ type: "spring", stiffness: 380, damping: 32 }}
                     className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.25)] flex flex-col overflow-hidden"
                 >
                     {/* ── Header ── */}
-                    <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 shrink-0">
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center">
-                                <span className="text-sm font-extrabold text-indigo-600 dark:text-indigo-400">
+                    <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-linear-to-r from-indigo-50/80 to-violet-50/60 dark:from-indigo-900/20 dark:to-violet-900/10 shrink-0">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-md shadow-indigo-200 dark:shadow-indigo-900/40">
+                                <span className="text-sm font-extrabold text-white">
                                     #{data.toothNumber}
                                 </span>
                             </div>
@@ -46,15 +46,14 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                                 <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
                                     Tooth {data.toothNumber}
                                 </p>
-                                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-semibold">
+                                <p className="text-[10px] text-indigo-500 dark:text-indigo-400 uppercase tracking-wider font-bold mt-0.5">
                                     Diagnosis Info
                                 </p>
                             </div>
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                            title="Close"
+                            className="w-7 h-7 rounded-lg hover:bg-slate-200/80 dark:hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                         >
                             <X size={14} />
                         </button>
@@ -82,10 +81,10 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
 
                         {/* Notes */}
                         {data.notes ? (
-                            <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60 p-3.5">
+                            <div className="rounded-xl bg-indigo-50/60 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/40 p-3.5">
                                 <div className="flex items-center gap-1.5 mb-2">
-                                    <FileText size={12} className="text-slate-400 dark:text-slate-500" />
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                                    <FileText size={12} className="text-indigo-400 dark:text-indigo-500" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
                                         Clinical Notes
                                     </span>
                                 </div>
@@ -121,9 +120,9 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
 
                         {/* Status pill */}
                         <div className="pt-1">
-                            <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/40 rounded-xl px-3.5 py-2.5">
-                                <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
-                                <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                            <div className="flex items-center gap-2 bg-linear-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/10 dark:to-violet-900/10 border border-indigo-100 dark:border-indigo-800/40 rounded-xl px-3.5 py-2.5">
+                                <Activity size={14} className="text-indigo-500 shrink-0" />
+                                <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">
                                     Case is under active treatment
                                 </p>
                             </div>
@@ -131,23 +130,22 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                     </div>
                 </motion.div>
             ) : (
-                /* Empty / idle state — shows when no tooth is selected */
                 <motion.div
                     key="idle"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="bg-slate-50/60 dark:bg-slate-800/20 border border-dashed border-slate-200 dark:border-slate-700/60 rounded-2xl flex flex-col items-center justify-center text-center p-8 gap-3"
+                    className="bg-linear-to-br from-slate-50 to-indigo-50/30 dark:from-slate-800/20 dark:to-indigo-900/10 border border-dashed border-slate-200 dark:border-slate-700/60 rounded-2xl flex flex-col items-center justify-center text-center p-8 gap-4"
                 >
-                    <div className="w-11 h-11 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                        <MousePointerClick size={18} className="text-slate-400 dark:text-slate-500" />
+                    <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center shadow-sm">
+                        <MousePointerClick size={20} className="text-indigo-400 dark:text-indigo-500" />
                     </div>
                     <div>
-                        <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
+                        <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
                             No tooth selected
                         </p>
-                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 leading-relaxed">
+                        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed max-w-[160px] mx-auto">
                             Click any tooth on the chart to view its diagnosis details
                         </p>
                     </div>

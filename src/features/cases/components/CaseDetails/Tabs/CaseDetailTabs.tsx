@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { PatientCase, ToothStatus } from "../../../types/CaseDetails.types";
+import { PatientCase } from "../../../types/CaseDetails.types";
 import Odontogram from "../Clinical/Odontogram";
 import ActivityTimeline from "../Tracking/ActivityTimeline";
 import MedicalInfoTab from "./parts/MedicalInfoTab";
@@ -16,7 +16,7 @@ import { getTabsForStatus } from "@/features/cases/utils/CaseDetails.utils";
 
 export default function PatientDetailTabs() {
     const role = useSelector((state: RootState) => state.auth.role);
-    const { caseData, doctorOwnerData, studentOwnerData } = useCase();
+    const { caseData } = useCase();
     const patient = caseData as PatientCase;
 
     const tabs = getTabsForStatus(patient.status);
@@ -72,20 +72,7 @@ export default function PatientDetailTabs() {
                             transition={{ duration: 0.2 }}
                         >
                             {activeTab === "student" && patient.student && <AssignedStudentTab student={patient.student} />}
-                            {activeTab === "odontogram" &&
-                                <Odontogram 
-                                    teeth={patient?.diagnosisdto?.teethNumbers?.map(num => ({
-                                        number: num,
-                                        status: patient?.diagnosisdto?.diagnosisStage as ToothStatus,
-                                        notes: patient.diagnosisdto?.notes || "",
-                                    })) || []} 
-                                    readonly={true} 
-                                    status={patient?.diagnosisdto?.diagnosisStage}
-                                    diagnosisdto={patient.diagnosisdto}
-                                    assignedStudentName={studentOwnerData?.data?.fullName}
-                                    assignedDoctorName={doctorOwnerData?.data?.fullName}
-                                />
-                            }
+                            {activeTab === "odontogram" && <Odontogram />}
                             {activeTab === "medical" && <MedicalInfoTab medicalHistory={patient.medicalHistory} medications={patient.medications} />}
                             {activeTab === "timeline" && <ActivityTimeline events={patient.timeline} />}
 
