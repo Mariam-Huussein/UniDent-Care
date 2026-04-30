@@ -1,15 +1,19 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 import { PatientCase } from "../types/CaseDetails.types";
 import { cancelCaseRequest } from "../server/caseRequest.action";
-import { createSession } from "../server/case.action";
-
+import { cancelSession, createSession } from "../server/sessions.action";
+import { SessionBookingData } from "../types/Sessions.types";
+import { useCase } from "../context/CaseContext";
 
 export function useStudentActions(
     patient: PatientCase,
     onRefetch: () => void
 ) {
+    const router = useRouter();
+    const { scheduledSession, refetchSessions } = useCase();
     const studentId = Cookies.get("user_id");
     const [cancelLoading, setCancelLoading] = useState(false);
     const [sessionLoading, setSessionLoading] = useState(false);
@@ -18,6 +22,14 @@ export function useStudentActions(
     const [showSessionForm, setShowSessionForm] = useState(false);
     const [showRequestModal, setShowRequestModal] = useState(false);
 
+    // ── Start Now modal state ──
+    const [showStartNowModal, setShowStartNowModal] = useState(false);
+    const [startNowLoading, setStartNowLoading] = useState(false);
+
+    // ── Cancel Session modal state ──
+    const [showCancelSessionModal, setShowCancelSessionModal] = useState(false);
+    const [cancelSessionLoading, setCancelSessionLoading] = useState(false);
+
     const { userFlags } = patient;
     const isAssignedToMe = userFlags?.isAssignedToMe ?? false;
     const hasRequest = userFlags?.hasRequest ?? false;
@@ -25,7 +37,7 @@ export function useStudentActions(
     const requestStatus = userFlags?.requestStatus ?? "";
 
     const handleCancelRequest = async () => {
-        if (!requestId || !studentId){
+        if (!requestId || !studentId) {
             toast.error("Invalid request or student ID");
             return;
         }
@@ -45,26 +57,32 @@ export function useStudentActions(
         }
     };
 
-    const handleCreateSession = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!studentId || !sessionDate) return;
+    const handleCreateSession = async (bookingData: SessionBookingData) => {
+        if (!studentId) return;
+
         setSessionLoading(true);
+
         try {
+            const bookingDateTime = new Date(bookingData.date);
+            const [hours, minutes, seconds] = bookingData.startTime.split(":").map(Number);
+            bookingDateTime.setHours(hours, minutes, seconds || 0);
+
             const res = await createSession({
                 studentId,
                 patientCaseId: patient.id,
-                sessionDate: new Date(sessionDate).toISOString(),
-                location: sessionLocation,
+                sessionDate: bookingDateTime.toISOString(),
+                location: bookingData.location,
             });
+
             if (res.success) {
                 toast.success("Session created successfully");
                 setShowSessionForm(false);
-                setSessionDate("");
-                setSessionLocation("");
                 onRefetch();
+                refetchSessions();
             } else {
                 toast.error(res.message || "Failed to create session");
             }
+
         } catch (err: any) {
             toast.error(err.message || "Failed to create session");
         } finally {
@@ -72,11 +90,45 @@ export function useStudentActions(
         }
     };
 
+    // ── Start Now: navigate to the start-session page ──
+    // Status is NOT changed here. The student will mark it as "Done" via "End Session" button.
+    const handleStartNow = async () => {
+        if (!scheduledSession) return;
+        setStartNowLoading(true);
+        try {
+            setShowStartNowModal(false);
+            router.push(`/my-cases/${patient.id}/start-session/${scheduledSession.id}`);
+        } finally {
+            setStartNowLoading(false);
+        }
+    };
+
+    // ── Cancel Session ──
+    const handleCancelSession = async () => {
+        if (!scheduledSession) return;
+        setCancelSessionLoading(true);
+        try {
+            const res = await cancelSession(scheduledSession.id);
+            if (res.success) {
+                toast.success("Session cancelled successfully");
+                setShowCancelSessionModal(false);
+                refetchSessions();
+                onRefetch();
+            } else {
+                toast.error(res.message || "Failed to cancel session");
+            }
+        } catch (err: any) {
+            toast.error(err.message || "Failed to cancel session");
+        } finally {
+            setCancelSessionLoading(false);
+        }
+    };
+
     return {
         showRequestModal, setShowRequestModal,
-        showSessionForm,  setShowSessionForm,
-        sessionDate,      setSessionDate,
-        sessionLocation,  setSessionLocation,
+        showSessionForm, setShowSessionForm,
+        sessionDate, setSessionDate,
+        sessionLocation, setSessionLocation,
         cancelLoading,
         sessionLoading,
 
@@ -86,5 +138,16 @@ export function useStudentActions(
 
         handleCancelRequest,
         handleCreateSession,
+
+        // ── Scheduled session ──
+        scheduledSession,
+        showStartNowModal, setShowStartNowModal,
+        startNowLoading,
+        handleStartNow,
+
+        // ── Cancel session ──
+        showCancelSessionModal, setShowCancelSessionModal,
+        cancelSessionLoading,
+        handleCancelSession,
     };
 }

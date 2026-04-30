@@ -51,15 +51,5 @@ export function useStudentStats() {
     fetchStats();
   }, []);
 
-  const sessionProgress =
-    stats.totalSessions > 0
-      ? Math.round((stats.completedSessions / stats.totalSessions) * 100)
-      : 0;
-
-  const requestApprovalRate =
-    stats.totalRequests > 0
-      ? Math.round((stats.approvedRequests / stats.totalRequests) * 100)
-      : 0;
-
-  return { stats, loading, sessionProgress, requestApprovalRate };
+  return { stats, loading };
 }

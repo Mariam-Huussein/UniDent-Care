@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { CaseStatus, PatientCase } from "../types/CaseDetails.types";
+import { CaseStatus, DiagnosisStage, PatientCase, ToothStatus } from "../types/CaseDetails.types";
 import { getCaseById } from "../server/case.action";
 import { CaseDetailData } from "../types/caseCardProps.types";
 
@@ -22,9 +22,9 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
     const studentId = useSelector((state: RootState) => state.auth.uinversalId ?? null);
     const [patient, setPatient] = useState<PatientCase | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [status, setStatus] = useState<CaseStatus>("unassigned");
+    const [status, setStatus] = useState<CaseStatus>("Pending");
 
-    const fetchCaseData = useCallback(async () => {
+    const fetchCaseData = useCallback(async () => { 
         if (!caseId) return;
         setIsLoading(true);
         try {
@@ -32,8 +32,8 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
             if (response.success && response.data) {
                 const apiData: CaseDetailData = response.data;
 
-                let mappedStatus = apiData.status?.toLowerCase() || "unassigned";
-                if (mappedStatus === 'inprogress') mappedStatus = 'in-progress';
+                let mappedStatus = apiData.status?.toLowerCase() || "Pending";
+                if (mappedStatus === 'inprogress') mappedStatus = 'InProgress';
 
                 setStatus(mappedStatus as CaseStatus);
 
@@ -51,6 +51,9 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     createdAt: apiData.createAt,
                     imageUrls: apiData.imageUrls || [],
                     description: apiData.diagnosisdto?.notes || undefined,
+                    phone: apiData.phone,
+                    city: apiData.city,
+                    nationalId: apiData.nationalId,
 
                     // Sessions & tracking
                     totalSessions: apiData.totalSessions,
@@ -75,15 +78,15 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     // Fields for existing components
                     medicalHistory: [],
                     medications: [],
-                    patientPhone: undefined,
-                    patientCity: undefined,
+                    gender: apiData.gender?.toString() || "Unknown",
                     student: undefined,
                     teeth: apiData.diagnosisdto?.teethNumbers?.map(num => ({
                         number: num,
-                        status: 'needs-treatment' as const,
+                        status: 'needs-treatment' as ToothStatus,
+                        notes: apiData.diagnosisdto?.notes || "",
                     })) || [],
                     timeline: [],
-                    progressStep: mappedStatus === 'completed' ? 4 : mappedStatus === 'in-progress' ? 3 : mappedStatus === 'diagnosis' ? 2 : 1,
+                    progressStep: mappedStatus === 'Completed' ? 4 : mappedStatus === 'InProgress' ? 3 : mappedStatus === 'Diagnosis' ? 2 : 1,
                     sessions: [],
                 };
 

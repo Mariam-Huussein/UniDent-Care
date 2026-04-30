@@ -1,15 +1,7 @@
-import axios, { AxiosRequestConfig } from "axios";
-import Cookies from "js-cookie";
 import {
     AvailableCasesResponse,
-    ApproveRejectResponse,
-    CancelRequestResponse,
     CaseDetailResponse,
-    CaseRequestBody,
-    CaseRequestResponse,
     CasesQueryParams,
-    CreateSessionBody,
-    CreateSessionResponse,
     DoctorSearchResponse,
     MyStudentCasesResponse,
     MyStudentRequestsResponse,
@@ -18,21 +10,12 @@ import {
     PatientMyCasesQueryParams,
     MyPatientCasesResponse,
 } from "../types/caseCardProps.types";
+import { getTokensAndUserId } from "@/utils/sharedHelper";
+import axiosInstance from "@/utils/api";
 
-const cookieToken = Cookies.get("token");
-const cookieUserId = Cookies.get("user_id");
-
-export async function getAvailableCases(params: CasesQueryParams, token: string): Promise<AvailableCasesResponse> {
+export async function getAvailableCases(params: CasesQueryParams): Promise<AvailableCasesResponse> {
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Students/available-cases`,
-            method: "GET",
-            params,
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/Students/available-cases`, { params });
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to find available cases");
@@ -41,53 +24,16 @@ export async function getAvailableCases(params: CasesQueryParams, token: string)
 
 export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Cases/${caseId}`,
-            method: "GET",
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/Cases/${caseId}`);
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to fetch case details");
     }
 }
 
-export async function createSession(body: CreateSessionBody): Promise<CreateSessionResponse> {
-    try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Sessions`,
-            method: "POST",
-            data: body,
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
-        return response.data;
-    } catch (error: any) {
-        const data = error.response?.data;
-        const validationErrors = data?.error?.errors;
-        if (validationErrors?.length) {
-            throw new Error(validationErrors.join(", "));
-        }
-        throw new Error(data?.message || "Failed to create session");
-    }
-}
-
 export async function getStudentMyCases(params: StudentMyCasesQueryParams): Promise<MyStudentCasesResponse> {
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Students/my-cases`,
-            method: "GET",
-            params,
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/Students/my-cases`, { params });
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to fetch my cases");
@@ -96,15 +42,7 @@ export async function getStudentMyCases(params: StudentMyCasesQueryParams): Prom
 
 export async function getStudentMyRequests(params: StudentMyRequestsQueryParams): Promise<MyStudentRequestsResponse> {
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Students/my-requests`,
-            method: "GET",
-            params,
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/Students/my-requests`, { params });
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to fetch my requests");
@@ -113,15 +51,7 @@ export async function getStudentMyRequests(params: StudentMyRequestsQueryParams)
 
 export async function getPatientMyCases(patientId: string, params: PatientMyCasesQueryParams): Promise<MyPatientCasesResponse> {
     try {
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Cases/patient/${patientId}`,
-            method: "GET",
-            params,
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/Cases/patient/${patientId}`, { params });
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to fetch patient cases");
@@ -129,6 +59,7 @@ export async function getPatientMyCases(patientId: string, params: PatientMyCase
 }
 
 export async function searchDoctorsByUsername(username: string, universityId: string): Promise<DoctorSearchResponse> {
+    const { token: cookieToken } = getTokensAndUserId();
     try {
         const queryParams: Record<string, string> = {
             universityId: universityId,
@@ -138,15 +69,7 @@ export async function searchDoctorsByUsername(username: string, universityId: st
             queryParams.username = username;
         }
 
-        const options: AxiosRequestConfig = {
-            url: `https://dental-hup1.runasp.net/api/Doctors`,
-            method: "GET",
-            params: queryParams,
-            headers: {
-                Authorization: `Bearer ${cookieToken}`,
-            },
-        };
-        const response = await axios.request(options);
+        const response = await axiosInstance.get(`/Doctors`, { params: queryParams });
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to search doctors");

@@ -89,6 +89,18 @@ export const dictionaries = {
     dashCasesEmpty: "No recent cases found.",
     dashCasesShowMore: "Show more cases",
 
+    // Upcoming Session Widget
+    dashUpcomingSessionTitle: "Upcoming Session",
+    dashUpcomingSessionProcedure: "Procedure",
+    dashUpcomingSessionTime: "Time",
+    dashUpcomingSessionDetails: "View Details",
+    dashUpcomingSessionEmpty: "No upcoming sessions",
+
+    // Upcoming Deadlines Widget
+    dashUpcomingDeadlinesTitle: "Upcoming Deadlines",
+    dashUpcomingDeadlinesEmpty: "No upcoming deadlines",
+    dashUpcomingDeadlinesDue: "Due",
+
     // Add Case
     addCaseTitle: "Create Medical Case",
     addCaseDesc: "Get the right diagnosis by filling the details",
@@ -156,8 +168,10 @@ export const dictionaries = {
     totalStudents: "Total Mentored Students",
     pendingRequests: "Pending Requests",
     approvedRequests: "Approved Requests",
+    rejectedRequests: "Rejected Requests",
     university: "University",
     level: "Academic Level",
+    completedSessions: "Completed Sessions",
     totalRequests: "Total Requests Made",
     totalSessions: "Total Sessions",
     age: "Age",
@@ -256,6 +270,18 @@ export const dictionaries = {
     dashCasesEmpty: "لم يتم العثور على حالات أخيرة.",
     dashCasesShowMore: "عرض المزيد من الحالات",
 
+    // Upcoming Session Widget
+    dashUpcomingSessionTitle: "الجلسة القادمة",
+    dashUpcomingSessionProcedure: "الإجراء",
+    dashUpcomingSessionTime: "الوقت",
+    dashUpcomingSessionDetails: "عرض التفاصيل",
+    dashUpcomingSessionEmpty: "لا توجد جلسات قادمة",
+
+    // Upcoming Deadlines Widget
+    dashUpcomingDeadlinesTitle: "المواعيد النهائية القادمة",
+    dashUpcomingDeadlinesEmpty: "لا توجد مواعيد نهائية قادمة",
+    dashUpcomingDeadlinesDue: "مستحق",
+
     // Add Case
     addCaseTitle: "إنشاء حالة طبية",
     addCaseDesc: "احصل على التشخيص الصحيح عبر ملئ التفاصيل",
@@ -323,10 +349,12 @@ export const dictionaries = {
     totalStudents: "إجمالي الطلاب المشرف عليهم",
     pendingRequests: "الطلبات المعلقة",
     approvedRequests: "الطلبات المقبولة",
+    rejectedRequests: "الطلبات المرفوضة",
     university: "الجامعة",
     level: "المستوى الأكاديمي",
     totalRequests: "إجمالي الطلبات المقدمة",
     totalSessions: "إجمالي الجلسات",
+    completedSessions: "إجمالي الجلسات المكتملة",
     age: "العمر",
     phone: "رقم الهاتف",
     activeCases: "الحالات النشطة",

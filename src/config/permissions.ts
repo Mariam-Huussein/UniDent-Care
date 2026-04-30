@@ -1,8 +1,8 @@
 import { UserRole } from "./navLinks";
 
 export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
-    '/my-student': ['Doctor'],
-    '/pending-cases': ['Doctor'],
+    '/my-students-cases': ['Doctor'],
+    '/pending-request': ['Doctor'],
     '/my-cases': ['Student','Patient'],
     '/add-case': ['Patient'],
     '/cases': ['Doctor', 'Student'],

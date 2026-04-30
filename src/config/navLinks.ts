@@ -15,10 +15,10 @@ export const NAV_LINKS: Record<UserRole[0], NavLink[]> = {
             name: "Dashboard", path: "/dashboard", icon: LayoutDashboard
         },
         {
-            name: "Pending Cases", path: "/pending-cases", icon: ClipboardClock
+            name: "Pending Requests", path: "/pending-request", icon: ClipboardClock
         },
         {
-            name: "Student List", path: "/my-student", icon: List
+            name: "Students Cases", path: "/my-students-cases", icon: List
         },
         {
             name: "Profile", path: "/profile", icon: User

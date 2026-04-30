@@ -51,7 +51,7 @@ export default function ActivityTimeline({ events }: ActivityTimelineProps) {
                                 className="relative flex items-start gap-3.5 py-3 group"
                             >
                                 {/* Node */}
-                                <div className={`relative z-10 shrink-0 w-7 h-7 rounded-lg bg-gradient-to-br ${cfg.gradient} flex items-center justify-center shadow-md ${cfg.glow} group-hover:scale-110 transition-transform duration-200`}>
+                                <div className={`relative z-10 shrink-0 w-7 h-7 rounded-lg bg-linear-to-br ${cfg.gradient} flex items-center justify-center shadow-md ${cfg.glow} group-hover:scale-110 transition-transform duration-200`}>
                                     <Icon size={13} className="text-white" />
                                 </div>
 

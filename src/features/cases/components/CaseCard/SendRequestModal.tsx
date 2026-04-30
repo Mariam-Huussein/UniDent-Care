@@ -3,7 +3,7 @@
 import { X, Send, Loader2, User } from "lucide-react";
 import { PiTooth } from "react-icons/pi";
 import { useSendRequest } from "@/features/cases/hooks/useSendRequest";
-import DoctorSelect from "@/features/cases/components/Request/DoctorSelect";
+import DoctorSelect from "@/features/cases/components/Request/SelectDoctorByUserName";
 import { useSearchDoctor } from "@/features/cases/hooks/useSearchDoctor";
 import { useEffect, useState } from "react";
 import { DoctorSearchResult } from "@/features/cases/types/caseCardProps.types";

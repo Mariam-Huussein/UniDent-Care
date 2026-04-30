@@ -9,19 +9,23 @@ import SendRequestModal from "../../../CaseCard/SendRequestModal";
 
 interface StudentActionsProps {
     patient: PatientCase;
-    studentId: string | null;
     onRefetch: () => void;
 }
 
-export default function StudentActions({ patient, studentId, onRefetch }: StudentActionsProps) {
+export default function StudentActions({ patient, onRefetch }: StudentActionsProps) {
     const {
         showRequestModal, setShowRequestModal,
         showSessionForm,  setShowSessionForm,
-        sessionDate,      setSessionDate,
-        sessionLocation,  setSessionLocation,
         cancelLoading,    sessionLoading,
         isAssignedToMe,   hasRequest,   requestStatus,
         handleCancelRequest, handleCreateSession,
+        scheduledSession,
+        showStartNowModal, setShowStartNowModal,
+        startNowLoading,
+        handleStartNow,
+        showCancelSessionModal, setShowCancelSessionModal,
+        cancelSessionLoading,
+        handleCancelSession,
     } = useStudentActions(patient, onRefetch);
 
     return (
@@ -44,13 +48,18 @@ export default function StudentActions({ patient, studentId, onRefetch }: Studen
             {isAssignedToMe && (
                 <ScheduleSessionSection
                     showForm={showSessionForm}
-                    sessionDate={sessionDate}
-                    sessionLocation={sessionLocation}
                     sessionLoading={sessionLoading}
                     onToggleForm={setShowSessionForm}
-                    onDateChange={setSessionDate}
-                    onLocationChange={setSessionLocation}
                     onSubmit={handleCreateSession}
+                    scheduledSession={scheduledSession}
+                    showStartNowModal={showStartNowModal}
+                    onToggleStartNowModal={setShowStartNowModal}
+                    onStartNow={handleStartNow}
+                    startNowLoading={startNowLoading}
+                    showCancelSessionModal={showCancelSessionModal}
+                    onToggleCancelSessionModal={setShowCancelSessionModal}
+                    onCancelSession={handleCancelSession}
+                    cancelSessionLoading={cancelSessionLoading}
                 />
             )}
 

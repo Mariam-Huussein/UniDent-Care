@@ -8,9 +8,42 @@ export function formatTimestamp(ts: string) {
     };
 }
 
+type TabDef = { key: string; label: string };
+export function getTabsForStatus(status: CaseStatus): TabDef[] {
+    switch (status) {
+        case "Pending":
+            return [
+                { key: "odontogram", label: "Odontogram" },
+                { key: "medical", label: "Medical Info" },
+            ];
+        case "Diagnosis":
+            return [
+                { key: "odontogram", label: "Odontogram" },
+                { key: "medical", label: "Medical Info" },
+            ];
+        case "InProgress":
+            return [
+                { key: "odontogram", label: "Odontogram" },
+                { key: "medical", label: "Medical Info" },
+                { key: "timeline", label: "Timeline" },
+            ];
+        case "Completed":
+            return [
+                { key: "odontogram", label: "Odontogram" },
+                { key: "medical", label: "Medical Info" },
+                { key: "timeline", label: "Timeline" },
+            ];
+        default:
+            return [
+                { key: "odontogram", label: "Odontogram" },
+                { key: "medical", label: "Medical Info" },
+            ];
+    }
+}
+
 export function getPatientStatusConfig(status: CaseStatus) {
     switch (status) {
-        case 'unassigned':
+        case 'Pending':
             return {
                 label: 'Unassigned',
                 bg: 'bg-gray-100',
@@ -19,7 +52,7 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-gray-200',
                 gradient: 'from-gray-400 to-gray-500',
             };
-        case 'diagnosis':
+        case 'Diagnosis':
             return {
                 label: 'Diagnosis',
                 bg: 'bg-blue-50',
@@ -28,7 +61,7 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-blue-200',
                 gradient: 'from-blue-400 to-blue-600',
             };
-        case 'in-progress':
+        case 'InProgress':
             return {
                 label: 'In Progress',
                 bg: 'bg-amber-50',
@@ -37,7 +70,7 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-amber-200',
                 gradient: 'from-amber-400 to-orange-500',
             };
-        case 'completed':
+        case 'Completed':
             return {
                 label: 'Completed',
                 bg: 'bg-emerald-50',

@@ -55,7 +55,7 @@ export const doctorDashboardService = {
         return response.data.data;
     },
     getCaseRequestsByDoctor: async (doctorId: string, page: number = 1, pageSize: number = 10): Promise<PaginatedRequests> => {
-        const response = await api.get(`/CaseRequests/doctor/${doctorId}`, { params: { page, pageSize } });
+        const response = await api.get(`/CaseRequests/doctor/${doctorId}`, { params: { page, pageSize ,sort:"desc" } });
         return response.data.data;
     },
     getCaseRequestById: async (id: string): Promise<CaseRequest> => {

@@ -20,14 +20,18 @@ export default function PendingRequestSection({ requestStatus, cancelLoading, on
                     </p>
                 </div>
             </div>
-            <button
-                onClick={() => setIsModalOpen(true)}
-                disabled={cancelLoading}
-                className="my-btn-danger w-full py-3 group"
-            >
-                <XCircle size={15} className="group-hover:scale-110 transition-transform" />
-                Cancel Request
-            </button>
+            {
+                requestStatus === "Pending" && (
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        disabled={cancelLoading}
+                        className="my-btn-danger w-full py-3 group"
+                    >
+                        <XCircle size={15} className="group-hover:scale-110 transition-transform" />
+                        Cancel Request
+                    </button>
+                )
+            }
             <ActionModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

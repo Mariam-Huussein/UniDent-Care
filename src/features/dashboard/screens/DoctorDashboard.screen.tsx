@@ -14,6 +14,7 @@ import {
     CaseRequest,
     PaginatedRequests,
 } from "../services/doctorDashboardService";
+import Link from "next/link";
 
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -228,7 +229,14 @@ export default function DoctorDashboardScreen() {
                                         className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
                                     >
                                         <td className="px-6 py-4 font-medium text-slate-900 dark:text-white">
-                                            {req.patientName || "N/A"}
+                                            <Link
+                                                href={`/cases/${req.patientCasePublicId}`}
+                                                className="group flex items-center gap-2 text-slate-900 dark:text-white hover:text-blue-600 transition-colors"
+                                            >
+                                                <span className="hover:underline">
+                                                    {req.patientName || "Unknown Patient"}
+                                                </span>
+                                            </Link>
                                         </td>
                                         <td className="px-6 py-4 text-slate-600 dark:text-slate-300">
                                             {req.caseName}
