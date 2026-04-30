@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Send, Loader2, Bot, User, Paperclip, CheckCircle2, X, Sparkles, Stethoscope
+  Send, Loader2, Bot, User, Paperclip, CheckCircle2, X, Sparkles, Stethoscope, RefreshCcw
 } from "lucide-react";
 import { RootState } from "@/store";
 import { createCaseAi } from "@/features/cases/services/caseService";
@@ -25,6 +25,7 @@ interface DisplayMessage {
   sender: "bot" | "user";
   content: string;
   isDiagnosis?: boolean;
+  canRetry?: boolean;
 }
 
 // ─────────────────────────────────────────────
@@ -43,6 +44,7 @@ export default function AddCaseChatbot() {
     submitting:  { en: "Submitting your case...", ar: "جاري إرسال الحالة..." },
     success:     { en: "Case submitted successfully!", ar: "تم إرسال الحالة بنجاح!" },
     error:       { en: "Something went wrong. Please try again.", ar: "حدث خطأ. يرجى المحاولة مرة أخرى." },
+    retry:       { en: "Retry", ar: "إعادة المحاولة" },
     redirecting: { en: "Redirecting...", ar: "جاري التحويل..." },
     placeholder: { en: "Describe your dental symptoms...", ar: "صف أعراض أسنانك..." },
     send:        { en: "Send", ar: "إرسال" },
@@ -92,25 +94,67 @@ export default function AddCaseChatbot() {
   }, []);
 
   // ── Send user message ─────────────────────
-  const handleSend = async () => {
-    if (!inputText.trim() || isTyping || isSubmitting || completed) return;
-    const userText = inputText.trim();
-    setInputText("");
-
-    // Add user message to display
-    setMessages(prev => [...prev, { id: Date.now() + "_u", sender: "user", content: userText }]);
-
-    // Update chat history
-    const newHistory: ChatMessage[] = [...chatHistory, { role: "USER", content: userText }];
-    setChatHistory(newHistory);
+  const handleSend = async (retryText?: string) => {
+    const isRetry = typeof retryText === 'string';
+    const textToSend = isRetry ? retryText : inputText.trim();
+    console.log("handleSend triggered with:", { textToSend, retryText, isTyping, isSubmitting, completed });
+    
+    if ((!isRetry && !textToSend) || isTyping || isSubmitting || completed) {
+      console.log("handleSend returned early due to condition");
+      return;
+    }
+    
+    // Prepare history for AI
+    let historyForAI: ChatMessage[] = [...chatHistory];
+    
+    if (isRetry) {
+      // If it's a retry, we use the history as it was BEFORE the failure
+      // (The failure bot message is usually the last one, we remove it to retry the user message)
+      if (historyForAI.length > 0 && historyForAI[historyForAI.length - 1].role === "MODEL") {
+        historyForAI.pop();
+      }
+    } else {
+      // Normal send: update display and history
+      setInputText("");
+      setMessages(prev => [...prev, { id: Date.now() + "_u", sender: "user", content: textToSend }]);
+      
+      const userMsg: ChatMessage = { role: "USER", content: textToSend };
+      historyForAI.push(userMsg);
+      setChatHistory(historyForAI);
+    }
 
     // Call AI
+    console.log("Calling AI with history:", historyForAI);
     setIsTyping(true);
     try {
-      const aiResponse = await chatWithAI(newHistory);
-      const updatedHistory: ChatMessage[] = [...newHistory, { role: "MODEL", content: aiResponse }];
+      const aiResponse = await chatWithAI(historyForAI);
+      const responseString = typeof aiResponse === 'string' ? aiResponse : JSON.stringify(aiResponse);
+      console.log("AI Response received:", responseString);
+      
+      const isServerBusy = responseString.includes("ضغط") || 
+                           responseString.includes("السيرفر") || 
+                           responseString.includes("دقيقة");
+
+      const updatedHistory: ChatMessage[] = [...historyForAI, { role: "MODEL", content: responseString }];
       setChatHistory(updatedHistory);
-      setMessages(prev => [...prev, { id: Date.now() + "_b", sender: "bot", content: aiResponse }]);
+      setMessages(prev => {
+        if (isRetry && prev.length > 0 && prev[prev.length - 1].sender === "bot") {
+          const newMessages = [...prev];
+          newMessages[newMessages.length - 1] = {
+            id: Date.now() + "_b",
+            sender: "bot",
+            content: responseString,
+            canRetry: isServerBusy
+          };
+          return newMessages;
+        }
+        return [...prev, { 
+          id: Date.now() + "_b", 
+          sender: "bot", 
+          content: responseString,
+          canRetry: isServerBusy
+        }];
+      });
     } catch (err: any) {
       toast.error(err.message || t(tUI.error));
     } finally {
@@ -254,6 +298,46 @@ export default function AddCaseChatbot() {
                   <div className={`text-sm sm:text-[15px] font-medium leading-relaxed whitespace-pre-wrap ${msg.isDiagnosis ? "text-emerald-800 dark:text-emerald-200" : ""}`}>
                     {msg.content}
                   </div>
+
+                  {(msg.canRetry || msg.content.includes("ضغط") || msg.content.includes("السيرفر")) && (
+                    <button
+                      onClick={() => {
+                        console.log("Attempting retry. History:", chatHistory, "Messages:", messages);
+                        
+                        // 1. Try to find in chatHistory
+                        let msgToRetry = [...chatHistory]
+                          .reverse()
+                          .find(h => h.role?.toUpperCase() === "USER" && h.content?.trim())?.content;
+                        
+                        // 2. Fallback to messages state if history is empty
+                        if (!msgToRetry) {
+                          msgToRetry = [...messages]
+                            .reverse()
+                            .find(m => m.sender === "user" && m.content?.trim())?.content;
+                        }
+
+                        // 3. Fallback to current input if nothing else found
+                        if (!msgToRetry) {
+                          msgToRetry = inputText.trim();
+                        }
+
+                        console.log("Final message selected for retry:", msgToRetry);
+                        
+                        if (msgToRetry) {
+                          setIsTyping(false);
+                          setTimeout(() => handleSend(msgToRetry), 50);
+                        } else {
+                          console.log("No message found to retry, sending empty string as fallback.");
+                          setIsTyping(false);
+                          setTimeout(() => handleSend(""), 50);
+                        }
+                      }}
+                      className="mt-3 flex items-center gap-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl transition-all shadow-md shadow-indigo-500/20 active:scale-95"
+                    >
+                      <RefreshCcw size={14} /> 
+                      {t(tUI.retry)}
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>
