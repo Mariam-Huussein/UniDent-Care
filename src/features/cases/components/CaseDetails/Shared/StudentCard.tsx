@@ -15,13 +15,13 @@ export default function StudentCard({ student, status }: { student: NonNullable<
                 <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-start">
                         <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate pr-2">{student.name}</p>
-                        {status === "completed" && (
+                        {status === "Completed" && (
                             <span className="shrink-0 text-[9px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded uppercase tracking-wider">Completed</span>
                         )}
-                        {status === "in-progress" && (
+                        {status === "InProgress" && (
                             <span className="shrink-0 text-[9px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded uppercase tracking-wider">In Progress</span>
                         )}
-                        {status === "diagnosis" && (
+                        {status === "Diagnosis" && (
                             <span className="shrink-0 text-[9px] font-bold text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded uppercase tracking-wider">Diagnosis</span>
                         )}
                     </div>

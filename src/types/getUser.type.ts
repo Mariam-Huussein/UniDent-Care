@@ -39,6 +39,9 @@ export interface PatientData {
     phone: string;
     age: number;
     createAt: string;
+    nationalId?: string;
+    birthDate?: string;
+    gender?: number;
     patientCases: PatientCase[];
 }
 
