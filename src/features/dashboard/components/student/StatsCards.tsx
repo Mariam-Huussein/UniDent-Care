@@ -3,9 +3,6 @@
 import { Briefcase, Clock, Percent } from "lucide-react";
 import { useStudentStats } from "@/features/dashboard/hooks/useStudentStats";
 import { useLanguage } from "@/components/providers/LanguageProvider";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
 import { StatCard } from "@/components/common/StatCard";
 
 export default function StatsCards() {

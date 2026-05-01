@@ -28,19 +28,21 @@
     /* FullCalendar Custom Styles */
     .calendar-container {
         --fc-border-color: rgba(226, 232, 240, 0.6);
-        --fc-button-text-color: #475569;
+        /* --fc-button-text-color: #475569; */
         --fc-button-bg-color: transparent;
         --fc-button-border-color: transparent;
         --fc-button-hover-bg-color: rgba(79, 70, 229, 0.05);
         --fc-event-bg-color: transparent;
         --fc-event-border-color: transparent;
-        --fc-today-bg-color: rgba(79, 70, 229, 0.02);
+        --fc-button-text-color: #4f46e5;
+        --fc-today-bg-color: rgba(79, 70, 229, 0.05);
     }
 
     .dark .calendar-container {
-        --fc-border-color: rgba(30, 41, 59, 0.5);
-        --fc-button-text-color: #cbd5e1;
         --fc-button-hover-bg-color: rgba(79, 70, 229, 0.15);
+        --fc-border-color: rgba(255, 255, 255, 0.1) !important;
+        --fc-button-text-color: #818cf8;
+        --fc-today-bg-color: rgba(129, 140, 248, 0.1);
     }
 
     .calendar-container .fc {
@@ -50,7 +52,7 @@
 
     .calendar-container .fc-theme-standard td,
     .calendar-container .fc-theme-standard th {
-        border: 1px solid rgba(226, 232, 240, 0.3) !important;
+        border: 1px solid var(--fc-border-color) !important;
     }
 
     .calendar-container .fc-scrollgrid {
@@ -58,15 +60,20 @@
     }
 
     .calendar-container .fc-col-header-cell {
+        background-color: transparent !important;
         padding: 12px 0;
         font-size: 0.85rem;
-        color: #94a3b8;
-        /* slate-400 */
+        color: #64748b !important;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         border-bottom: 1px solid var(--fc-border-color) !important;
         border-inline: none !important;
         border-top: none !important;
+    }
+
+    .dark .calendar-container .fc-col-header-cell {
+        color: #94a3b8 !important;
+        background-color: rgba(255, 255, 255, 0.02) !important;
     }
 
     .calendar-container .fc-event {
@@ -77,7 +84,6 @@
         background-color: rgba(79, 70, 229, 0.1) !important;
         border: none !important;
         border-left: 3px solid #4f46e5 !important;
-        /* indigo-600 */
         margin: 2px;
         padding: 2px 4px;
     }
@@ -94,25 +100,29 @@
     }
 
     .calendar-container .fc-toolbar {
-        background: rgba(248, 250, 252, 0.8);
+        background: rgba(248, 250, 252, 0.5);
         padding: 1rem;
         border-radius: 12px;
         margin-bottom: 1.5rem !important;
-        border: 1px solid rgba(226, 232, 240, 0.5);
+        border: 1px solid var(--fc-border-color);
     }
 
     .dark .calendar-container .fc-toolbar {
-        background: rgba(30, 41, 59, 0.4);
+        background: rgba(30, 41, 59, 0.4) !important;
         border-color: rgba(71, 85, 105, 0.3);
     }
 
     .calendar-container .fc-toolbar-title {
         font-size: 1.25rem !important;
         font-weight: 800 !important;
-        color: #1e293b;
+        color: #1e293b !important;
         letter-spacing: -0.02em;
         position: relative;
         padding: 0.2rem 1rem;
+    }
+
+    .dark .calendar-container .fc-toolbar-title {
+        color: #f1f5f9 !important;
     }
 
     .calendar-container .fc-toolbar-title::after {
@@ -132,13 +142,15 @@
     }
 
     .calendar-container .fc-daygrid-day-number {
-        color: #475569;
+        color: #475569 !important;
+        padding: 8px !important;
+        text-decoration: none !important;
         font-weight: 500;
         padding: 8px !important;
     }
 
     .dark .calendar-container .fc-daygrid-day-number {
-        color: #94a3b8;
+        color: #cbd5e1 !important;
     }
 
     /* تصميم الزراير (Month, Week, Today) */
@@ -146,14 +158,15 @@
         border-radius: 8px !important;
         font-weight: 600 !important;
         padding: 6px 12px !important;
-        color: #4f46e5 !important;
+        color: #a5b4fc !important;
         font-size: 0.85rem !important;
         background: transparent !important;
         border: none !important;
     }
 
     .calendar-container .fc-button-primary:not(:disabled).fc-button-active {
-        background-color: rgba(79, 70, 229, 0.1) !important;
+        background-color: rgba(129, 140, 248, 0.2) !important;
+        color: #fff !important;
     }
 }
 
