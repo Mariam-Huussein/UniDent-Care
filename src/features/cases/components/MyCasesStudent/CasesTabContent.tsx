@@ -28,14 +28,14 @@ const mapStudentCaseToCaseItem = (item: StudentCaseItem): CaseItem => ({
     patientId: item.patientId,
     patientName: item.patientName,
     patientAge: item.patientAge,
-    caseType: item.diagnosisdto ? { publicId: "", name: item.diagnosisdto.caseType, description: "" } : null,
+    caseType: item.diagnoses?.[0] ? { publicId: "", name: item.diagnoses[0].caseType, description: "" } : null,
     status: item.status,
     createAt: item.createAt,
     totalSessions: item.totalSessions,
     pendingRequests: item.pendingRequests,
     imageUrls: item.imageUrls,
     gender: undefined,
-    diagnosisdto: item.diagnosisdto ? [item.diagnosisdto] : null,
+    diagnoses: item.diagnoses || null,
 });
 
 export function CasesTabContent({
@@ -60,13 +60,13 @@ export function CasesTabContent({
     },
     {
       header: "Diagnosis",
-      accessor: "diagnosisdto",
+      accessor: "diagnoses",
       render: (_, row) => {
           const sc = getCaseStatusConfig(row.processStatus || row.status);
           const StatusIcon = sc.icon || Activity;
           return (
               <div className="flex flex-col gap-1.5 items-start">
-                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnosisdto?.caseType || "Pending"}</span>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnoses?.[0]?.caseType || "Pending"}</span>
                   <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
                       <StatusIcon size={10} className={sc.text} />
                       {row.processStatus || sc.label}

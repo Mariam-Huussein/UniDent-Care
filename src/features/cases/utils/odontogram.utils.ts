@@ -21,21 +21,25 @@ export function buildConditions(teeth: ToothData[]): ToothConditionGroup[] {
 }
 
 export function buildDiagnosedTeethMap(
-    diagnosisdto: DiagnosisDto | null | undefined,
+    diagnoses: DiagnosisDto[] | null | undefined,
     assignedStudentName?: string | null,
     assignedDoctorName?: string | null
 ): Map<number, ToothPanelData> {
     const map = new Map<number, ToothPanelData>();
-    if (!diagnosisdto) return map;
-    for (const num of diagnosisdto.teethNumbers ?? []) {
-        map.set(num, {
-            toothNumber: num,
-            caseType: diagnosisdto.caseType,
-            diagnosisStage: diagnosisdto.diagnosisStage,
-            notes: diagnosisdto.notes,
-            assignedStudentName: assignedStudentName ?? null,
-            assignedDoctorName: assignedDoctorName ?? null,
-        });
-    }
+    if (!diagnoses || !Array.isArray(diagnoses)) return map;
+
+    diagnoses.forEach(diag => {
+        for (const num of diag.teethNumbers ?? []) {
+            map.set(num, {
+                toothNumber: num,
+                caseType: diag.caseType,
+                diagnosisStage: diag.diagnosisStage,
+                notes: diag.notes,
+                assignedStudentName: assignedStudentName ?? null,
+                assignedDoctorName: assignedDoctorName ?? null,
+            });
+        }
+    });
+
     return map;
 }

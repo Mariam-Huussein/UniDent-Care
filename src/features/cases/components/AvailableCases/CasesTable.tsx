@@ -91,7 +91,7 @@ export default function CasesTable({
 
     const tableData = cases.map((c) => ({
         ...c,
-        caseType: c.diagnosisdto?.map((d) => d.caseType).join(", ") || "Uncategorized",
+        caseType: c.diagnoses?.map((d) => d.caseType).join(", ") || "Uncategorized",
         gender: c.gender !== undefined ? getGenderLabel(c.gender) : "Unknown",
         createAt: new Date(c.createAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
         status: (

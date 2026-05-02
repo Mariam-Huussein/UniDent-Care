@@ -73,7 +73,7 @@ export interface PatientCase {
     pendingRequests: number;
     assignedStudentId: string | null;
     assignedDoctorId: string | null;
-    diagnosisdto: DiagnosisDto | null;
+    diagnoses: DiagnosisDto[] | null;
     createdById: string;
     createdByRole: string;
     userFlags: UserFlags;

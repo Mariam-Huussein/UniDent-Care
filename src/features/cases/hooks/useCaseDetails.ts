@@ -44,13 +44,13 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     patientAge: apiData.patientAge,
                     status: mappedStatus as CaseStatus,
                     processStatus: apiData.processStatus || "",
-                    caseType: apiData.diagnosisdto?.caseType || "Unknown",
+                    caseType: apiData.diagnoses?.[0]?.caseType || "Unknown",
                     isPublic: apiData.isPublic,
                     universityId: apiData.universityId,
                     universityName: apiData.universityName,
                     createdAt: apiData.createAt,
                     imageUrls: apiData.imageUrls || [],
-                    description: apiData.diagnosisdto?.notes || undefined,
+                    description: apiData.diagnoses?.[0]?.notes || undefined,
                     phone: apiData.phone,
                     city: apiData.city,
                     nationalId: apiData.nationalId,
@@ -65,7 +65,7 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     assignedDoctorId: apiData.assignedDoctorId || null,
 
                     // Diagnosis
-                    diagnosisdto: apiData.diagnosisdto || null,
+                    diagnoses: apiData.diagnoses || null,
 
                     // Creator info
                     createdById: apiData.createdById,
@@ -80,10 +80,10 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     medications: [],
                     gender: apiData.gender?.toString() || "Unknown",
                     student: undefined,
-                    teeth: apiData.diagnosisdto?.teethNumbers?.map(num => ({
+                    teeth: apiData.diagnoses?.[0]?.teethNumbers?.map(num => ({
                         number: num,
                         status: 'needs-treatment' as ToothStatus,
-                        notes: apiData.diagnosisdto?.notes || "",
+                        notes: apiData.diagnoses?.[0]?.notes || "",
                     })) || [],
                     timeline: [],
                     progressStep: mappedStatus === 'Completed' ? 4 : mappedStatus === 'InProgress' ? 3 : mappedStatus === 'Diagnosis' ? 2 : 1,

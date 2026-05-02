@@ -54,6 +54,25 @@ export const createCaseAi = (data: {
         });
     }
 
-    return api.post("/Cases/ai/create", formData);
+    return api.post("/Cases/ai/create", formData, {
+        headers: {
+            "X-AI-API-KEY": "this_key_for_ai_created_by_omargamal",
+        },
+    });
 };
-//   Cases/ai/create
+
+export const createDiagnosisAi = (data: {
+    patientCaseId: string;
+    stage: number;
+    caseTypeId: string;
+    notes?: string;
+    createdById?: string;
+    role?: string;
+    teethNumbers?: number[];
+}) => {
+    return api.post("/Diagnoses/ai/create", data, {
+        headers: {
+            "X-AI-API-KEY": "this_key_for_ai_created_by_omargamal",
+        },
+    });
+};

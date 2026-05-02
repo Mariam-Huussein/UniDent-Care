@@ -42,7 +42,7 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {caseData?.caseType} Case
-                        {caseData?.diagnosisdto?.diagnosisStage ? ` · ${caseData.diagnosisdto.diagnosisStage}` : ""}
+                        {caseData?.diagnoses?.[0]?.diagnosisStage ? ` · ${caseData.diagnoses[0].diagnosisStage}` : ""}
                     </p>
                 </div>
             </div>

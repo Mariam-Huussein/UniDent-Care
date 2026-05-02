@@ -18,21 +18,29 @@ export default function Odontogram() {
     const patient = caseData as PatientCase;
 
     // ── Derive from context ────────────────────────────────────────────────
-    const diagnosisdto        = patient?.diagnosisdto ?? null;
+    const diagnoses           = patient?.diagnoses ?? null;
     const status              = patient?.status;
     const readonly            = status !== "Diagnosis";
     const assignedStudentName = studentOwnerData?.data?.fullName ?? null;
     const assignedDoctorName  = doctorOwnerData?.data?.fullName  ?? null;
 
     const teeth: ToothData[] = useMemo(() => {
-        if (!diagnosisdto?.teethNumbers?.length) return [];
-        return diagnosisdto.teethNumbers.map((num) => ({
-            number: num,
-            status: "needs-treatment" as ToothStatus,
-            treatmentType: diagnosisdto.caseType || "",
-            notes: diagnosisdto.notes || "",
-        }));
-    }, [diagnosisdto]);
+        if (!diagnoses || !Array.isArray(diagnoses)) return [];
+        const allTeeth: ToothData[] = [];
+        diagnoses.forEach(diag => {
+            if (diag.teethNumbers?.length) {
+                diag.teethNumbers.forEach(num => {
+                    allTeeth.push({
+                        number: num,
+                        status: "needs-treatment" as ToothStatus,
+                        treatmentType: diag.caseType || "",
+                        notes: diag.notes || "",
+                    });
+                });
+            }
+        });
+        return allTeeth;
+    }, [diagnoses]);
 
     // ── Local state ────────────────────────────────────────────────────────
     const [selected, setSelected]   = useState<ToothDetail[]>([]);
@@ -45,7 +53,7 @@ export default function Odontogram() {
     // ── Derived ────────────────────────────────────────────────────────────
     const isDiagnosisActive = status === "Diagnosis" && !readonly;
     const isUnassigned      = status === "Pending";
-    const hasDiagnosisData  = !!diagnosisdto && (diagnosisdto.teethNumbers?.length ?? 0) > 0;
+    const hasDiagnosisData  = !!diagnoses && diagnoses.length > 0;
     const showRightPanel    = isDiagnosisActive || hasDiagnosisData;
 
     const conditions: ToothConditionGroup[] = useMemo(
@@ -59,8 +67,8 @@ export default function Odontogram() {
     );
 
     const diagnosedTeethMap = useMemo(
-        () => buildDiagnosedTeethMap(diagnosisdto, assignedStudentName, assignedDoctorName),
-        [diagnosisdto, assignedStudentName, assignedDoctorName]
+        () => buildDiagnosedTeethMap(diagnoses, assignedStudentName, assignedDoctorName),
+        [diagnoses, assignedStudentName, assignedDoctorName]
     );
 
     // ── Handlers ───────────────────────────────────────────────────────────
