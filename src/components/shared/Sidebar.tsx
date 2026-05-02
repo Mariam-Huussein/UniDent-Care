@@ -27,13 +27,16 @@ export default function Sidebar() {
         (state: RootState) => state.auth.role
     ) as UserRole | undefined;
 
-    const userRole =
-        roleFromRedux ?? (Cookies.get("user_role") as UserRole);
+    const role = roleFromRedux 
+        ?? (Cookies.get("user_role") as UserRole)
+        ?? (typeof window !== "undefined" ? localStorage.getItem("user_role") as UserRole : null);
 
     if (!mounted) return null;
-    if (!userRole) return null;
+    if (!role) return null;
 
+    const userRole = (role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()) as UserRole;
     const links = NAV_LINKS[userRole];
+
 
     const getLinkName = (englishName: string) => {
         const map: Record<string, string> = {
@@ -54,16 +57,16 @@ export default function Sidebar() {
             {/* Desktop Header & Toggle */}
             <div className={`hidden md:flex items-center px-4 mb-6 relative w-full h-8 ${isExpanded ? 'justify-between' : 'justify-center'}`}>
                 {isExpanded ? (
-                    <Logo 
-                        showText={true} 
-                        iconClassName="w-10 md:w-14" 
+                    <Logo
+                        showText={true}
+                        iconClassName="w-10 md:w-14"
                         textClassName="text-2xl"
                         className="mt-2"
                     />
                 ) : (
-                    <Logo 
-                        showText={false} 
-                        iconClassName="w-8 md:w-12" 
+                    <Logo
+                        showText={false}
+                        iconClassName="w-8 md:w-12"
                         className="w-full justify-center transition-opacity duration-300"
                     />
                 )}

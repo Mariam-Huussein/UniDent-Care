@@ -21,7 +21,11 @@ export default function DashboardRenderer() {
         (state: RootState) => state.auth.role
     );
 
-    const role = roleFromRedux ?? (Cookies.get("user_role") as UserRole);
+    const role = roleFromRedux 
+        ?? (Cookies.get("user_role") as UserRole)
+        ?? (typeof window !== "undefined" ? localStorage.getItem("user_role") as UserRole : null);
+    const normalizedRole = role ? (role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()) as UserRole : "Patient";
+
     const dashboards = {
         Doctor: DoctorDashboardScreen,
         Student: StudentDashboardScreen,
@@ -30,6 +34,6 @@ export default function DashboardRenderer() {
 
     if (!mounted) return null;
 
-    const Dashboard = dashboards[role as UserRole] ?? PatientDashboardScreen;
+    const Dashboard = dashboards[normalizedRole] ?? PatientDashboardScreen;
     return <Dashboard />;
 }

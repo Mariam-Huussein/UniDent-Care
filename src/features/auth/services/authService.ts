@@ -8,13 +8,13 @@ import { StudentSignupPayload } from "../types/studentPayload.Types";
 export const authService = {
     login: async (credentials: LoginRequest): Promise<LoginResponse> => {
         const response = await api.post<LoginResponse>(
-            `/Auth/login`,
+            `/Auth/Login`,
             credentials
         );
         return response.data;
     },
     logout: async (): Promise<void> => {
-        await api.post("/Auth/logout");
+        await api.post("/Auth/Logout");
     },
     forgotPassword: async (email: string): Promise<ApiResponse<string>> => {
         const response = await api.post<ApiResponse<string>>("/Auth/forgot-password", { email })
