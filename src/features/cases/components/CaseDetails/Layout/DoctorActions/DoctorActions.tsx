@@ -6,7 +6,7 @@ import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { PatientCase } from "../../../../types/CaseDetails.types";
 import { approveRequest, rejectRequest } from "@/features/cases/server/caseRequest.action";
 import PendingRequestCard from "./PendingRequestCard";
-import EvaluationCard from "./EvaluationCard";
+// import EvaluationCard from "./EvaluationCard";
 import { useCase } from "@/features/cases/context/CaseContext";
 
 interface DoctorActionsProps {
@@ -113,9 +113,9 @@ export default function DoctorActions({ patient, onRefetch }: DoctorActionsProps
             ) : null}
 
             {/* ── Session needs evaluation ── */}
-            {patient.userFlags?.isAssignedDoctor && patient.hasEvaluatedSession === false && patient.assignedStudentId && (
+            {/* {patient.userFlags?.isAssignedDoctor && patient.hasEvaluatedSession === false && patient.assignedStudentId && (
                 <EvaluationCard />
-            )}
+            )} */}
         </>
     );
 }

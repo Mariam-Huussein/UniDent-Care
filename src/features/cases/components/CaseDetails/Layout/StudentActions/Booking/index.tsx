@@ -15,7 +15,7 @@ import { BookingStepper } from "./parts/Bookingstepper";
 import { StepDate } from "./parts/StepDate";
 import { StepTime } from "./parts/StepTime";
 import { StepLocation } from "./parts/StepLocation";
-import { SessionBookingData } from "@/features/cases/types/Sessions.types";
+import { SessionBookingData } from "@/features/session/types/Sessions.types";
 import { normalizeTime } from "@/features/cases/utils/caseDetailsBooking.utils";
 import { Locale, translations } from "@/features/cases/types/Booking.types";
 

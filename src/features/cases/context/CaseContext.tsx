@@ -4,7 +4,7 @@ import { createContext, useContext, ReactNode, useState, useEffect, useCallback 
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { PatientCase } from "../types/CaseDetails.types";
-import { DoctorRequestItem, SessionItem } from "../types/Sessions.types";
+import { DoctorRequestItem, SessionItem } from "../../session/types/Sessions.types";
 import { getCaseSessions } from "../server/sessions.action";
 import { getDoctorMyCaseRequests } from "../server/caseRequest.action";
 import { getDoctorById, getStudentById } from "@/server/getUsers.action";
@@ -89,10 +89,11 @@ export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }:
     }
   }, [caseId, sessionsPage]);
 
-  // ── Derived: scheduled session ──
-  const scheduledSession = sessions.find(
-    (s) => s.status?.toLowerCase() === "scheduled"
-  ) || null;
+  // ── Derived: scheduled session or latest expired session ──
+  const scheduledSession = sessions.find((s) => {
+    const status = s.status?.toString().toLowerCase();
+    return status === "scheduled" || status === "expired" || status === "3";
+  }) || null;
 
   // ── Helper: find session by ID ──
   const getSessionById = useCallback(
@@ -135,21 +136,21 @@ export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }:
     if (!userId || !role || !caseId) return;
     setInfoOwnerDataLoading(true);
     try {
-        const AssignedDoctorData = assignedDoctorId ? await getDoctorById(assignedDoctorId) : null;
-        setDoctorOwnerData(AssignedDoctorData);
-        
-        const AssignedStudentData = assignedStudentId ? await getStudentById(assignedStudentId) : null;
-        setStudentOwnerData(AssignedStudentData);
-        
-        let CreatedUser: DoctorDataResponse | StudentDataResponse | null = null;
-        if (createdById) {
-            if (createdByRole === "Doctor") {
-                CreatedUser = await getDoctorById(createdById);
-            } else if (createdByRole === "Student") {
-                CreatedUser = await getStudentById(createdById);
-            }
+      const AssignedDoctorData = assignedDoctorId ? await getDoctorById(assignedDoctorId) : null;
+      setDoctorOwnerData(AssignedDoctorData);
+
+      const AssignedStudentData = assignedStudentId ? await getStudentById(assignedStudentId) : null;
+      setStudentOwnerData(AssignedStudentData);
+
+      let CreatedUser: DoctorDataResponse | StudentDataResponse | null = null;
+      if (createdById) {
+        if (createdByRole === "Doctor") {
+          CreatedUser = await getDoctorById(createdById);
+        } else if (createdByRole === "Student") {
+          CreatedUser = await getStudentById(createdById);
         }
-        setCreatorData(CreatedUser);
+      }
+      setCreatorData(CreatedUser);
 
     } catch (err) {
       console.error("Failed to fetch user data:", err);

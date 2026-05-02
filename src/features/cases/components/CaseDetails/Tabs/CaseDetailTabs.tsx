@@ -8,7 +8,6 @@ import { PatientCase } from "../../../types/CaseDetails.types";
 import Odontogram from "../Clinical/Odontogram";
 import ActivityTimeline from "../Tracking/ActivityTimeline";
 import MedicalInfoTab from "./parts/MedicalInfoTab";
-import AssignedStudentTab from "./parts/AssignedStudentTab";
 import BeforeAfterTab from "./parts/BeforeAfterTab";
 import { useCase } from "@/features/cases/context/CaseContext";
 import { getTabsForStatus } from "@/features/cases/utils/CaseDetails.utils";
@@ -71,10 +70,9 @@ export default function PatientDetailTabs() {
                             exit={{ opacity: 0 }}
                             transition={{ duration: 0.2 }}
                         >
-                            {activeTab === "student" && patient.student && <AssignedStudentTab student={patient.student} />}
                             {activeTab === "odontogram" && <Odontogram />}
                             {activeTab === "medical" && <MedicalInfoTab medicalHistory={patient.medicalHistory} medications={patient.medications} />}
-                            {activeTab === "timeline" && <ActivityTimeline events={patient.timeline} />}
+                            {activeTab === "timeline" && <ActivityTimeline caseId={patient.id} />}
 
                             {activeTab === "beforeAfter" && (
                                 <BeforeAfterTab

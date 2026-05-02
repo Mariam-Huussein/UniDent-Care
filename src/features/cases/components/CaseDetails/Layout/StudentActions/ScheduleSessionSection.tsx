@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { CalendarPlus, Play, CalendarClock, Trash2 } from "lucide-react";
 import ActionModal from "@/components/ui/ActionModal";
 import SessionBookingDialog from "./Booking";
-import { SessionBookingData, SessionItem } from "../../../../types/Sessions.types";
+import { SessionBookingData, SessionItem } from "../../../../../session/types/Sessions.types";
 
 interface Props {
     showForm: boolean;
@@ -42,6 +42,16 @@ export default function ScheduleSessionSection({
 }: Props) {
     const hasScheduledSession = !!scheduledSession;
 
+    const status = scheduledSession?.status?.toString().toLowerCase();
+    const isExpired = status === "expired" || status === "3" || (() => {
+        if (!scheduledSession) return false;
+        const sd = new Date(scheduledSession.scheduledAt);
+        sd.setHours(0, 0, 0, 0);
+        const td = new Date();
+        td.setHours(0, 0, 0, 0);
+        return sd.getTime() < td.getTime();
+    })();
+
     const formatSessionTime = (iso: string) => {
         const d = new Date(iso);
         return d.toLocaleString("en-US", {
@@ -55,7 +65,7 @@ export default function ScheduleSessionSection({
 
     return (
         <>
-            {hasScheduledSession ? (
+            {hasScheduledSession && !isExpired ? (
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -94,6 +104,48 @@ export default function ScheduleSessionSection({
                         >
                             <Trash2 size={13} />
                             {locale === "ar" ? "إلغاء الجلسة" : "Cancel Session"}
+                        </button>
+
+                        <button
+                            disabled={startNowLoading}
+                            onClick={() => onToggleStartNowModal?.(true)}
+                            className="my-btn flex items-center justify-center gap-1.5 py-2.5 text-xs group cursor-pointer"
+                        >
+                            <Play size={13} className="group-hover:scale-110 transition-transform" />
+                            {locale === "ar" ? "ابدأ الآن" : "Start Now"}
+                        </button>
+                    </div>
+                </motion.div>
+            ) : hasScheduledSession && isExpired ? (
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="rounded-2xl border border-rose-200/60 dark:border-rose-800/50 bg-rose-50/70 dark:bg-rose-900/10 p-4 space-y-3"
+                >
+                    {/* Session badge */}
+                    <p className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wide flex items-center gap-1.5">
+                        <CalendarClock size={13} />
+                        {locale === "ar" ? "جلسة منتهية الصلاحية" : "Session Expired"}
+                    </p>
+
+                    {/* Session time */}
+                    <div className="space-y-1">
+                        <div className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+                            <CalendarClock size={14} className="text-rose-500 shrink-0" />
+                            <span className="font-medium line-through opacity-70">{formatSessionTime(scheduledSession.scheduledAt)}</span>
+                        </div>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                        <button
+                            disabled={sessionLoading}
+                            onClick={() => onToggleForm(true)}
+                            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 text-xs font-semibold py-2.5 px-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
+                        >
+                            <CalendarPlus size={13} />
+                            {locale === "ar" ? "جدولة جديدة" : "Reschedule"}
                         </button>
 
                         <button

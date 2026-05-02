@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
-import ProgressTracker from "../Tracking/ProgressTracker";
+import ProgressTracker from "../../../../session/components/SessionTimeLine/ProgressTracker";
 import InfoCard from "../Shared/InfoCard";
 import StudentActions from "./StudentActions";
 import DoctorActions from "./DoctorActions/DoctorActions";
@@ -84,19 +84,32 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                 {patient.assignedDoctorId && doctorOwnerData && (
                     <InfoCard icon={Stethoscope} label="Supervising Doctor" value={doctorOwnerData?.data?.fullName || "Unknown"} color="text-cyan-500" />
                 )}
-                {scheduledSession && (
-                    <InfoCard
-                        icon={Clock}
-                        label="Next Session"
-                        value={new Date(scheduledSession.scheduledAt).toLocaleString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
-                        color="text-blue-500"
-                    />
-                )}
+                {scheduledSession && (() => {
+                    const status = scheduledSession.status?.toString().toLowerCase();
+                    const isExpired = status === "expired" || status === "3" || (() => {
+                        const sd = new Date(scheduledSession.scheduledAt);
+                        sd.setHours(0, 0, 0, 0);
+                        const td = new Date();
+                        td.setHours(0, 0, 0, 0);
+                        return sd.getTime() < td.getTime();
+                    })();
+
+                    if (isExpired) return null;
+
+                    return (
+                        <InfoCard
+                            icon={Clock}
+                            label="Next Session"
+                            value={new Date(scheduledSession.scheduledAt).toLocaleString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                            color="text-blue-500"
+                        />
+                    );
+                })()}
             </div>
 
             {/* Treatment Progress */}
@@ -111,7 +124,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                 <StudentActions patient={patient} onRefetch={onRefetch} />
             )}
 
-            {(patient.userFlags?.isAssignedDoctor || patient.userFlags?.hasRequest ) && role === "Doctor" && (
+            {(patient.userFlags?.isAssignedDoctor || patient.userFlags?.hasRequest) && role === "Doctor" && (
                 <DoctorActions patient={patient} onRefetch={onRefetch} />
             )}
 

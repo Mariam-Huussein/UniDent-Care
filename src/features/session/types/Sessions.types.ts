@@ -29,7 +29,7 @@ export type CaseSessionsResponse = ApiResponse<SessionsMetaData>;
 
 export interface UpdateSessionStatusBody {
     sessionId: string;
-    status: string;
+    status: string | number;
 }
 
 export type UpdateSessionStatusResponse = ApiResponse<boolean>;
@@ -78,29 +78,53 @@ export interface SessionBookingData {
     location: string;
 }
 
+/* ═══ Session Media ═══ */
+export interface SessionMediaItem {
+    id: string;
+    sessionId: string;
+    noteId: string | null;
+    mediaUrl: string;
+    createAt: string;
+}
+
+export type AddSessionMediaResponse = ApiResponse<SessionMediaItem>;
+export type GetSessionMediaResponse = ApiResponse<SessionMediaItem[]>;
+
 /* ═══ Session Notes ═══ */
 export interface SessionNoteBody {
     sessionId: string;
     note: string;
-    isPrivate: boolean;
-    imageUrl?: string;
 }
 
-export type AddSessionNoteResponse = ApiResponse<string>;
-
-export type GetSessionNotesResponse = ApiResponse<GetSessionNoteItem[]>;
-
-/** Local representation of a note added during the session */
+/** Full note item as returned by the backend */
 export interface SessionNoteItem {
     id: string;
+    sessionId: string;
     note: string;
-    isPrivate: boolean;
-    imageUrl?: string;
-    createdAt: string;
+    createAt: string;
+    medias: SessionMediaItem[];
 }
-export interface GetSessionNoteItem {
-    id: string;
+
+export type AddSessionNoteResponse = ApiResponse<SessionNoteItem>;
+export type GetSessionNotesResponse = ApiResponse<SessionNoteItem[]>;
+export type AddNoteMediaResponse = ApiResponse<SessionMediaItem>;
+export type GetNoteMediaResponse = ApiResponse<SessionMediaItem[]>;
+
+/* ═══ Session Evaluation ═══ */
+export interface EvaluateSessionBody {
+    grade: number;
     note: string;
-    imageUrl?: string;
-    createdAt: string;
+    isFinalSession: boolean;
+}
+
+export type EvaluateSessionResponse = ApiResponse<boolean>;
+
+/** Extended session item that includes evaluation data returned by the timeline endpoint */
+export interface TimelineSessionItem extends SessionItem {
+    grade: number;
+    doctorNote: string | "";
+    evaluteDoctorId: string | null;
+    evaluteDoctorName: string | null;
+    updateAt: string;
+    notes: SessionNoteItem[];
 }

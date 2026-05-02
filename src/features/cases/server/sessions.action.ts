@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/types/api";
-import { CaseSessionsResponse, CreateSessionBody, CreateSessionResponse, DoctorRequestsResponse, UpdateSessionStatusBody, UpdateSessionStatusResponse } from "../types/Sessions.types";
+import { CaseSessionsResponse, CreateSessionBody, CreateSessionResponse, DoctorRequestsResponse, EvaluateSessionBody, EvaluateSessionResponse, UpdateSessionStatusBody, UpdateSessionStatusResponse } from "../../session/types/Sessions.types";
 import axiosInstance from "@/utils/api";
 
 export async function createSession(body: CreateSessionBody): Promise<CreateSessionResponse> {
@@ -84,5 +84,22 @@ export async function cancelSession(sessionId: string): Promise<ApiResponse<bool
             throw new Error(validationErrors.join(", "));
         }
         throw new Error(data?.message || error.message || "Failed to cancel session");
+    }
+}
+
+export async function evaluateSession(
+    sessionId: string,
+    body: EvaluateSessionBody
+): Promise<EvaluateSessionResponse> {
+    try {
+        const response = await axiosInstance.post(`/Sessions/${sessionId}/evaluate`, body);
+        return response.data;
+    } catch (error: any) {
+        const data = error.response?.data;
+        const validationErrors = data?.error?.errors;
+        if (validationErrors?.length) {
+            throw new Error(validationErrors.join(", "));
+        }
+        throw new Error(data?.message || error.message || "Failed to evaluate session");
     }
 }
