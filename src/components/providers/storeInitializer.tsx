@@ -9,13 +9,13 @@ import { setUserFromReload } from "@/features/auth/store/authSlice";
 export default function StoreInitializer() {
   const dispatch = useDispatch();
   const hasInitialized = useRef(false);
-  
+
   useEffect(() => {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
-    const token = Cookies.get("token");
-    const role = Cookies.get("user_role");
-    const publicId = Cookies.get("user_id");
+    const token = Cookies.get("token") || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+    const role = Cookies.get("user_role") || (typeof window !== "undefined" ? localStorage.getItem("user_role") : null);
+    const publicId = Cookies.get("user_id") || (typeof window !== "undefined" ? localStorage.getItem("user_id") : null);
     if (!token || !role || !publicId) return;
 
     hasInitialized.current = true;

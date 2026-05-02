@@ -29,28 +29,37 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             state.uinversalId = action.payload.universityId;
 
+            const isProd = process.env.NODE_ENV === "production";
             Cookies.set("token", action.payload.token, {
                 expires: 7,
-                secure: true,
+                secure: isProd,
                 sameSite: "strict",
             });
 
             Cookies.set("user_id", action.payload.publicId, {
                 expires: 7,
-                secure: true,
+                secure: isProd,
                 sameSite: "strict",
             });
 
             Cookies.set("university_id", action.payload.universityId, {
                 expires: 7,
-                secure: true,
+                secure: isProd,
                 sameSite: "strict",
             });
 
             Cookies.set("user_role", action.payload.roles[0], {
                 expires: 7,
+                secure: isProd,
                 sameSite: "strict",
             });
+
+            if (typeof window !== "undefined") {
+                localStorage.setItem("token", action.payload.token);
+                localStorage.setItem("user_id", action.payload.publicId);
+                localStorage.setItem("university_id", action.payload.universityId);
+                localStorage.setItem("user_role", action.payload.roles[0]);
+            }
         },
 
         setUserFromReload: (
@@ -73,6 +82,12 @@ const authSlice = createSlice({
             Cookies.remove("user_role");
             Cookies.remove("user_id");
             Cookies.remove("university_id");
+            if (typeof window !== "undefined") {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user_role");
+                localStorage.removeItem("user_id");
+                localStorage.removeItem("university_id");
+            }
             window.location.href = "/login";
         },
     },
