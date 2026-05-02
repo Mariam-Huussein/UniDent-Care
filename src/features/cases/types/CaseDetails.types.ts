@@ -1,6 +1,7 @@
-import { DiagnosisDto, UserFlags } from "./caseCardProps.types";
+import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
+import { UserFlags } from "./caseCardProps.types";
 
-export type CaseStatus = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled' | 'UnderReview' | 'Rejected' | 'Diagnosis' ;
+export type CaseStatus = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled' | 'UnderReview' | 'Rejected';
 
 export type ToothStatus = 'healthy' | 'needs-treatment' | 'in-progress' | 'treated';
 export type DiagnosisStage = 'BasicClinic' | 'AI' | '';
@@ -11,13 +12,6 @@ export interface ToothData {
     treatmentType?: string;
     caseTypeId?: string;
     notes?: string;
-}
-
-export interface TimelineEvent {
-    id: string;
-    timestamp: string;
-    description: string;
-    type: 'info' | 'treatment' | 'diagnosis' | 'note';
 }
 
 export interface SessionInfo {
@@ -43,7 +37,7 @@ export interface PatientCase {
     patientName: string;
     patientAge: number;
     phone?: string;
-    description?: string;
+    description: string | null;
     patientAvatar?: string;
     status: CaseStatus;
     processStatus: string;
@@ -60,10 +54,8 @@ export interface PatientCase {
     beforeImageUrls?: string[];
     afterImageUrls?: string[];
     student?: StudentAssignment;
-    teeth: ToothData[];
-    timeline: TimelineEvent[];
     sessions: SessionInfo[];
-    progressStep: number; // 0=diagnosis, 1=treatment, 2=follow-up
+    progressStep: string; // 0=diagnosis, 1=treatment, 2=follow-up
     treatmentSummary?: string;
     feedbackNotes?: string;
     createdAt: string;
@@ -73,7 +65,7 @@ export interface PatientCase {
     pendingRequests: number;
     assignedStudentId: string | null;
     assignedDoctorId: string | null;
-    diagnosisdto: DiagnosisDto | null;
+    diagnoses: DiagnosisDto[];
     createdById: string;
     createdByRole: string;
     userFlags: UserFlags;

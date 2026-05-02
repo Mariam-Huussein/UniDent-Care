@@ -11,7 +11,7 @@ import { DoctorSearchResult } from "@/features/cases/types/caseCardProps.types";
 interface SendRequestModalProps {
     caseId: string;
     patientName: string;
-    caseType?: string;
+    caseType?: string | null;
     onClose: () => void;
 }
 

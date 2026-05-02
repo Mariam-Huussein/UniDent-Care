@@ -15,7 +15,6 @@ interface CaseDetailsTopBarProps {
 export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDetailsTopBarProps) {
     const router = useRouter();
     const cfg = getPatientStatusConfig(currentStatus);
-    const {caseData} = useCase();
     return (
         <motion.div
             initial={{ opacity: 0, y: -12 }}

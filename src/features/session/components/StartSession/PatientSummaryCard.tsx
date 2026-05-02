@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { PatientCase } from "@/features/cases/types/CaseDetails.types";
 import InfoCard from "@/features/cases/components/CaseDetails/Shared/InfoCard";
-import ProgressTracker from "@/features/session/components/SessionTimeLine/ProgressTracker";
 import { useCase } from "@/features/cases/context/CaseContext";
+import ProgressTracker from "@/features/cases/components/CaseDetails/Layout/ProgressTracker";
 
 interface PatientSummaryCardProps {
     patient: PatientCase;
@@ -42,7 +42,7 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {caseData?.caseType} Case
-                        {caseData?.diagnosisdto?.diagnosisStage ? ` · ${caseData.diagnosisdto.diagnosisStage}` : ""}
+                        {caseData?.diagnoses?.[0]?.stage ? ` · ${caseData.diagnoses[0].stage}` : ""}
                     </p>
                 </div>
             </div>
@@ -60,7 +60,7 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
 
             {/* Treatment Progress */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80">
-                <ProgressTracker currentStep={patient.progressStep} processStatus={patient.processStatus} />
+                <ProgressTracker status={patient?.status} createdByRole={patient?.createdByRole} diagnoses={patient?.diagnoses} />
             </div>
         </motion.div>
     );

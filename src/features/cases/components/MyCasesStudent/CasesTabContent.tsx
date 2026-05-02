@@ -3,7 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, User, GraduationCap, Calendar } from "lucide-react";
 import Link from "next/link";
-import { StudentCaseItem, CaseItem } from "../../types/caseCardProps.types";
+import { CaseItem } from "../../types/caseCardProps.types";
+import { StudentDashboardCaseItem } from "../../types/studentDashboard.types";
 import DataTable, { Column } from "@/components/common/DataTable";
 import Pagination from "@/components/common/pagination";
 import CaseCard from "../CaseCard";
@@ -12,7 +13,7 @@ import { MyCasesEmptyState } from "./MyCasesEmptyState";
 import { getCaseStatusConfig } from "./getCaseStatusConfig";
 
 interface CasesTabContentProps {
-    cases: StudentCaseItem[];
+    cases: StudentDashboardCaseItem[];
     casesLoading: boolean;
     caseType: string;
     setCaseType: (val: string) => void;
@@ -23,26 +24,30 @@ interface CasesTabContentProps {
     setCasesViewMode: (val: "grid" | "table") => void;
 }
 
-const mapStudentCaseToCaseItem = (item: StudentCaseItem): CaseItem => ({
-    id: item.id,
-    patientId: item.patientId,
-    patientName: item.patientName,
-    patientAge: item.patientAge,
-    caseType: item.diagnosisdto ? { publicId: "", name: item.diagnosisdto.caseType, description: "" } : null,
-    status: item.status,
-    createAt: item.createAt,
-    totalSessions: item.totalSessions,
-    pendingRequests: item.pendingRequests,
-    imageUrls: item.imageUrls,
-    gender: undefined,
-    diagnosisdto: item.diagnosisdto ? [item.diagnosisdto] : null,
-});
+const mapStudentCaseToCaseItem = (item: StudentDashboardCaseItem): CaseItem => {
+    const firstDiagnosis = item.diagnoses?.[0];
+    return {
+        id: item.id,
+        patientId: item.patientId,
+        patientName: item.patientName,
+        patientAge: item.patientAge,
+        caseType: firstDiagnosis ? { publicId: firstDiagnosis.caseTypeId, name: firstDiagnosis.caseTypeName || "", description: "" } : null,
+        status: item.status,
+        createAt: item.createAt,
+        totalSessions: item.totalSessions,
+        pendingRequests: item.pendingRequests,
+        imageUrls: item.imageUrls,
+        gender: undefined,
+        // The user manually modified CaseItem's diagnosisdto to be an array of DiagnosisStage
+        diagnosisdto: item.diagnoses ? item.diagnoses.map(d => d.stage as any) : null,
+    };
+};
 
 export function CasesTabContent({
     cases, casesLoading, caseType, setCaseType, casesPage, setCasesPage, casesTotalPages, casesViewMode, setCasesViewMode
 }: CasesTabContentProps) {
 
-  const casesColumns: Column<StudentCaseItem>[] = [
+  const casesColumns: Column<StudentDashboardCaseItem>[] = [
     {
       header: "Patient",
       accessor: "patientName",
@@ -60,13 +65,13 @@ export function CasesTabContent({
     },
     {
       header: "Diagnosis",
-      accessor: "diagnosisdto",
+      accessor: "diagnoses",
       render: (_, row) => {
           const sc = getCaseStatusConfig(row.processStatus || row.status);
           const StatusIcon = sc.icon || Activity;
           return (
               <div className="flex flex-col gap-1.5 items-start">
-                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnosisdto?.caseType || "Pending"}</span>
+                  <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnoses?.[0]?.caseTypeName || "Pending"}</span>
                   <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
                       <StatusIcon size={10} className={sc.text} />
                       {row.processStatus || sc.label}

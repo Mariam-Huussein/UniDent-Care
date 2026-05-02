@@ -1,4 +1,5 @@
 import { ApiResponse } from "@/types/api";
+import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
 
 export interface CaseCardProps {
     caseItem: CaseItem;
@@ -12,7 +13,8 @@ export interface CaseItem {
     patientId: string;
     patientName: string;
     patientAge: number;
-    caseType: CaseType | null;
+    description?: string;
+    caseType: CaseType | string | null;
     status: string;
     createAt: string;
     gender: 0 | 1 | undefined;
@@ -53,13 +55,14 @@ export type Cases = CaseCardProps["caseItem"][];
 export interface AvailableCasesResponse extends ApiResponse<MetaData> { }
 
 
-export interface DiagnosisDto {
+export interface Diagnosis {
     id: string;
+    patientCaseId: string;
     diagnosisStage: string;
     caseType: string;
-    notes: string;
     teethNumbers: number[];
 }
+
 
 export interface UserFlags {
     isOwner: boolean;
@@ -82,7 +85,6 @@ export interface CaseDetailData {
     phone: string;
     city: string;
     nationalId: string;
-    gender: string | null;
     isPublic: boolean;
     universityId: string;
     universityName: string;
@@ -92,7 +94,7 @@ export interface CaseDetailData {
     pendingRequests: number;
     assignedStudentId: string;
     assignedDoctorId: string;
-    diagnosisdto: DiagnosisDto | null;
+    diagnoses: DiagnosisDto[];
     imageUrls: string[];
     createdById: string;
     createdByRole: string;
@@ -102,6 +104,16 @@ export interface CaseDetailData {
 
 export interface CaseDetailResponse extends ApiResponse<CaseDetailData> { }
 
+export interface DiagnosesMetaData {
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    items: DiagnosisDto[];
+}
+
+export type DiagnosesResponse = ApiResponse<DiagnosesMetaData>;
 export interface CaseRequestBody {
     patientCasePublicId: string;
     studentPublicId: string;

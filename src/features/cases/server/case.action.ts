@@ -3,12 +3,19 @@ import {
     CaseDetailResponse,
     CasesQueryParams,
     DoctorSearchResponse,
-    MyStudentCasesResponse,
-    MyStudentRequestsResponse,
     StudentMyCasesQueryParams,
     StudentMyRequestsQueryParams,
+} from "../types/caseCardProps.types";
+import {
+    StudentDashboardMyCasesQueryParams,
+    StudentDashboardMyRequestsQueryParams,
+    StudentDashboardMyCasesResponse,
+    StudentDashboardMyRequestsResponse
+} from "../types/studentDashboard.types";
+import {
     PatientMyCasesQueryParams,
     MyPatientCasesResponse,
+    DiagnosesResponse,
 } from "../types/caseCardProps.types";
 import { getTokensAndUserId } from "@/utils/sharedHelper";
 import axiosInstance from "@/utils/api";
@@ -31,7 +38,18 @@ export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
     }
 }
 
-export async function getStudentMyCases(params: StudentMyCasesQueryParams): Promise<MyStudentCasesResponse> {
+export async function getDiagnosesByCaseId(caseId: string, page: number = 1, pageSize: number = 100): Promise<DiagnosesResponse> {
+    try {
+        const response = await axiosInstance.get(`/Diagnoses/case/${caseId}`, {
+            params: { page, pageSize }
+        });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || "Failed to fetch diagnoses");
+    }
+}
+
+export async function getStudentMyCases(params: StudentDashboardMyCasesQueryParams): Promise<StudentDashboardMyCasesResponse> {
     try {
         const response = await axiosInstance.get(`/Students/my-cases`, { params });
         return response.data;
@@ -40,7 +58,7 @@ export async function getStudentMyCases(params: StudentMyCasesQueryParams): Prom
     }
 }
 
-export async function getStudentMyRequests(params: StudentMyRequestsQueryParams): Promise<MyStudentRequestsResponse> {
+export async function getStudentMyRequests(params: StudentDashboardMyRequestsQueryParams): Promise<StudentDashboardMyRequestsResponse> {
     try {
         const response = await axiosInstance.get(`/Students/my-requests`, { params });
         return response.data;

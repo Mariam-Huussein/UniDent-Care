@@ -3,10 +3,10 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Clock, ArrowRight, Stethoscope, GraduationCap, User } from "lucide-react";
-import { StudentRequestItem } from "../../types/caseCardProps.types";
+import { StudentDashboardRequestItem } from "../../types/studentDashboard.types";
 import { getRequestStatusConfig } from "./getRequestStatusConfig";
 
-export function StudentRequestCard({ item, index }: { item: StudentRequestItem; index: number }) {
+export function StudentRequestCard({ item, index }: { item: StudentDashboardRequestItem; index: number }) {
   const sc = getRequestStatusConfig(item.status);
 
   const formattedDate = new Date(item.createAt).toLocaleDateString("en-US", {

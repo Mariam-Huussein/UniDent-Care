@@ -91,7 +91,7 @@ export default function CasesTable({
 
     const tableData = cases.map((c) => ({
         ...c,
-        caseType: c.diagnosisdto?.map((d) => d.caseType).join(", ") || "Uncategorized",
+        caseType: c.diagnosisdto?.map((d) => d.caseTypeName).join(", ") || "Uncategorized",
         gender: c.gender !== undefined ? getGenderLabel(c.gender) : "Unknown",
         createAt: new Date(c.createAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
         status: (
@@ -181,7 +181,7 @@ export default function CasesTable({
                     <SendRequestModal
                         caseId={selectedCase.id}
                         patientName={selectedCase.patientName}
-                        caseType={selectedCase.caseType?.name || undefined}
+                        caseType={selectedCase.diagnosisdto ? selectedCase.diagnosisdto[0].caseTypeName : undefined}
                         onClose={() => setSelectedCaseId(null)}
                     />
                 ) : null;

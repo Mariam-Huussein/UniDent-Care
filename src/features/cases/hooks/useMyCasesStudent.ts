@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
-import { StudentCaseItem, StudentRequestItem } from "../types/caseCardProps.types";
+import { StudentDashboardCaseItem, StudentDashboardRequestItem } from "../types/studentDashboard.types";
 import { getStudentMyCases, getStudentMyRequests } from "../server/case.action";
 
 export type MyCasesTab = "cases" | "requests";
@@ -13,7 +13,7 @@ export function useMyCasesStudent() {
     const [activeTab, setActiveTab] = useState<MyCasesTab>("cases");
 
     // Cases state
-    const [cases, setCases] = useState<StudentCaseItem[]>([]);
+    const [cases, setCases] = useState<StudentDashboardCaseItem[]>([]);
     const [casesLoading, setCasesLoading] = useState(true);
     const [caseType, setCaseType] = useState("");
     const [casesPage, setCasesPage] = useState(1);
@@ -21,7 +21,7 @@ export function useMyCasesStudent() {
     const [casesTotalCount, setCasesTotalCount] = useState(0);
 
     // Requests state
-    const [requests, setRequests] = useState<StudentRequestItem[]>([]);
+    const [requests, setRequests] = useState<StudentDashboardRequestItem[]>([]);
     const [requestsLoading, setRequestsLoading] = useState(true);
     const [requestStatus, setRequestStatus] = useState("");
     const [requestsPage, setRequestsPage] = useState(1);

@@ -1,8 +1,9 @@
 import { ToothConditionGroup } from "react-odontogram";
-import { DiagnosisDto } from "../types/caseCardProps.types";
 import { ToothData } from "../types/CaseDetails.types";
 import { getToothStatusColor } from "./CaseDetails.utils";
 import { ToothPanelData } from "../components/CaseDetails/Clinical/OdontogramParts/ToothInfoPanel";
+import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
+
 
 export function buildConditions(teeth: ToothData[]): ToothConditionGroup[] {
     const groups: Record<
@@ -21,21 +22,23 @@ export function buildConditions(teeth: ToothData[]): ToothConditionGroup[] {
 }
 
 export function buildDiagnosedTeethMap(
-    diagnosisdto: DiagnosisDto | null | undefined,
+    diagnoses: DiagnosisDto[] | null | undefined,
     assignedStudentName?: string | null,
     assignedDoctorName?: string | null
 ): Map<number, ToothPanelData> {
     const map = new Map<number, ToothPanelData>();
-    if (!diagnosisdto) return map;
-    for (const num of diagnosisdto.teethNumbers ?? []) {
-        map.set(num, {
-            toothNumber: num,
-            caseType: diagnosisdto.caseType,
-            diagnosisStage: diagnosisdto.diagnosisStage,
-            notes: diagnosisdto.notes,
-            assignedStudentName: assignedStudentName ?? null,
-            assignedDoctorName: assignedDoctorName ?? null,
-        });
+    if (!diagnoses || !Array.isArray(diagnoses)) return map;
+    for (const diagnosis of diagnoses) {
+        for (const num of diagnosis.teethNumbers ?? []) {
+            map.set(num, {
+                toothNumber: num,
+                caseType: diagnosis.caseTypeName || "",
+                diagnosisStage: String(diagnosis.stage ?? ""),
+                notes: diagnosis.notes || "",
+                assignedStudentName: assignedStudentName ?? null,
+                assignedDoctorName: assignedDoctorName ?? null,
+            });
+        }
     }
     return map;
 }

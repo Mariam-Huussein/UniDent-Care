@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { CaseStatus, DiagnosisStage, PatientCase, ToothStatus } from "../types/CaseDetails.types";
-import { getCaseById } from "../server/case.action";
+import { getCaseById, getDiagnosesByCaseId } from "../server/case.action";
 import { CaseDetailData } from "../types/caseCardProps.types";
 
 interface UseCaseDetailsReturn {
@@ -28,9 +28,14 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
         if (!caseId) return;
         setIsLoading(true);
         try {
-            const response = await getCaseById(caseId);
-            if (response.success && response.data) {
-                const apiData: CaseDetailData = response.data;
+            const [caseResponse, diagnosesResponse] = await Promise.all([
+                getCaseById(caseId),
+                getDiagnosesByCaseId(caseId)
+            ]);
+
+            if (caseResponse.success && caseResponse.data) {
+                const apiData: CaseDetailData = caseResponse.data;
+                const diagnosesData = diagnosesResponse.success ? diagnosesResponse.data?.items || [] : [];
 
                 let mappedStatus = apiData.status?.toLowerCase() || "Pending";
                 if (mappedStatus === 'inprogress') mappedStatus = 'InProgress';
@@ -44,13 +49,13 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     patientAge: apiData.patientAge,
                     status: mappedStatus as CaseStatus,
                     processStatus: apiData.processStatus || "",
-                    caseType: apiData.diagnosisdto?.caseType || "Unknown",
+                    caseType: diagnosesData.length > 0 ? diagnosesData[0].caseTypeName || "Unknown" : "Unknown",
                     isPublic: apiData.isPublic,
                     universityId: apiData.universityId,
                     universityName: apiData.universityName,
                     createdAt: apiData.createAt,
                     imageUrls: apiData.imageUrls || [],
-                    description: apiData.diagnosisdto?.notes || undefined,
+                    description: apiData.diagnoses[0]?.notes || null,
                     phone: apiData.phone,
                     city: apiData.city,
                     nationalId: apiData.nationalId,
@@ -65,7 +70,7 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     assignedDoctorId: apiData.assignedDoctorId || null,
 
                     // Diagnosis
-                    diagnosisdto: apiData.diagnosisdto || null,
+                    diagnoses: diagnosesData,
 
                     // Creator info
                     createdById: apiData.createdById,
@@ -74,25 +79,21 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     // User flags & actions
                     userFlags: apiData.userFlags,
                     availableActions: apiData.availableActions || [],
+                    gender: "N/A",
 
-                    // Fields for existing components
-                    medicalHistory: [],
-                    medications: [],
-                    gender: apiData.gender?.toString() || "Unknown",
+                    // gender: apiData.gender,
+                    // medicalHistory: [],
+                    // medications: [],
+                    // timeline: [],
+
                     student: undefined,
-                    teeth: apiData.diagnosisdto?.teethNumbers?.map(num => ({
-                        number: num,
-                        status: 'needs-treatment' as ToothStatus,
-                        notes: apiData.diagnosisdto?.notes || "",
-                    })) || [],
-                    timeline: [],
-                    progressStep: mappedStatus === 'Completed' ? 4 : mappedStatus === 'InProgress' ? 3 : mappedStatus === 'Diagnosis' ? 2 : 1,
+                    progressStep: apiData.processStatus,
                     sessions: [],
                 };
 
                 setPatient(mappedPatient);
             } else {
-                toast.error(response.message || "Failed to load case details.");
+                toast.error(caseResponse.message || "Failed to load case details.");
             }
         } catch (err: any) {
             toast.error(err.message || "An error occurred while fetching.");
