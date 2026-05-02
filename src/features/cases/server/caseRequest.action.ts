@@ -8,7 +8,7 @@ import {
 } from "../types/caseCardProps.types";
 import { getTokensAndUserId } from "@/utils/sharedHelper";
 import { ApiResponse } from "@/types/api";
-import { DoctorRequestsResponse } from "../types/Sessions.types";
+import { DoctorRequestsResponse } from "../../session/types/Sessions.types";
 import axiosInstance from "@/utils/api";
 
 

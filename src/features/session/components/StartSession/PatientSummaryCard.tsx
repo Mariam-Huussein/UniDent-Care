@@ -2,12 +2,13 @@
 
 import { motion } from "framer-motion";
 import {
-    User, Calendar, GraduationCap, Stethoscope,
-    Activity, FileText,
+    User, GraduationCap, Stethoscope,
+    FileText,
 } from "lucide-react";
-import { PatientCase } from "../../types/CaseDetails.types";
-import InfoCard from "../CaseDetails/Shared/InfoCard";
-import ProgressTracker from "../CaseDetails/Tracking/ProgressTracker";
+import { PatientCase } from "@/features/cases/types/CaseDetails.types";
+import InfoCard from "@/features/cases/components/CaseDetails/Shared/InfoCard";
+import ProgressTracker from "@/features/session/components/SessionTimeLine/ProgressTracker";
+import { useCase } from "@/features/cases/context/CaseContext";
 
 interface PatientSummaryCardProps {
     patient: PatientCase;
@@ -20,6 +21,8 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
         .join("")
         .toUpperCase()
         .slice(0, 2);
+
+    const { caseData, doctorOwnerData, } = useCase()
 
     return (
         <motion.div
@@ -35,11 +38,11 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
                 </div>
                 <div className="min-w-0">
                     <h2 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight truncate">
-                        {patient.patientName}
+                        {caseData?.patientName}
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        {patient.caseType} Case
-                        {patient.diagnosisdto?.diagnosisStage ? ` · ${patient.diagnosisdto.diagnosisStage}` : ""}
+                        {caseData?.caseType} Case
+                        {caseData?.diagnosisdto?.diagnosisStage ? ` · ${caseData.diagnosisdto.diagnosisStage}` : ""}
                     </p>
                 </div>
             </div>
@@ -49,10 +52,10 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
 
             {/* Quick Info */}
             <div className="grid grid-cols-2 gap-3">
-                <InfoCard icon={User} label="Age" value={`${patient.patientAge} years`} color="text-blue-500" />
-                <InfoCard icon={GraduationCap} label="University" value={patient.universityName || "Not Assigned"} color="text-indigo-500" />
-                <InfoCard icon={Calendar} label="Created" value={new Date(patient.createdAt).toLocaleDateString()} color="text-violet-500" />
-                <InfoCard icon={FileText} label="Sessions" value={`${patient.totalSessions}`} color="text-emerald-500" />
+                <InfoCard icon={User} label="Age" value={`${caseData?.patientAge} years`} color="text-blue-500" />
+                <InfoCard icon={GraduationCap} label="University" value={caseData?.universityName || "Not Assigned"} color="text-indigo-500" />
+                <InfoCard icon={FileText} label="Sessions" value={`${caseData?.totalSessions}`} color="text-emerald-500" />
+                <InfoCard icon={Stethoscope} label="Supervising Doctor" value={doctorOwnerData?.data?.fullName || "Unknown"} color="text-cyan-500" />
             </div>
 
             {/* Treatment Progress */}

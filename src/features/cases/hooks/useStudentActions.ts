@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { PatientCase } from "../types/CaseDetails.types";
 import { cancelCaseRequest } from "../server/caseRequest.action";
-import { cancelSession, createSession } from "../server/sessions.action";
-import { SessionBookingData } from "../types/Sessions.types";
+import { cancelSession, createSession, updateSessionStatus } from "../server/sessions.action";
+import { SessionBookingData } from "../../session/types/Sessions.types";
 import { useCase } from "../context/CaseContext";
 
 export function useStudentActions(
@@ -35,6 +35,40 @@ export function useStudentActions(
     const hasRequest = userFlags?.hasRequest ?? false;
     const requestId = userFlags?.requestId ?? "";
     const requestStatus = userFlags?.requestStatus ?? "";
+
+    // ── Auto-expire session if the scheduled day has passed ──
+    useEffect(() => {
+        if (scheduledSession) {
+            const status = scheduledSession.status?.toLowerCase();
+            // Only expire if still "scheduled" — never touch InProgress sessions
+            if (status !== "scheduled") return;
+            const sessionDate = new Date(scheduledSession.scheduledAt);
+            sessionDate.setHours(0, 0, 0, 0); // Reset to start of day
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset to start of day
+
+            if (sessionDate.getTime() < today.getTime()) {
+                console.log("Auto-expiring session: ", scheduledSession.id);
+                updateSessionStatus(scheduledSession.id, {
+                    sessionId: scheduledSession.id,
+                    status: 3, // Backend Enum value for Expired
+                })
+                    .then((res) => {
+                        if (res.success) {
+                            toast.success("Session has automatically expired");
+                            refetchSessions();
+                        } else {
+                            toast.error("Failed to auto-expire session");
+                        }
+                    })
+                    .catch((err) => {
+                        console.error("Error auto-expiring session:", err);
+                        toast.error("Error auto-expiring session: " + err.message);
+                    });
+            }
+        }
+    }, [scheduledSession, refetchSessions]);
 
     const handleCancelRequest = async () => {
         if (!requestId || !studentId) {

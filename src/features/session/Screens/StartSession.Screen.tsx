@@ -1,22 +1,25 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { useCaseDetails } from "../hooks/useCaseDetails";
-import { CaseProvider, useCase } from "../context/CaseContext";
+import { useCaseDetails } from "../../cases/hooks/useCaseDetails";
+import { CaseProvider, useCase } from "../../cases/context/CaseContext";
 import { SessionNoteItem } from "../types/Sessions.types";
-import { addSessionNote } from "../server/sessionNotes.action";
-import { updateSessionStatus } from "../server/sessions.action";
+import {
+    addSessionNote,
+    getSessionNotes,
+    addNoteMedia,
+} from "../../cases/server/sessionNotes.action";
+import { updateSessionStatus } from "../../cases/server/sessions.action";
 import ActionModal from "@/components/ui/ActionModal";
-
-import SessionTopBar from "../components/StartSession/SessionTopBar";
-import PatientSummaryCard from "../components/StartSession/PatientSummaryCard";
-import SessionWorkspace from "../components/StartSession/SessionWorkspace";
-import DentalImageGallery from "../components/CaseDetails/Clinical/DentalImageGallery";
+import SessionTopBar from "@/features/session/components/StartSession/SessionTopBar";
+import PatientSummaryCard from "@/features/session/components/StartSession/PatientSummaryCard";
+import DentalImageGallery from "@/features/cases/components/CaseDetails/Clinical/DentalImageGallery";
+import SessionWorkspace from "@/features/session/components/StartSession/SessionWorkspace";
 
 interface StartSessionScreenProps {
     caseId: string;
@@ -72,38 +75,88 @@ function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: stri
     const { caseData: patient, getSessionById, sessionsLoading, refetchSessions } = useCase();
     const router = useRouter();
     const [notes, setNotes] = useState<SessionNoteItem[]>([]);
+    const [notesLoading, setNotesLoading] = useState(true);
     const [noteLoading, setNoteLoading] = useState(false);
     const [endSessionLoading, setEndSessionLoading] = useState(false);
     const [showEndModal, setShowEndModal] = useState(false);
 
-    // Get session from CaseContext
     const session = getSessionById(sessionId) || null;
 
-    // Add a note
+    useEffect(() => {
+        if (!session) return;
+        const status = session.status?.toLowerCase();
+        if (status === "scheduled") {
+            updateSessionStatus(sessionId, {
+                sessionId,
+                status: "InProgress",
+            })
+                .then(() => refetchSessions())
+                .catch(() => { /* silently ignore — user can still work */ });
+        }
+    }, [sessionId, session?.id]);
+
+    // Fetch existing notes on mount
+    useEffect(() => {
+        let cancelled = false;
+        setNotesLoading(true);
+        getSessionNotes(sessionId)
+            .then((res) => {
+                if (cancelled) return;
+                if (res.success && res.data) {
+                    setNotes(res.data);
+                }
+            })
+            .catch(() => {
+                // silently fail — notes start empty
+            })
+            .finally(() => {
+                if (!cancelled) setNotesLoading(false);
+            });
+        return () => { cancelled = true; };
+    }, [sessionId]);
+
+    // Add a note (text first, then upload media files)
     const handleAddNote = useCallback(
-        async (noteText: string, isPrivate: boolean, imageUrl?: string) => {
+        async (noteText: string, files?: File[]) => {
             setNoteLoading(true);
             try {
-                const body = {
+                // 1. Create the note
+                const res = await addSessionNote(sessionId, {
                     sessionId,
                     note: noteText,
-                    isPrivate,
-                    imageUrl: imageUrl || "",
-                };
-                const res = await addSessionNote(sessionId, body);
-                if (res.success) {
-                    toast.success("Note added successfully");
-                    const newNote: SessionNoteItem = {
-                        id: res.data || crypto.randomUUID(),
-                        note: noteText,
-                        isPrivate,
-                        imageUrl,
-                        createdAt: new Date().toISOString(),
-                    };
-                    setNotes((prev) => [...prev, newNote]);
-                } else {
+                });
+
+                if (!res.success || !res.data) {
                     toast.error(res.message || "Failed to add note");
+                    return;
                 }
+
+                const createdNote: SessionNoteItem = { ...res.data, medias: res.data.medias ?? [] };
+
+                // 2. Upload media files sequentially
+                if (files && files.length > 0) {
+                    const uploadToast = toast.loading(`Uploading ${files.length} file(s)…`);
+                    const uploadedMedias = [...createdNote.medias];
+
+                    for (const file of files) {
+                        try {
+                            const mediaRes = await addNoteMedia(sessionId, createdNote.id, file);
+                            if (mediaRes.success && mediaRes.data) {
+                                uploadedMedias.push(mediaRes.data);
+                            }
+                        } catch {
+                            // continue uploading remaining files
+                        }
+                    }
+
+                    createdNote.medias = uploadedMedias;
+                    toast.dismiss(uploadToast);
+                    toast.success("Note & media saved!");
+                } else {
+                    toast.success("Note added successfully");
+                }
+
+                setNotes((prev) => [...prev, createdNote]);
             } catch (err: any) {
                 toast.error(err.message || "Failed to add note");
             } finally {
@@ -158,7 +211,7 @@ function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: stri
                         try {
                             const res = await updateSessionStatus(sessionId, {
                                 sessionId,
-                                status: "Cancelled", // (0=Scheduled, 1=Done, 2=Cancelled, 3=Expired)
+                                status: "Done",
                             });
                             if (res.success) {
                                 toast.success("Session completed successfully");
@@ -213,7 +266,7 @@ function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: stri
                                     session={session}
                                     notes={notes}
                                     onAddNote={handleAddNote}
-                                    noteLoading={noteLoading}
+                                    noteLoading={noteLoading || notesLoading}
                                 />
                             </div>
                         </div>
