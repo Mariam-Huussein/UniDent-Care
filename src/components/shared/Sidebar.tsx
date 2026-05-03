@@ -11,6 +11,7 @@ import { RootState } from "@/store";
 import Cookies from "js-cookie";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import Logo from "@/components/ui/Logo";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 
 export default function Sidebar() {
     const [mounted, setMounted] = useState(false);
@@ -27,9 +28,7 @@ export default function Sidebar() {
         (state: RootState) => state.auth.role
     ) as UserRole | undefined;
 
-    const role = roleFromRedux 
-        ?? (Cookies.get("user_role") as UserRole)
-        ?? (typeof window !== "undefined" ? localStorage.getItem("user_role") as UserRole : null);
+    const role = roleFromRedux ?? getUserDetailsFromCookies().userRole as UserRole;
 
     if (!mounted) return null;
     if (!role) return null;

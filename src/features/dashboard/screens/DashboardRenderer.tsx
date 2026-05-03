@@ -8,7 +8,7 @@ import StudentDashboardScreen from "@/features/dashboard/screens/StudentDashboar
 import DoctorDashboardScreen from "@/features/dashboard/screens/DoctorDashboard.screen";
 import PatientDashboardScreen from "@/features/dashboard/screens/PatientDashboard.screen";
 import { UserRole } from "@/config/navLinks";
-import Cookies from "js-cookie";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 
 export default function DashboardRenderer() {
     const [mounted, setMounted] = useState(false);
@@ -21,9 +21,10 @@ export default function DashboardRenderer() {
         (state: RootState) => state.auth.role
     );
 
-    const role = roleFromRedux 
-        ?? (Cookies.get("user_role") as UserRole)
-        ?? (typeof window !== "undefined" ? localStorage.getItem("user_role") as UserRole : null);
+    const roleFromCookies = getUserDetailsFromCookies().userRole;
+
+    const role = roleFromRedux
+        ?? roleFromCookies
     const normalizedRole = role ? (role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()) as UserRole : "Patient";
 
     const dashboards = {

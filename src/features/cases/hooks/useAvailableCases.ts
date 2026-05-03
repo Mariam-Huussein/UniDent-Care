@@ -6,11 +6,11 @@ import toast from "react-hot-toast";
 import { getAvailableCases } from "../server/case.action";
 import { CasesQueryParams } from "../types/caseCardProps.types";
 import { useFilterCases } from "./useFilterCases";
-import { getTokensAndUserId } from "@/utils/sharedHelper";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 
 
 export const useAvailableCases = () => {
-    const token = (useSelector((state: RootState) => state.auth.token) || getTokensAndUserId().token) as string;
+    const token = (useSelector((state: RootState) => state.auth.token) || getUserDetailsFromCookies().token) as string;
 
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
     const [currentPage, setCurrentPage] = useState(1);

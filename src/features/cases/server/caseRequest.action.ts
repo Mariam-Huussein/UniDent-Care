@@ -6,7 +6,7 @@ import {
     CaseRequestResponse,
     CaseRequestData,
 } from "../types/caseCardProps.types";
-import { getTokensAndUserId } from "@/utils/sharedHelper";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import { ApiResponse } from "@/types/api";
 import { DoctorRequestsResponse } from "../../session/types/Sessions.types";
 import axiosInstance from "@/utils/api";
@@ -28,7 +28,7 @@ export async function sendCaseRequest(body: CaseRequestBody): Promise<CaseReques
 
 export async function cancelCaseRequest(requestId: string): Promise<CancelRequestResponse> {
     try {
-        const { userId: cookieUserId } = await getTokensAndUserId();
+        const { userId: cookieUserId } = await getUserDetailsFromCookies();
         const response = await axiosInstance.delete(`/CaseRequests/${requestId}/${cookieUserId}`);
         return response.data;
     } catch (error: any) {
@@ -43,7 +43,7 @@ export async function cancelCaseRequest(requestId: string): Promise<CancelReques
 
 export async function getAllCaseRequestsForDoctor(): Promise<CaseRequestResponse> {
     try {
-        const { userId: cookieUserId } = await getTokensAndUserId();
+        const { userId: cookieUserId } = await getUserDetailsFromCookies();
 
         const response = await axiosInstance.get(`/CaseRequests/requests/${cookieUserId}`);
         return response.data;

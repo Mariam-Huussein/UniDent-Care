@@ -9,7 +9,7 @@ import { getCaseSessions } from "../server/sessions.action";
 import { getDoctorMyCaseRequests } from "../server/caseRequest.action";
 import { getDoctorById, getStudentById } from "@/server/getUsers.action";
 import { DoctorDataResponse, StudentDataResponse } from "@/types/getUser.type";
-import { getTokensAndUserId } from "@/utils/sharedHelper";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import toast from "react-hot-toast";
 
 interface CaseContextType {
@@ -52,7 +52,7 @@ interface CaseProviderProps {
 
 export const CaseProvider = ({ children, caseData, caseId, isLoading, refetch }: CaseProviderProps) => {
   const role = useSelector((state: RootState) => state.auth.role);
-  const userId = useSelector((state: RootState) => state.auth.user?.publicId) || getTokensAndUserId().userId;
+  const userId = useSelector((state: RootState) => state.auth.user?.publicId) || getUserDetailsFromCookies().userId;
 
   // ── Sessions state ──
   const [sessions, setSessions] = useState<SessionItem[]>([]);

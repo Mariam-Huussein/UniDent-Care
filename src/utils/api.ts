@@ -1,6 +1,7 @@
 'use client'
 import axios from "axios";
 import Cookies from "js-cookie";
+import { getUserDetailsFromCookies } from "./sharedHelper";
 
 const axiosInstance = axios.create({
     baseURL: "https://dental-hup1.runasp.net/api",
@@ -8,7 +9,7 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     (config) => {
-        const token = Cookies.get("token") || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
+        const {token} = getUserDetailsFromCookies();
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -27,10 +28,6 @@ axiosInstance.interceptors.response.use(
             Cookies.remove("user_role");
             Cookies.remove("user_id");
             Cookies.remove("university_id");
-            localStorage.removeItem("token");
-            localStorage.removeItem("user_role");
-            localStorage.removeItem("user_id");
-            localStorage.removeItem("university_id");
             window.location.href = "/login";
         }
         return Promise.reject(error);

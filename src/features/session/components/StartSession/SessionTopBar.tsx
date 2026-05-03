@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Clock, Square, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { formatElapsed } from "../../services/sessionHelper";
 
 interface SessionTopBarProps {
     patientName: string;
@@ -12,17 +13,6 @@ interface SessionTopBarProps {
     onEndSession?: () => void;
     endSessionLoading?: boolean;
     sessionStatus?: string;
-}
-
-function formatElapsed(seconds: number): string {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    const parts: string[] = [];
-    if (h > 0) parts.push(`${h}h`);
-    parts.push(`${String(m).padStart(2, "0")}m`);
-    parts.push(`${String(s).padStart(2, "0")}s`);
-    return parts.join(" ");
 }
 
 export default function SessionTopBar({

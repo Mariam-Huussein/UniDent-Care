@@ -1,11 +1,15 @@
 import Cookies from "js-cookie";
 
-export function getTokensAndUserId() {
+export function getUserDetailsFromCookies() {
     const token = Cookies.get("token");
     const userId = Cookies.get("user_id");
+    const userRole = Cookies.get("user_role");
+    const universityId = Cookies.get("university_id");
     return {
         token,
         userId,
+        userRole,
+        universityId,
     };
 }
 

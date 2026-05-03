@@ -17,7 +17,7 @@ import {
     MyPatientCasesResponse,
     DiagnosesResponse,
 } from "../types/caseCardProps.types";
-import { getTokensAndUserId } from "@/utils/sharedHelper";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import axiosInstance from "@/utils/api";
 
 export async function getAvailableCases(params: CasesQueryParams): Promise<AvailableCasesResponse> {
@@ -77,7 +77,7 @@ export async function getPatientMyCases(patientId: string, params: PatientMyCase
 }
 
 export async function searchDoctorsByUsername(username: string, universityId: string): Promise<DoctorSearchResponse> {
-    const { token: cookieToken } = getTokensAndUserId();
+    const { universityId: cookieUniversityId } = getUserDetailsFromCookies();
     try {
         const queryParams: Record<string, string> = {
             universityId: universityId,

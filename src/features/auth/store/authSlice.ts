@@ -53,13 +53,6 @@ const authSlice = createSlice({
                 secure: isProd,
                 sameSite: "strict",
             });
-
-            if (typeof window !== "undefined") {
-                localStorage.setItem("token", action.payload.token);
-                localStorage.setItem("user_id", action.payload.publicId);
-                localStorage.setItem("university_id", action.payload.universityId);
-                localStorage.setItem("user_role", action.payload.roles[0]);
-            }
         },
 
         setUserFromReload: (
@@ -82,12 +75,6 @@ const authSlice = createSlice({
             Cookies.remove("user_role");
             Cookies.remove("user_id");
             Cookies.remove("university_id");
-            if (typeof window !== "undefined") {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user_role");
-                localStorage.removeItem("user_id");
-                localStorage.removeItem("university_id");
-            }
             window.location.href = "/login";
         },
     },

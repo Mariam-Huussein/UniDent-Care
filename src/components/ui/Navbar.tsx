@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLanguage } from "../providers/LanguageProvider";
 import Logo from "@/components/ui/Logo";
 import { useEffect, useState } from "react";
-import { getTokensAndUserId } from "@/utils/sharedHelper";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import { User2 } from "lucide-react";
 
 export default function Navbar() {
@@ -14,7 +14,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-    const { token } = getTokensAndUserId();
+    const { token } = getUserDetailsFromCookies();
     if (token) {
       setIsLoggedIn(true);
     }
