@@ -1,255 +1,293 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { motion, Variants } from "framer-motion";
-import {
-    GraduationCap,
-    Hospital,
-    BookOpen,
-    ChevronRight,
-    RefreshCw,
-    Users,
-    CheckCircle2,
-    Clock,
-    XCircle,
-    ClipboardList,
-} from "lucide-react";
-import { useLanguage } from "@/components/providers/LanguageProvider";
 import Cookies from "js-cookie";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Loader2, Users, LayoutGrid, List, Activity, GraduationCap, Calendar } from "lucide-react";
+import CaseCard from "@/features/cases/components/CaseCard";
+import Pagination from "@/components/common/pagination";
+import DataTable, { Column } from "@/components/common/DataTable";
+import SearchableSelect from "@/components/common/SearchableSelect";
+import api from "@/utils/api";
+import { useDoctorCases } from "@/features/cases/hooks/useDoctorCases";
+import { PatientCaseItem, CaseItem } from "@/features/cases/types/caseCardProps.types";
+import { getCaseStatusConfig } from "@/features/cases/components/MyCasesStudent/getCaseStatusConfig";
+import { MyCasesSkeleton } from "@/features/cases/components/MyCasesStudent/MyCasesSkeleton";
+import { MyCasesEmptyState } from "@/features/cases/components/MyCasesStudent/MyCasesEmptyState";
 import Link from "next/link";
-import { doctorDashboardService, CaseRequest } from "@/features/dashboard/services/doctorDashboardService";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
-const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
-};
+const mapDoctorCaseToCaseItem = (item: any): CaseItem => ({
+    id: item.id,
+    patientId: item.patientId,
+    patientName: item.patientName,
+    patientAge: item.patientAge,
+    caseType: item.diagnoses?.[0] ? { publicId: "", name: item.diagnoses[0]?.caseTypeName || "null", description: "" } : null,
+    status: item.status,
+    createAt: item.createAt,
+    totalSessions: item.totalSessions,
+    pendingRequests: item.pendingRequests,
+    imageUrls: item.imageUrls,
+    gender: undefined,
+    diagnosisdto: item.diagnoses || item.diagnosisdto || null,
+});
 
-const cardVariants: Variants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.4, ease: "easeOut" } },
-};
+const TABS = ["Under Review", "In Progress", "Completed"];
 
-interface StudentGroup {
-    studentPublicId: string;
-    studentName: string;
-    university: string;
-    level: number;
-    requests: CaseRequest[];
-}
-
-const getStatusStyles = (status: string) => {
-    switch (status.toLowerCase()) {
-        case "approved":
-            return {
-                bg: "bg-emerald-100 dark:bg-emerald-900/30",
-                text: "text-emerald-700 dark:text-emerald-400",
-                icon: <CheckCircle2 size={12} />,
-            };
-        case "rejected":
-            return {
-                bg: "bg-red-100 dark:bg-red-900/30",
-                text: "text-red-700 dark:text-red-400",
-                icon: <XCircle size={12} />,
-            };
-        default:
-            return {
-                bg: "bg-amber-100 dark:bg-amber-900/30",
-                text: "text-amber-700 dark:text-amber-400",
-                icon: <Clock size={12} />,
-            };
-    }
-};
-
-export default function MyStudentPage() {
+export default function MyStudentCasesPage() {
     const user = useSelector((state: RootState) => state.auth.user);
+    const doctorId = (user as any)?.publicId ?? (user as any)?.id ?? Cookies.get("user_id");
     const { language } = useLanguage();
     const isRtl = language === "ar";
 
-    const doctorId =
-        (user as any)?.publicId ??
-        (user as any)?.id ??
-        Cookies.get("user_id");
+    const [activeTab, setActiveTab] = useState(TABS[0]);
+    const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
+    
+    // Filters State for UI input
+    const [searchInput, setSearchInput] = useState("");
+    const [caseTypes, setCaseTypes] = useState<{id: string, label: string}[]>([]);
 
-    const [students, setStudents] = useState<StudentGroup[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [totalRequests, setTotalRequests] = useState(0);
+    const {
+        cases, loading, search, setSearch, caseType, setCaseType,
+        page, setPage, totalPages, totalCount
+    } = useDoctorCases(doctorId, activeTab);
 
-    const fetchStudents = async () => {
-        if (!doctorId) return;
-        try {
-            setLoading(true);
-            // Fetch up to 100 requests to cover most cases in one shot
-            const res = await doctorDashboardService.getCaseRequestsByDoctor(doctorId, 1, 100);
-            setTotalRequests(res.totalCount);
-
-            // Group by studentPublicId
-            const map = new Map<string, StudentGroup>();
-            for (const req of res.items) {
-                if (!map.has(req.studentPublicId)) {
-                    map.set(req.studentPublicId, {
-                        studentPublicId: req.studentPublicId,
-                        studentName: req.studentName,
-                        university: req.university,
-                        level: req.level,
-                        requests: [],
-                    });
-                }
-                map.get(req.studentPublicId)!.requests.push(req);
-            }
-
-            // Sort students: those with Pending first
-            const sorted = Array.from(map.values()).sort((a, b) => {
-                const aPending = a.requests.some((r) => r.status === "Pending") ? 0 : 1;
-                const bPending = b.requests.some((r) => r.status === "Pending") ? 0 : 1;
-                return aPending - bPending;
-            });
-
-            setStudents(sorted);
-        } catch (err) {
-            console.error("Failed to fetch students:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setSearch(searchInput);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchInput, setSearch]);
 
     useEffect(() => {
-        fetchStudents();
-    }, [doctorId]);
+        const fetchCaseTypes = async () => {
+            try {
+                const res = await api.get('/CaseTypes', { params: { page: 1, pageSize: 100 } });
+                if (res.data?.success) {
+                    const types = res.data.data.items.map((t: any) => ({
+                        id: t.name,
+                        label: t.name
+                    }));
+                    setCaseTypes(types);
+                }
+            } catch (err) {
+                console.error("Failed to fetch case types", err);
+            }
+        };
+        fetchCaseTypes();
+    }, []);
 
-    const getInitials = (name: string) =>
-        name
-            .split(" ")
-            .slice(0, 2)
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase();
+    const casesColumns: Column<any>[] = [
+        {
+            header: "Diagnosis",
+            accessor: "diagnoses",
+            render: (_, row) => {
+                const sc = getCaseStatusConfig(row.processStatus || row.status);
+                const StatusIcon = sc.icon || Activity;
+                return (
+                    <div className="flex flex-col gap-1.5 items-start">
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnoses?.[0]?.caseTypeName || "Pending"}</span>
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
+                            <StatusIcon size={10} className={sc.text} />
+                            {row.processStatus || sc.label}
+                        </span>
+                    </div>
+                )
+            }
+        },
+        {
+            header: "Patient",
+            accessor: "patientName",
+            render: (val) => (
+                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+                    {val || "—"}
+                </div>
+            )
+        },
+        {
+            header: "Registered On",
+            accessor: "createAt",
+            render: (val) => (
+                <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <Calendar size={14} className="text-amber-500" />
+                    {new Date(val).toLocaleDateString(isRtl ? "ar-EG" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </div>
+            )
+        },
+        {
+            header: "",
+            accessor: "id",
+            render: (val) => (
+                <Link href={`/cases/${val}`} className="my-btn-outline px-3 py-1.5 text-xs float-right">
+                    View Details
+                </Link>
+            )
+        }
+    ];
 
     return (
-        <div className="p-6 max-w-7xl mx-auto space-y-6" dir={isRtl ? "rtl" : "ltr"}>
+        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300" dir={isRtl ? "rtl" : "ltr"}>
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400">
-                        <Users size={26} strokeWidth={2.5} />
+            <div className="relative z-20 rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 mb-8 backdrop-blur-xl transition-all duration-300">
+                <div className="absolute top-0 right-0 -mt-24 -mr-24 w-96 h-96 rounded-full bg-indigo-50 dark:bg-indigo-500/5 blur-3xl opacity-60 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 -mb-24 -ml-24 w-96 h-96 rounded-full bg-emerald-50 dark:bg-emerald-500/5 blur-3xl opacity-60 pointer-events-none" />
+
+                <div className="relative flex flex-col xl:flex-row xl:items-end justify-between gap-6">
+                    <div className="flex flex-1 items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 text-white shrink-0">
+                            <Users size={24} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                Student Cases
+                            </h1>
+                            <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base font-medium flex items-center gap-2 mt-1">
+                                Review and manage cases assigned to you
+                                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300">
+                                    {totalCount} Total
+                                </span>
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-2xl font-black text-slate-800 dark:text-white">Student List</h1>
-                        <p className="text-sm font-medium text-slate-400 dark:text-slate-500 mt-0.5">
-                            {loading ? "Loading…" : `${students.length} students · ${totalRequests} total requests`}
-                        </p>
+
+                    {/* Tabs only in this area */}
+                    <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl self-start overflow-x-auto max-w-full custom-scrollbar ring-1 ring-slate-200 dark:ring-slate-800">
+                        {TABS.map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 ${
+                                    activeTab === tab
+                                        ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-slate-200 dark:ring-slate-600"
+                                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800"
+                                }`}
+                            >
+                                {tab} Cases
+                            </button>
+                        ))}
                     </div>
                 </div>
-                <button
-                    onClick={fetchStudents}
-                    className="p-2.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                    title="Refresh"
-                >
-                    <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-                </button>
             </div>
 
-            {/* Content */}
-            {loading ? (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="h-52 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 animate-pulse" />
-                    ))}
-                </div>
-            ) : students.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-center">
-                    <div className="w-24 h-24 rounded-full bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center mb-6">
-                        <ClipboardList size={40} className="text-slate-300 dark:text-slate-600" />
+            {/* Filters Section - Moved Below Header */}
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white/50 dark:bg-slate-900/30 p-4 rounded-3xl border border-slate-100 dark:border-slate-800 backdrop-blur-sm relative z-30">
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
+                    <div className="relative w-full sm:w-80">
+                        <Search className={`absolute ${isRtl ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 text-slate-400`} size={18} />
+                        <input
+                            type="text"
+                            placeholder="Search by name..."
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            className={`w-full ${isRtl ? "pr-10 pl-4" : "pl-10 pr-4"} py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 shadow-sm`}
+                        />
                     </div>
-                    <p className="text-lg font-bold text-slate-500 dark:text-slate-400">No students yet</p>
-                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
-                        Students who send you case requests will appear here.
-                    </p>
-                </div>
-            ) : (
-                <motion.div
-                    className="grid grid-cols-1 lg:grid-cols-2 gap-5"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                >
-                    {students.map((student) => {
-                        const hasPending = student.requests.some((r) => r.status === "Pending");
-                        return (
-                            <motion.div
-                                key={student.studentPublicId}
-                                variants={cardVariants}
-                                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                            >
-                                {/* Student Info Header */}
-                                <div className="p-5 flex items-center gap-4 border-b border-slate-100 dark:border-slate-800">
-                                    {/* Avatar */}
-                                    <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-400 to-blue-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md shadow-indigo-200 dark:shadow-indigo-900/40">
-                                        {getInitials(student.studentName)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                            <h3 className="font-black text-slate-800 dark:text-white text-base truncate">
-                                                {student.studentName}
-                                            </h3>
-                                            {hasPending && (
-                                                <span className="shrink-0 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                                                    Pending
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                                            <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                                                <Hospital size={11} />
-                                                {student.university}
-                                            </span>
-                                            <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                                                <BookOpen size={11} />
-                                                Level {student.level}
-                                            </span>
-                                            <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                                                <GraduationCap size={11} />
-                                                {student.requests.length} request{student.requests.length !== 1 ? "s" : ""}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
 
-                                {/* Requests list */}
-                                <div className="divide-y divide-slate-50 dark:divide-slate-800/60">
-                                    {student.requests.map((req) => {
-                                        const s = getStatusStyles(req.status);
-                                        return (
-                                            <div key={req.id} className="flex items-center justify-between px-5 py-3 gap-3 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                                                <div className="min-w-0 flex-1">
-                                                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{req.caseName}</p>
-                                                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-                                                        {new Date(req.createAt).toLocaleDateString(isRtl ? "ar-EG" : "en-GB", { day: "numeric", month: "short", year: "numeric" })}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-2 shrink-0">
-                                                    <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${s.bg} ${s.text}`}>
-                                                        {s.icon}
-                                                        {req.status}
-                                                    </span>
-                                                    <Link
-                                                        href={`/my-students-cases/${req.patientCasePublicId}`}
-                                                        className="p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/30 text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                                        title="View Details"
-                                                    >
-                                                        <ChevronRight size={16} />
-                                                    </Link>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </motion.div>
-            )}
+                    <div className="w-full sm:w-80 relative z-[100]">
+                        <SearchableSelect
+                            options={[{ id: "", label: "All Case Types" }, ...caseTypes]}
+                            value={caseType}
+                            onChange={(val) => setCaseType(val as string)}
+                            placeholder="Search case type..."
+                            searchPlaceholder="Search..."
+                            accentColor="indigo"
+                            isRtl={isRtl}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex bg-slate-100 dark:bg-slate-950/50 p-1 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800 shrink-0 self-end md:self-center">
+                    <button
+                        onClick={() => setViewMode('grid')}
+                        className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'text-slate-400'}`}
+                    >
+                        <LayoutGrid size={18} />
+                    </button>
+                    <button
+                        onClick={() => setViewMode('table')}
+                        className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'text-slate-400'}`}
+                    >
+                        <List size={18} />
+                    </button>
+                </div>
+            </div>
+
+            {/* List / Grid Content */}
+            <motion.div
+                key="cases"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col gap-6"
+            >
+                {loading ? (
+                    viewMode === 'grid' ? (
+                        <div className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 place-items-center">
+                            {Array.from({ length: 6 }).map((_, i) => <MyCasesSkeleton key={i} />)}
+                        </div>
+                    ) : (
+                        <div className="space-y-4 pt-4">
+                            <div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" />
+                            <div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" />
+                        </div>
+                    )
+                ) : cases.length === 0 ? (
+                    <MyCasesEmptyState message="No cases found matching your criteria." />
+                ) : (
+                    viewMode === 'grid' ? (
+                        <motion.div layout className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 place-items-center">
+                            <AnimatePresence>
+                                {cases.map((item, i) => {
+                                    const sc = getCaseStatusConfig(item.processStatus || item.status);
+                                    const StatusIcon = sc.icon || Activity;
+                                    return (
+                                        <motion.div
+                                            key={item.id}
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            transition={{ duration: 0.4, delay: i * 0.05, type: 'spring', bounce: 0.3 }}
+                                            className="w-full flex justify-center h-full"
+                                        >
+                                            <CaseCard
+                                                caseItem={mapDoctorCaseToCaseItem(item)}
+                                                hideRequestButton={true}
+                                                navigationPath="/my-students-cases"
+                                                customBadge={
+                                                    <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-full p-0.5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-none ring-1 ring-white/50 dark:ring-slate-700">
+                                                        <span className={`shrink-0 flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
+                                                            {item.processStatus === 'In Progress' && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
+                                                            {item.processStatus !== 'In Progress' && <StatusIcon size={12} className={sc.text} />}
+                                                            {item.processStatus || sc.label}
+                                                        </span>
+                                                    </div>
+                                                }
+                                            />
+                                        </motion.div>
+                                    );
+                                })}
+                            </AnimatePresence>
+                        </motion.div>
+                    ) : (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
+                            <DataTable columns={casesColumns} data={cases} />
+                        </motion.div>
+                    )
+                )}
+
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    hasPreviousPage={page > 1}
+                    hasNextPage={page < totalPages}
+                    onPageChange={setPage}
+                />
+            </motion.div>
         </div>
     );
 }

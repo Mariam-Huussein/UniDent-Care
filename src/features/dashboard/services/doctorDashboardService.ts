@@ -92,4 +92,14 @@ export const doctorDashboardService = {
         const response = await api.get(`/Universities/lookup`);
         return response.data.data;
     },
+
+    getDoctorCases: async (doctorId: string, params: { page?: number; pageSize?: number; status?: string; search?: string; caseType?: string } = {}) => {
+        const { page = 1, pageSize = 10, status, search, caseType } = params;
+        const query: Record<string, any> = { page, pageSize };
+        if (status) query.status = status;
+        if (search) query.PatientName = search; // التغيير هنا ليتوافق مع الـ Backend
+        if (caseType) query.CaseType = caseType; // التغيير هنا ليتوافق مع الـ Backend
+        const response = await api.get(`/Cases/doctor/${doctorId}`, { params: query });
+        return response.data;
+    },
 };

@@ -11,6 +11,7 @@ import { RootState } from "@/store";
 import { createCaseAi, createDiagnosisAi } from "@/features/cases/services/caseService";
 import { getCaseTypes } from "@/server/caseTypes.action";
 import { chatWithAI, getDiagnosis, ChatMessage } from "@/features/cases/services/aiChatService";
+import { startConversation, saveMessage } from "@/features/cases/services/chatHistoryService";
 import Cookies from "js-cookie";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useRouter } from "next/navigation";
@@ -70,8 +71,10 @@ export default function AddCaseChatbot() {
   const [showDiagnosis, setShowDiagnosis] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [collectingImages, setCollectingImages] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const initialized = useRef(false);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -80,11 +83,22 @@ export default function AddCaseChatbot() {
   // ── Bootstrap: send empty history to get first AI message ──
   useEffect(() => {
     const init = async () => {
+      if (initialized.current) return;
+      initialized.current = true;
       setIsTyping(true);
       try {
-        const initHistory: ChatMessage[] = [{ role: "USER", content: "أهلاً، أريد استشارة طبية بخصوص أسناني" }];
+        const convId = await startConversation();
+        setConversationId(convId);
+
+        const initMsg = "أهلاً، أريد استشارة طبية بخصوص أسناني";
+        await saveMessage(convId, initMsg, false);
+
+        const initHistory: ChatMessage[] = [{ role: "USER", content: initMsg }];
         const firstMsgObj = await chatWithAI(initHistory);
         const firstMsgText = typeof firstMsgObj === "string" ? firstMsgObj : (firstMsgObj.reply || JSON.stringify(firstMsgObj));
+        
+        await saveMessage(convId, firstMsgText, true);
+
         const history: ChatMessage[] = [...initHistory, { role: "MODEL", content: firstMsgText }];
         setChatHistory(history);
         setMessages([{ id: "init", sender: "bot", content: firstMsgText }]);
@@ -126,6 +140,10 @@ export default function AddCaseChatbot() {
       const userMsg: ChatMessage = { role: "USER", content: textToSend };
       historyForAI.push(userMsg);
       setChatHistory(historyForAI);
+      
+      if (conversationId) {
+        saveMessage(conversationId, textToSend, false).catch(err => console.error("Failed to save user msg:", err));
+      }
     }
 
     // Call AI
@@ -162,6 +180,10 @@ export default function AddCaseChatbot() {
 
       const updatedHistory: ChatMessage[] = [...historyForAI, { role: "MODEL", content: responseString }];
       setChatHistory(updatedHistory);
+      
+      if (conversationId && !isServerBusy && responseString) {
+        saveMessage(conversationId, responseString, true).catch(err => console.error("Failed to save AI msg:", err));
+      }
       
       setMessages(prev => {
         let newMessages = [...prev];
@@ -222,6 +244,10 @@ export default function AddCaseChatbot() {
         content: diagText,
         isDiagnosis: true,
       }]);
+
+      if (conversationId) {
+        saveMessage(conversationId, diagText, true).catch(err => console.error("Failed to save diagnosis msg:", err));
+      }
 
       // Move to image collection phase
       setCollectingImages(true);
