@@ -20,7 +20,7 @@ export default function Odontogram() {
     console.log(patient)
 
     // ── Derive from context ────────────────────────────────────────────────
-    const diagnoses           = patient?.diagnoses ?? [];
+    const diagnoses           = patient?.diagnoses ?? null;
     const status              = patient?.status;
     const readonly            = DiagnosisFlag;
     const assignedStudentName = studentOwnerData?.data?.fullName ?? null;
@@ -47,8 +47,7 @@ export default function Odontogram() {
     // ── Derived ────────────────────────────────────────────────────────────
     const isDiagnosisActive = DiagnosisFlag && !readonly;
     const isUnassigned      = status === "Pending";
-    console.log(caseData)
-    const hasDiagnosisData  = diagnoses.some(d => (d.teethNumbers?.length ?? 0) > 0);
+    const hasDiagnosisData  = !!diagnoses && diagnoses.length > 0;
     const showRightPanel    = isDiagnosisActive || hasDiagnosisData;
 
     const conditions: ToothConditionGroup[] = useMemo(

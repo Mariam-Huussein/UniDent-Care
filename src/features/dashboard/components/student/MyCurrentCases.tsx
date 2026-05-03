@@ -5,6 +5,8 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { StudentDashboardCaseItem } from "@/features/cases/types/studentDashboard.types";
+import { useMemo } from "react";
 
 export default function MyCurrentCases() {
   const { t, language } = useLanguage();
@@ -24,7 +26,9 @@ export default function MyCurrentCases() {
   }
 
   // Filter for 'In Progress' status
-  const currentCases = data?.data?.items?.filter(item => item.status === "InProgress") || [];
+  const currentCases = useMemo(() => {
+    return data?.data?.items?.filter((item: StudentDashboardCaseItem) => item.status === "InProgress") || [];
+  }, [data]);
 
   return (
     <Card className="h-full flex flex-col rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-lg relative overflow-hidden" dir={isRtl ? "rtl" : "ltr"}>
@@ -66,17 +70,15 @@ export default function MyCurrentCases() {
                         {caseItem.patientName}
                       </span>
                     </div>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-6 rtl:mr-6">
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-6 ms-6">
                       {isRtl ? "رقم الهاتف:" : "Phone:"} {caseItem.phone}
                     </span>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-6 rtl:mr-6">
-                      {isRtl ? "وصف الحالة:" : "Case description:"} {caseItem.diagnoses?.[0]?.caseTypeName}
-                    </span>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 ml-6 rtl:mr-6">
-                      {isRtl ? "الحالة:" : "Status:"} {caseItem.status}
+                    <span className="text-xs line-clamp-1 font-medium text-slate-500 dark:text-slate-400 ml-6 ms-6">
+                      {isRtl ? "وصف الحالة:" : "Case description:"} {caseItem.description || caseItem.diagnoses?.[0]?.caseTypeName || "No Description Provided"}
+                  {isRtl ? "الحالة:" : "Status:"} {caseItem.status}
                     </span>
                   </div>
-                </div>
+        </div>
               </div>
             ))}
           </div>

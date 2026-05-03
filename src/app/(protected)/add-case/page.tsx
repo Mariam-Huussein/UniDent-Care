@@ -8,7 +8,7 @@ import {
   Send, Loader2, Bot, User, Paperclip, CheckCircle2, X, Sparkles, Stethoscope, RefreshCcw
 } from "lucide-react";
 import { RootState } from "@/store";
-import { createCaseAi } from "@/features/cases/services/caseService";
+import { createCaseAi, createDiagnosisAi } from "@/features/cases/services/caseService";
 import { getCaseTypes } from "@/server/caseTypes.action";
 import { chatWithAI, getDiagnosis, ChatMessage } from "@/features/cases/services/aiChatService";
 import Cookies from "js-cookie";
@@ -26,6 +26,8 @@ interface DisplayMessage {
   content: string;
   isDiagnosis?: boolean;
   canRetry?: boolean;
+  isEndConversationBtn?: boolean;
+  diagnosisData?: any;
 }
 
 // ─────────────────────────────────────────────
@@ -52,6 +54,8 @@ export default function AddCaseChatbot() {
     attachPhotos:{ en: "Attach Photos", ar: "إرفاق صور" },
     skip:        { en: "Skip", ar: "تخطي" },
     createCase:  { en: "Create Case", ar: "إنشاء حالة" },
+    endConv:     { en: "End Conversation", ar: "إنهاء المحادثة" },
+    endingConv:  { en: "Ending...", ar: "جاري الإنهاء..." },
   };
   const t = (obj: Localized) => obj[language as keyof Localized];
 
@@ -78,11 +82,12 @@ export default function AddCaseChatbot() {
     const init = async () => {
       setIsTyping(true);
       try {
-        const initHistory: ChatMessage[] = [{ role: "USER", content: "" }];
-        const firstMsg = await chatWithAI(initHistory);
-        const history: ChatMessage[] = [...initHistory, { role: "MODEL", content: firstMsg }];
+        const initHistory: ChatMessage[] = [{ role: "USER", content: "أهلاً، أريد استشارة طبية بخصوص أسناني" }];
+        const firstMsgObj = await chatWithAI(initHistory);
+        const firstMsgText = typeof firstMsgObj === "string" ? firstMsgObj : (firstMsgObj.reply || JSON.stringify(firstMsgObj));
+        const history: ChatMessage[] = [...initHistory, { role: "MODEL", content: firstMsgText }];
         setChatHistory(history);
-        setMessages([{ id: "init", sender: "bot", content: firstMsg }]);
+        setMessages([{ id: "init", sender: "bot", content: firstMsgText }]);
       } catch (err: any) {
         console.error("AI init error", err);
         toast.error(t(tUI.error));
@@ -128,7 +133,27 @@ export default function AddCaseChatbot() {
     setIsTyping(true);
     try {
       const aiResponse = await chatWithAI(historyForAI);
-      const responseString = typeof aiResponse === 'string' ? aiResponse : JSON.stringify(aiResponse);
+      
+      let responseString = "";
+      let isCompleted = false;
+      let aiDiagnosis = null;
+      let shouldCollectImages = false;
+
+      if (typeof aiResponse === "string") {
+        responseString = aiResponse;
+      } else if (aiResponse && typeof aiResponse === "object") {
+        responseString = aiResponse.reply || JSON.stringify(aiResponse);
+        if (aiResponse.diagnosis_status === "completed" && aiResponse.show_side_panel) {
+          isCompleted = true;
+          aiDiagnosis = aiResponse.diagnosis;
+        } else if (aiResponse.diagnosis && Array.isArray(aiResponse.diagnosis) && aiResponse.diagnosis.length > 0) {
+          aiDiagnosis = aiResponse.diagnosis;
+          shouldCollectImages = true;
+          setDiagnosisData(aiDiagnosis);
+          setCollectingImages(true);
+        }
+      }
+
       console.log("AI Response received:", responseString);
       
       const isServerBusy = responseString.includes("ضغط") || 
@@ -137,23 +162,38 @@ export default function AddCaseChatbot() {
 
       const updatedHistory: ChatMessage[] = [...historyForAI, { role: "MODEL", content: responseString }];
       setChatHistory(updatedHistory);
+      
       setMessages(prev => {
+        let newMessages = [...prev];
         if (isRetry && prev.length > 0 && prev[prev.length - 1].sender === "bot") {
-          const newMessages = [...prev];
           newMessages[newMessages.length - 1] = {
             id: Date.now() + "_b",
             sender: "bot",
             content: responseString,
-            canRetry: isServerBusy
+            canRetry: isServerBusy,
+            isEndConversationBtn: isCompleted,
+            diagnosisData: aiDiagnosis
           };
-          return newMessages;
+        } else {
+          newMessages.push({ 
+            id: Date.now() + "_b", 
+            sender: "bot", 
+            content: responseString,
+            canRetry: isServerBusy,
+            isEndConversationBtn: isCompleted,
+            diagnosisData: aiDiagnosis
+          });
         }
-        return [...prev, { 
-          id: Date.now() + "_b", 
-          sender: "bot", 
-          content: responseString,
-          canRetry: isServerBusy
-        }];
+        
+        if (shouldCollectImages) {
+          newMessages.push({
+            id: Date.now() + "_img",
+            sender: "bot",
+            content: isRtl ? "من فضلك ارسل صور الاسنان" : "Please send pictures of the teeth",
+          });
+        }
+
+        return newMessages;
       });
     } catch (err: any) {
       toast.error(err.message || t(tUI.error));
@@ -203,16 +243,17 @@ export default function AddCaseChatbot() {
         .join("\n");
 
       // Try to match a case type
+      let availableCaseTypes: any[] = [];
       let caseTypeId = "";
       try {
         const res = await getCaseTypes(1, 40, "");
-        const items = (res as any).data?.items || (res as any).items || [];
-        if (items.length > 0) {
+        availableCaseTypes = (res as any).data?.items || (res as any).items || [];
+        if (availableCaseTypes.length > 0) {
           // Use first/general type as fallback
-          const general = items.find((i: any) =>
+          const general = availableCaseTypes.find((i: any) =>
             (i.name || "").toLowerCase().includes("general")
           );
-          caseTypeId = general?.publicId || items[0]?.publicId || "";
+          caseTypeId = general?.publicId || availableCaseTypes[0]?.publicId || "";
         }
       } catch { /* fallback: empty */ }
 
@@ -230,6 +271,107 @@ export default function AddCaseChatbot() {
       });
 
       console.log("Case created:", caseRes.data);
+      const newCaseId = caseRes.data?.data || caseRes.data;
+
+      // Create Diagnoses
+      if (diagnosisData && Array.isArray(diagnosisData)) {
+        for (const diag of diagnosisData) {
+          let diagCaseTypeId = caseTypeId;
+          if (diag.CaseTypeId) {
+             const matchedType = availableCaseTypes.find((t: any) => t.key === diag.CaseTypeId || t.name === diag.CaseTypeId);
+             if (matchedType) {
+                 diagCaseTypeId = matchedType.publicId;
+             }
+          }
+
+          await createDiagnosisAi({
+             patientCaseId: newCaseId,
+             stage: 0,
+             caseTypeId: diagCaseTypeId,
+             notes: diag.note || diag.description,
+             createdById: patientId,
+             role: userRole,
+             teethNumbers: diag.tooth_number
+          });
+        }
+      }
+
+      setCompleted(true);
+      setMessages(prev => [...prev, {
+        id: "final",
+        sender: "bot",
+        content: t(tUI.success),
+      }]);
+      toast.success(t(tUI.success));
+      setTimeout(() => router.push("/my-cases"), 2000);
+    } catch (err: any) {
+      toast.error(err.message || t(tUI.error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // ── End Conversation & Create Case + Diagnosis ──
+  const handleEndConversation = async (diagnosisArray: any[]) => {
+    if (isSubmitting || completed) return;
+    setIsSubmitting(true);
+    try {
+      const description = chatHistory
+        .filter(m => m.role === "USER")
+        .map(m => m.content)
+        .join("\n");
+
+      // Fetch case types
+      let availableCaseTypes: any[] = [];
+      let caseTypeId = "";
+      try {
+        const res = await getCaseTypes(1, 40, "");
+        availableCaseTypes = (res as any).data?.items || (res as any).items || [];
+        if (availableCaseTypes.length > 0) {
+          const general = availableCaseTypes.find((i: any) =>
+            (i.name || "").toLowerCase().includes("general")
+          );
+          caseTypeId = general?.publicId || availableCaseTypes[0]?.publicId || "";
+        }
+      } catch { /* fallback */ }
+
+      const title = isRtl ? "حالة جديدة" : "New Case";
+
+      // 1. Create Case
+      const caseRes = await createCaseAi({
+        PatientId: patientId,
+        Title: title,
+        Description: description,
+        CaseTypeId: caseTypeId,
+        IsPublic: false,
+        CreatedById: patientId,
+        CreatedByRole: userRole,
+      });
+
+      const newCaseId = caseRes.data?.data || caseRes.data;
+
+      // 2. Create Diagnoses
+      if (diagnosisArray && Array.isArray(diagnosisArray)) {
+        for (const diag of diagnosisArray) {
+          let diagCaseTypeId = caseTypeId;
+          if (diag.CaseTypeId) {
+             const matchedType = availableCaseTypes.find((t: any) => t.key === diag.CaseTypeId || t.name === diag.CaseTypeId);
+             if (matchedType) {
+                 diagCaseTypeId = matchedType.publicId;
+             }
+          }
+
+          await createDiagnosisAi({
+             patientCaseId: newCaseId,
+             stage: 0,
+             caseTypeId: diagCaseTypeId,
+             notes: diag.note,
+             createdById: patientId,
+             role: userRole,
+             teethNumbers: diag.tooth_number
+          });
+        }
+      }
 
       setCompleted(true);
       setMessages(prev => [...prev, {
@@ -336,6 +478,17 @@ export default function AddCaseChatbot() {
                     >
                       <RefreshCcw size={14} /> 
                       {t(tUI.retry)}
+                    </button>
+                  )}
+
+                  {msg.isEndConversationBtn && !completed && (
+                    <button
+                      onClick={() => handleEndConversation(msg.diagnosisData)}
+                      disabled={isSubmitting}
+                      className="mt-3 flex items-center gap-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white px-4 py-2 rounded-xl transition-all shadow-md shadow-emerald-500/20 active:scale-95"
+                    >
+                      {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />} 
+                      {isSubmitting ? t(tUI.endingConv) : t(tUI.endConv)}
                     </button>
                   )}
                 </div>

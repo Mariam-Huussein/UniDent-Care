@@ -66,6 +66,7 @@ export function CasesTabContent({
     {
       header: "Diagnosis",
       accessor: "diagnoses",
+      accessor: "diagnoses",
       render: (_, row) => {
           const sc = getCaseStatusConfig(row.processStatus || row.status);
           const StatusIcon = sc.icon || Activity;

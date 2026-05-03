@@ -20,7 +20,7 @@ export interface ChatRequest {
 // ── POST /chat ───────────────────────────────
 export const chatWithAI = async (
   history: ChatMessage[]
-): Promise<string> => {
+): Promise<any> => {
   const res = await fetch(`${AI_BASE_URL}/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -38,14 +38,12 @@ export const chatWithAI = async (
   const data = await res.json();
 
   // Handle various possible response shapes
-  if (typeof data?.reply === "string") return data.reply;
-  if (typeof data === "string") return data;
-  if (typeof data?.content === "string") return data.content;
-  if (typeof data?.response === "string") return data.response;
-  if (typeof data?.message === "string") return data.message;
+  if (data && typeof data === "object") {
+    return data;
+  }
 
-  // Fallback: stringify whatever came back
-  return JSON.stringify(data);
+  // Fallback
+  return data;
 };
 
 // ── GET /diagnosis ───────────────────────────
