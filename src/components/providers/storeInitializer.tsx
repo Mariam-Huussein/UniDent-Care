@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import Cookies from "js-cookie";
 import { getProfileByRole } from "@/features/auth/services/authService";
 import { setUserFromReload } from "@/features/auth/store/authSlice";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 
 export default function StoreInitializer() {
   const dispatch = useDispatch();
@@ -13,10 +14,8 @@ export default function StoreInitializer() {
   useEffect(() => {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
-    const token = Cookies.get("token") || (typeof window !== "undefined" ? localStorage.getItem("token") : null);
-    const role = Cookies.get("user_role") || (typeof window !== "undefined" ? localStorage.getItem("user_role") : null);
-    const publicId = Cookies.get("user_id") || (typeof window !== "undefined" ? localStorage.getItem("user_id") : null);
-    if (!token || !role || !publicId) return;
+    const { token, userId: publicId, userRole: role } = getUserDetailsFromCookies();
+    if (!token || !role || !publicId) return;  
 
     hasInitialized.current = true;
 
