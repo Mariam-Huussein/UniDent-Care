@@ -29,7 +29,7 @@ export default function MediaSlider({ medias }: { medias: { id: string; mediaUrl
                                 <img
                                     src={m.mediaUrl}
                                     alt={`Media ${idx + 1}`}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300 cursor-pointer"
                                     onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                                 />
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 rounded-xl" />

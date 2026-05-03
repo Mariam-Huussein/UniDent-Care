@@ -1,4 +1,5 @@
 import { ApiResponse } from "@/types/api";
+import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
 
 export interface CaseCardProps {
     caseItem: CaseItem;
@@ -12,11 +13,13 @@ export interface CaseItem {
     patientId: string;
     patientName: string;
     patientAge: number;
-    caseType: CaseType | null;
+    description?: string;
+    caseType: CaseType | string | null;
     status: string;
     createAt: string;
     gender: 0 | 1 | undefined;
     diagnoses: DiagnosisDto[] | null;
+    diagnosisdto?: DiagnosisDto[] | null;
     imageUrls: string[];
     totalSessions?: number;
     pendingRequests?: number;
@@ -53,14 +56,6 @@ export type Cases = CaseCardProps["caseItem"][];
 export interface AvailableCasesResponse extends ApiResponse<MetaData> { }
 
 
-export interface DiagnosisDto {
-    id: string;
-    diagnosisStage: string;
-    caseType: string;
-    notes: string;
-    teethNumbers: number[];
-}
-
 export interface UserFlags {
     isOwner: boolean;
     role: string;
@@ -78,11 +73,11 @@ export interface CaseDetailData {
     patientName: string;
     patientAge: number;
     status: string;
+    description?: string;
     processStatus: string;
     phone: string;
     city: string;
     nationalId: string;
-    gender: string | null;
     isPublic: boolean;
     universityId: string;
     universityName: string;
@@ -102,6 +97,16 @@ export interface CaseDetailData {
 
 export interface CaseDetailResponse extends ApiResponse<CaseDetailData> { }
 
+export interface DiagnosesMetaData {
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    items: DiagnosisDto[];
+}
+
+export type DiagnosesResponse = ApiResponse<DiagnosesMetaData>;
 export interface CaseRequestBody {
     patientCasePublicId: string;
     studentPublicId: string;
@@ -186,6 +191,7 @@ export interface StudentCaseItem {
     assignedStudentId: string;
     assignedDoctorId: string;
     diagnoses: DiagnosisDto[] | null;
+    diagnosisdto?: DiagnosisDto[] | null;
     imageUrls: string[];
     createdById: string;
     createdByRole: string;

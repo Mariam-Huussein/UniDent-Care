@@ -1,10 +1,9 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, LayoutGrid, List, Clock, Stethoscope, ArrowRight } from "lucide-react";
+import { Clock, Stethoscope, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { StudentRequestItem } from "../../types/caseCardProps.types";
-import SelectItems from "@/components/common/SelectItems";
+import { StudentDashboardRequestItem } from "../../types/studentDashboard.types";
 import DataTable, { Column } from "@/components/common/DataTable";
 import Pagination from "@/components/common/pagination";
 import { StudentRequestCard } from "./StudentRequestCard";
@@ -13,7 +12,7 @@ import { MyCasesEmptyState } from "./MyCasesEmptyState";
 import { getRequestStatusConfig } from "./getRequestStatusConfig";
 
 interface RequestsTabContentProps {
-    requests: StudentRequestItem[];
+    requests: StudentDashboardRequestItem[];
     requestsLoading: boolean;
     requestStatus: string;
     setRequestStatus: (val: string) => void;
@@ -31,7 +30,7 @@ export function RequestsTabContent({
 
   const REQUEST_STATUSES = ["Pending", "UnderReview", "Approved", "Rejected", "Taken", "Cancelled"];
 
-  const requestColumns: Column<StudentRequestItem>[] = [
+  const requestColumns: Column<StudentDashboardRequestItem>[] = [
     {
       header: "Request Info",
       accessor: "patientName",

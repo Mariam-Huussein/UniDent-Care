@@ -21,14 +21,15 @@ const mapPatientCaseToCaseItem = (item: PatientCaseItem): CaseItem => ({
     patientId: item.patientId,
     patientName: item.patientName,
     patientAge: item.patientAge,
-    caseType: item.diagnoses?.[0] ? { publicId: "", name: item.diagnoses[0].caseType, description: "" } : null,
+    caseType: item.diagnoses?.[0] ? { publicId: "", name: item.diagnoses[0]?.caseTypeName || "null", description: "" } : null,
     status: item.status,
     createAt: item.createAt,
     totalSessions: item.totalSessions,
     pendingRequests: item.pendingRequests,
     imageUrls: item.imageUrls,
     gender: undefined,
-    diagnoses: item.diagnoses || null,
+    diagnoses: item.diagnoses || item.diagnosisdto || null,
+    diagnosisdto: item.diagnoses || item.diagnosisdto || null,
 });
 
 export default function MyCasesPatientScreen() {
@@ -59,7 +60,7 @@ export default function MyCasesPatientScreen() {
                 const StatusIcon = sc.icon || Activity;
                 return (
                     <div className="flex flex-col gap-1.5 items-start">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnoses?.[0]?.caseType || "Pending"}</span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnoses?.[0]?.caseTypeName || "Pending"}</span>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
                             <StatusIcon size={10} className={sc.text} />
                             {row.processStatus || sc.label}
@@ -139,7 +140,7 @@ export default function MyCasesPatientScreen() {
 
                         <div className="flex items-center gap-3 w-full sm:w-auto">
                             <div className="w-full sm:w-40">
-                                <select 
+                                <select
                                     className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-700 dark:text-slate-200 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NDkzYjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=')] bg-no-repeat bg-position-[right_12px_center] bg-size[16px] pr-10 hover:border-indigo-500"
                                     value={status}
                                     onChange={(e) => {
@@ -153,9 +154,9 @@ export default function MyCasesPatientScreen() {
                                     <option value="Completed">Completed</option>
                                 </select>
                             </div>
-                            
+
                             <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
-                            
+
                             <div className="flex bg-slate-100 dark:bg-slate-950/50 p-1 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
                                 <button
                                     onClick={() => setViewMode('grid')}
@@ -214,8 +215,8 @@ export default function MyCasesPatientScreen() {
                                             transition={{ duration: 0.4, delay: i * 0.05, type: 'spring', bounce: 0.3 }}
                                             className="w-full flex justify-center h-full"
                                         >
-                                            <CaseCard 
-                                                caseItem={mapPatientCaseToCaseItem(item)} 
+                                            <CaseCard
+                                                caseItem={mapPatientCaseToCaseItem(item)}
                                                 hideRequestButton={true}
                                                 navigationPath="/my-cases"
                                                 customBadge={
@@ -234,18 +235,18 @@ export default function MyCasesPatientScreen() {
                             </AnimatePresence>
                         </motion.div>
                     ) : (
-                        <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.4}}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
                             <DataTable columns={casesColumns} data={cases} />
                         </motion.div>
                     )
                 )}
 
-                <Pagination 
-                    currentPage={page} 
-                    totalPages={totalPages} 
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
                     hasPreviousPage={page > 1}
                     hasNextPage={page < totalPages}
-                    onPageChange={setPage} 
+                    onPageChange={setPage}
                 />
             </motion.div>
         </div>

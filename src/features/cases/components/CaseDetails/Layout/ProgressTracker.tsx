@@ -1,30 +1,64 @@
 "use client";
 
+import { CaseStatus } from "@/features/cases/types/CaseDetails.types";
+import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
 import { motion } from "framer-motion";
 import { Check, Circle } from "lucide-react";
 
 interface ProgressTrackerProps {
-    currentStep: number;
-    processStatus?: string;
+    status: CaseStatus;
+    createdByRole: string;
+    diagnoses: DiagnosisDto[] | null;
+    supervisingDoctorName?: string;
+    StudentName?: string;
 }
 
-const STEPS = [
-    { label: "Case Added", desc: "AI exam" },
-    { label: "Diagnosis", desc: "Initial exam" },
-    { label: "Treatment", desc: "Active care" },
-    { label: "Follow-up", desc: "Post-review" },
-];
+export default function ProgressTracker({ status, createdByRole, diagnoses, supervisingDoctorName }: ProgressTrackerProps) {
+    let currentStep = 0;
 
-export default function ProgressTracker({ currentStep, processStatus }: ProgressTrackerProps) {
+    if (status === "Completed") {
+        currentStep = 4;
+    } else if (status === "InProgress") {
+        currentStep = 2;
+    } else if ((diagnoses || diagnoses !== null)) {
+        currentStep = 1;
+    } else {
+        currentStep = 0;
+    }
+
+    const getInitialStageDesc = () => {
+        if (!diagnoses || diagnoses.length === 0) {
+            return createdByRole === "Patient" ? "AI Exam" : `By ${createdByRole}`;
+        }
+        
+        const firstStage = diagnoses[0].stage;
+        if (firstStage === 0 || firstStage === "AI") {
+            return "AI Exam";
+        }
+        return "By Doctor";
+    };
+    
+    const isReviewed = (diagnoses && diagnoses !== null) && status === 'InProgress';
+
+    const diagnosisLabel = isReviewed
+        ? `Reviewed By Supervisor`
+        : `Clinical Diagnosis`;
+
+    const diagnosisDesc = isReviewed
+        ? `Verified Review`
+        : "Clinical Exam";
+
+    const STEPS = [
+        { label: "Case Added", desc: getInitialStageDesc() },
+        { label: diagnosisLabel, desc: diagnosisDesc },
+        { label: "Treatment", desc: "Active care" },
+        { label: "Case Closed", desc: "Completed" },
+    ];
+
     return (
         <div className="space-y-5">
             <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Treatment Progress</h3>
-                {processStatus && (
-                    <span className="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800/40">
-                        {processStatus}
-                    </span>
-                )}
             </div>
 
             <div className="flex items-start">
@@ -53,10 +87,10 @@ export default function ProgressTracker({ currentStep, processStatus }: Progress
                                 animate={{ scale: 1, opacity: 1 }}
                                 transition={{ delay: i * 0.15, type: "spring", stiffness: 300, damping: 20 }}
                                 className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${done
-                                        ? "bg-indigo-600 dark:bg-indigo-500 border-indigo-600 dark:border-indigo-500 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
-                                        : active
-                                            ? "bg-white dark:bg-slate-900 border-indigo-500 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 shadow-lg shadow-indigo-100 dark:shadow-indigo-900/20 ring-4 ring-indigo-50 dark:ring-indigo-900/10"
-                                            : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600"
+                                    ? "bg-indigo-600 dark:bg-indigo-50 border-indigo-600 dark:border-indigo-500 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
+                                    : active
+                                        ? "bg-white dark:bg-slate-900 border-indigo-500 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 shadow-lg shadow-indigo-100 dark:shadow-indigo-900/20 ring-4 ring-indigo-50 dark:ring-indigo-900/10"
+                                        : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600"
                                     }`}
                             >
                                 {done ? (

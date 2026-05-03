@@ -11,7 +11,7 @@ import { DoctorSearchResult } from "@/features/cases/types/caseCardProps.types";
 interface SendRequestModalProps {
     caseId: string;
     patientName: string;
-    caseType?: string;
+    caseType?: string | null;
     onClose: () => void;
 }
 
@@ -42,7 +42,7 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
     }, []);
 
     return (
-        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-90 flex items-center justify-center p-4" onClick={onClose}>
             <div
                 className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl dark:shadow-blue-900/10 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 border border-transparent dark:border-slate-800"
                 onClick={(e) => e.stopPropagation()}

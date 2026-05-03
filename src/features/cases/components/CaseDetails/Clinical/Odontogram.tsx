@@ -15,31 +15,25 @@ import OdontogramEmptyState from "./OdontogramParts/OdontogramEmptyState";
 
 export default function Odontogram() {
     const { caseData, studentOwnerData, doctorOwnerData } = useCase();
+    const DiagnosisFlag = false
     const patient = caseData as PatientCase;
+    console.log(patient)
 
     // ── Derive from context ────────────────────────────────────────────────
     const diagnoses           = patient?.diagnoses ?? null;
     const status              = patient?.status;
-    const readonly            = status !== "Diagnosis";
+    const readonly            = DiagnosisFlag;
     const assignedStudentName = studentOwnerData?.data?.fullName ?? null;
     const assignedDoctorName  = doctorOwnerData?.data?.fullName  ?? null;
 
     const teeth: ToothData[] = useMemo(() => {
         if (!diagnoses || !Array.isArray(diagnoses)) return [];
-        const allTeeth: ToothData[] = [];
-        diagnoses.forEach(diag => {
-            if (diag.teethNumbers?.length) {
-                diag.teethNumbers.forEach(num => {
-                    allTeeth.push({
-                        number: num,
-                        status: "needs-treatment" as ToothStatus,
-                        treatmentType: diag.caseType || "",
-                        notes: diag.notes || "",
-                    });
-                });
-            }
-        });
-        return allTeeth;
+        return diagnoses.flatMap(d => (d.teethNumbers ?? []).map(num => ({
+            number: num,
+            status: "needs-treatment" as ToothStatus,
+            treatmentType: d.caseTypeName || "",
+            notes: d.notes || "",
+        })));
     }, [diagnoses]);
 
     // ── Local state ────────────────────────────────────────────────────────
@@ -51,7 +45,7 @@ export default function Odontogram() {
     useEffect(() => { setLocalTeeth(teeth); }, [teeth]);
 
     // ── Derived ────────────────────────────────────────────────────────────
-    const isDiagnosisActive = status === "Diagnosis" && !readonly;
+    const isDiagnosisActive = DiagnosisFlag && !readonly;
     const isUnassigned      = status === "Pending";
     const hasDiagnosisData  = !!diagnoses && diagnoses.length > 0;
     const showRightPanel    = isDiagnosisActive || hasDiagnosisData;

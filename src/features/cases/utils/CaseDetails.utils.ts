@@ -16,7 +16,7 @@ export function getTabsForStatus(status: CaseStatus): TabDef[] {
                 { key: "odontogram", label: "Odontogram" },
                 { key: "medical", label: "Medical Info" },
             ];
-        case "Diagnosis":
+        case "UnderReview":
             return [
                 { key: "odontogram", label: "Odontogram" },
                 { key: "medical", label: "Medical Info" },
@@ -52,7 +52,7 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-gray-200',
                 gradient: 'from-gray-400 to-gray-500',
             };
-        case 'Diagnosis':
+        case 'UnderReview':
             return {
                 label: 'Diagnosis',
                 bg: 'bg-blue-50',

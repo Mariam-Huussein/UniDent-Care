@@ -1,8 +1,9 @@
 import { ToothConditionGroup } from "react-odontogram";
-import { DiagnosisDto } from "../types/caseCardProps.types";
-import { ToothData } from "../types/CaseDetails.types";
+import { DiagnosisStage, ToothData } from "../types/CaseDetails.types";
 import { getToothStatusColor } from "./CaseDetails.utils";
 import { ToothPanelData } from "../components/CaseDetails/Clinical/OdontogramParts/ToothInfoPanel";
+import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
+
 
 export function buildConditions(teeth: ToothData[]): ToothConditionGroup[] {
     const groups: Record<
@@ -27,19 +28,17 @@ export function buildDiagnosedTeethMap(
 ): Map<number, ToothPanelData> {
     const map = new Map<number, ToothPanelData>();
     if (!diagnoses || !Array.isArray(diagnoses)) return map;
-
-    diagnoses.forEach(diag => {
-        for (const num of diag.teethNumbers ?? []) {
+    for (const diagnosis of diagnoses) {
+        for (const num of diagnosis.teethNumbers ?? []) {
             map.set(num, {
                 toothNumber: num,
-                caseType: diag.caseType,
-                diagnosisStage: diag.diagnosisStage,
-                notes: diag.notes,
+                caseType: diagnosis.caseTypeName || "",
+                diagnosisStage: diagnosis.stage as DiagnosisStage,
+                notes: diagnosis.notes || "",
                 assignedStudentName: assignedStudentName ?? null,
                 assignedDoctorName: assignedDoctorName ?? null,
             });
         }
-    });
-
+    }
     return map;
 }

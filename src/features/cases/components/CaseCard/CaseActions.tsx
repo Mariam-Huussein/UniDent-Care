@@ -8,7 +8,7 @@ import SendRequestModal from "./SendRequestModal";
 interface CaseActionsProps {
     caseId: string;
     patientName: string;
-    caseType?: string;
+    caseType?: string | null;
     hideRequestButton?: boolean;
     navigationPath?: string;
 }
