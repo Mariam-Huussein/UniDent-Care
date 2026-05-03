@@ -9,17 +9,8 @@ import listPlugin from "@fullcalendar/list";
 import { useStudentDashboardData } from "@/features/dashboard/hooks/useStudentDashboardData";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import MyCustomButton from "@/components/ui/MyCustomButton";
-import { Calendar as CalendarIcon, CheckCircle, Clock } from "lucide-react";
-import { format } from "date-fns";
-import { ar, enUS } from "date-fns/locale";
+import SessionDetailsDialog from "./SessionDetailsDialog";
+import { SessionItem } from "../../server/studentDashboard.action";
 
 const FullCalendar = dynamic(() => import("@fullcalendar/react"), { ssr: false });
 
@@ -29,7 +20,7 @@ export default function CalendarWidget() {
   const { sessions } = useStudentDashboardData();
   const { data, isLoading, isError } = sessions;
 
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [selectedEvent, setSelectedEvent] = useState<SessionItem | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   const [currentView, setCurrentView] = useState("dayGridMonth");
@@ -48,13 +39,8 @@ export default function CalendarWidget() {
   }, []);
 
   const handleEventClick = (clickInfo: any) => {
-    setSelectedEvent({
-      id: clickInfo.event.id,
-      title: clickInfo.event.title,
-      start: clickInfo.event.start,
-      end: clickInfo.event.end,
-      extendedProps: clickInfo.event.extendedProps,
-    });
+    const sessionData = clickInfo.event.extendedProps.rawSession as SessionItem;
+    setSelectedEvent(sessionData);
     setIsDialogOpen(true);
   };
 
@@ -102,12 +88,12 @@ export default function CalendarWidget() {
                 }}
                 locale={language}
                 direction={isRtl ? "rtl" : "ltr"}
-                events={data?.map((event) => ({
+                events={data?.map((event:SessionItem) => ({
                   id: event.id,
-                  title: `${event.patientName} - ${event.treatmentType}`,
+                  title: event.patientName,
                   start: event.scheduledAt,
                   end: event.endAt,
-                  extendedProps: { patientName: event.patientName, treatmentType: event.treatmentType },
+                  extendedProps: { rawSession: event },
                 }))}
                 eventClick={handleEventClick}
                 eventContent={renderEventContent}
@@ -124,56 +110,12 @@ export default function CalendarWidget() {
           )}
         </CardContent>
       </Card>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl" dir={isRtl ? "rtl" : "ltr"}>
-          <div className="bg-indigo-50/50 dark:bg-indigo-950/20 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">{isRtl ? "تفاصيل الجلسة" : "Session Details"}</DialogTitle>
-              <DialogDescription className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {isRtl ? "استعرض تفاصيل هذه الجلسة والمهام المتاحة." : "View the details of this session and available actions."}
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-          <div className="px-6 py-4">
-            {selectedEvent && (
-              <div className="grid gap-5 py-2">
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">{isRtl ? "اسم المريض" : "Patient Name"}</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-100 text-lg">{selectedEvent.extendedProps?.patientName}</span>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">{isRtl ? "نوع العلاج" : "Treatment Type"}</span>
-                  <span className="font-medium text-slate-700 dark:text-slate-300 text-base">{selectedEvent.extendedProps?.treatmentType}</span>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">{isRtl ? "الوقت" : "Time"}</span>
-                  <span className="font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-2 text-base">
-                    <Clock className="w-4 h-4" />
-                    {format(new Date(selectedEvent.start), "PPP p", { locale: isRtl ? ar : enUS })} -{" "}
-                    {format(new Date(selectedEvent.end), "p", { locale: isRtl ? ar : enUS })}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 px-6 pb-6 pt-2 justify-end bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 mt-2 p-4">
-            <MyCustomButton
-              variant="outline"
-              leftIcon={<Clock className="w-4 h-4" />}
-              onClick={() => setIsDialogOpen(false)}
-            >
-              {isRtl ? "إعادة جدولة" : "Reschedule"}
-            </MyCustomButton>
-            <MyCustomButton
-              variant="solid"
-              leftIcon={<CheckCircle className="w-4 h-4" />}
-              onClick={() => setIsDialogOpen(false)}
-            >
-              {isRtl ? "تأكيد الجلسة" : "Confirm Session"}
-            </MyCustomButton>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <SessionDetailsDialog
+        session={selectedEvent}
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        language={language}
+      />
     </>
   );
 }

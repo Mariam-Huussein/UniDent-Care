@@ -16,7 +16,7 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function PatientDashboardScreen() {
   const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
   const [rawSessions, setRawSessions] = useState<SessionDto[]>([]);
   const [loading, setLoading] = useState(true);

@@ -74,11 +74,10 @@ export default function MyCurrentCases() {
                       {isRtl ? "رقم الهاتف:" : "Phone:"} {caseItem.phone}
                     </span>
                     <span className="text-xs line-clamp-1 font-medium text-slate-500 dark:text-slate-400 ml-6 ms-6">
-                      {isRtl ? "وصف الحالة:" : "Case description:"} {caseItem.description || caseItem.diagnoses?.[0]?.caseTypeName || "No Description Provided"}
-                  {isRtl ? "الحالة:" : "Status:"} {caseItem.status}
+                      {isRtl ? "نوع الحالة:" : "Type:"} {caseItem?.diagnosisdto?.[0]?.caseTypeName}
                     </span>
                   </div>
-        </div>
+                </div>
               </div>
             ))}
           </div>

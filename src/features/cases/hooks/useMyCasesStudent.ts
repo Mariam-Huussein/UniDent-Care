@@ -23,7 +23,7 @@ export function useMyCasesStudent() {
     // Requests state
     const [requests, setRequests] = useState<StudentDashboardRequestItem[]>([]);
     const [requestsLoading, setRequestsLoading] = useState(true);
-    const [requestStatus, setRequestStatus] = useState("");
+    const [requestStatus, setRequestStatus] = useState("Pending");
     const [requestsPage, setRequestsPage] = useState(1);
     const [requestsTotalPages, setRequestsTotalPages] = useState(1);
     const [requestsTotalCount, setRequestsTotalCount] = useState(0);

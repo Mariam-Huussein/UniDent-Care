@@ -18,7 +18,6 @@ export interface CaseItem {
     status: string;
     createAt: string;
     gender: 0 | 1 | undefined;
-    diagnoses: DiagnosisDto[] | null;
     diagnosisdto?: DiagnosisDto[] | null;
     imageUrls: string[];
     totalSessions?: number;
@@ -87,7 +86,7 @@ export interface CaseDetailData {
     pendingRequests: number;
     assignedStudentId: string;
     assignedDoctorId: string;
-    diagnoses: DiagnosisDto[] | null;
+    diagnosisdto: DiagnosisDto[] | null;
     imageUrls: string[];
     createdById: string;
     createdByRole: string;
@@ -190,7 +189,6 @@ export interface StudentCaseItem {
     pendingRequests: number;
     assignedStudentId: string;
     assignedDoctorId: string;
-    diagnoses: DiagnosisDto[] | null;
     diagnosisdto?: DiagnosisDto[] | null;
     imageUrls: string[];
     createdById: string;

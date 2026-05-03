@@ -22,7 +22,7 @@ export interface StudentDashboardCaseItem {
     pendingRequests: number;
     assignedStudentId: string;
     assignedDoctorId: string;
-    diagnoses: DiagnosisDto[];
+    diagnosisdto: DiagnosisDto[];
     imageUrls: string[];
     createdById: string;
     createdByRole: string;
@@ -56,6 +56,8 @@ export interface StudentDashboardRequestItem {
     status: string;
     createAt: string;
     isRejectedStudent: boolean;
+    imageUrls: string[];
+    diagnosisdto: DiagnosisDto[];
 }
 
 export interface StudentDashboardMyRequestsMetaData {

@@ -1,64 +1,76 @@
 "use client";
 
+import { useLanguage } from "@/components/providers/LanguageProvider";
 import { CaseStatus } from "@/features/cases/types/CaseDetails.types";
 import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
 import { motion } from "framer-motion";
 import { Check, Circle } from "lucide-react";
+import { progressTrackerTranslations } from "../../constants/progressTracker.translate";
 
 interface ProgressTrackerProps {
     status: CaseStatus;
     createdByRole: string;
-    diagnoses: DiagnosisDto[] | null;
+    diagnosisdto: DiagnosisDto[] | null;
     supervisingDoctorName?: string;
     StudentName?: string;
 }
 
-export default function ProgressTracker({ status, createdByRole, diagnoses, supervisingDoctorName }: ProgressTrackerProps) {
+export default function ProgressTracker({ status, createdByRole, diagnosisdto, supervisingDoctorName }: ProgressTrackerProps) {
+    console.log("diagnosisdto", diagnosisdto);
+    console.log("status", status);
+    console.log("createdByRole", createdByRole);
+    console.log("supervisingDoctorName", supervisingDoctorName);
+
+
+    const { language } = useLanguage();
+    const dict = progressTrackerTranslations[language as "ar" | "en"] || progressTrackerTranslations.en;
+    const isAr = language === "ar";
     let currentStep = 0;
 
-    if (status === "Completed") {
+    if (status.toLowerCase() === "completed") {
         currentStep = 4;
-    } else if (status === "InProgress") {
+    } else if (status.toLowerCase() === "inprogress") {
         currentStep = 2;
-    } else if ((diagnoses || diagnoses !== null)) {
+    } else if ((diagnosisdto || diagnosisdto !== null)) {
         currentStep = 1;
     } else {
         currentStep = 0;
     }
 
     const getInitialStageDesc = () => {
-        if (!diagnoses || diagnoses.length === 0) {
-            return createdByRole === "Patient" ? "AI Exam" : `By ${createdByRole}`;
+        if (!diagnosisdto || diagnosisdto.length === 0) {
+            const roleKey = createdByRole.toLowerCase() as keyof typeof dict;
+            return createdByRole === "Patient" ? dict.aiExam : `${dict.by} ${dict[roleKey] || createdByRole}`;
         }
-        
-        const firstStage = diagnoses[0].stage;
+
+        const firstStage = diagnosisdto[0].stage;
         if (firstStage === 0 || firstStage === "AI") {
-            return "AI Exam";
+            return dict.aiExam;
         }
-        return "By Doctor";
+        return dict.byDoctor;
     };
-    
-    const isReviewed = (diagnoses && diagnoses !== null) && status === 'InProgress';
+
+    const isReviewed = (diagnosisdto && diagnosisdto !== null) && status === 'InProgress';
 
     const diagnosisLabel = isReviewed
-        ? `Reviewed By Supervisor`
-        : `Clinical Diagnosis`;
+        ? dict.reviewedBySupervisor
+        : dict.clinicalDiagnosis;
 
     const diagnosisDesc = isReviewed
-        ? `Verified Review`
-        : "Clinical Exam";
+        ? dict.verifiedReview
+        : dict.clinicalExam;
 
     const STEPS = [
-        { label: "Case Added", desc: getInitialStageDesc() },
+        { label: dict.caseAdded, desc: getInitialStageDesc() },
         { label: diagnosisLabel, desc: diagnosisDesc },
-        { label: "Treatment", desc: "Active care" },
-        { label: "Case Closed", desc: "Completed" },
+        { label: dict.treatment, desc: dict.activeCare },
+        { label: dict.caseClosed, desc: dict.completed },
     ];
 
     return (
-        <div className="space-y-5">
+        <div className="space-y-5" dir={isAr ? "rtl" : "ltr"}>
             <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">Treatment Progress</h3>
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-white">{dict.treatmentProgress}</h3>
             </div>
 
             <div className="flex items-start">
@@ -71,7 +83,7 @@ export default function ProgressTracker({ status, createdByRole, diagnoses, supe
                         <div key={step.label} className="flex-1 flex flex-col items-center text-center relative">
                             {/* Connector */}
                             {!last && (
-                                <div className="absolute top-4 left-[50%] w-full h-[3px] z-0 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+                                <div className={`absolute top-4 left-[50%] w-full h-[3px] z-0 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-800 ${isAr ? "right-[50%]" : "left-[50%]"}`}>
                                     <motion.div
                                         initial={{ width: 0 }}
                                         animate={{ width: done ? "100%" : "0%" }}

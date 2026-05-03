@@ -16,7 +16,7 @@ const getGenderLabel = (gender?: 0 | 1): string => {
 };
 
 export default function CaseContent({ caseItem }: CaseContentProps) {
-    const diagnosesArray = caseItem.diagnoses || caseItem.diagnosisdto || [];
+    const diagnosesArray = caseItem.diagnosisdto || [];
     const firstDiagnosis = diagnosesArray[0];
     const displayName = firstDiagnosis?.caseTypeName || firstDiagnosis?.caseType || 'Uncategorized';
     return (

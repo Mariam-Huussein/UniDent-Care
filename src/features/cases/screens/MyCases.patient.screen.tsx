@@ -21,15 +21,14 @@ const mapPatientCaseToCaseItem = (item: PatientCaseItem): CaseItem => ({
     patientId: item.patientId,
     patientName: item.patientName,
     patientAge: item.patientAge,
-    caseType: item.diagnoses?.[0] ? { publicId: "", name: item.diagnoses[0]?.caseTypeName || "null", description: "" } : null,
+    caseType: item.diagnosisdto?.[0] ? { publicId: "", name: item.diagnosisdto[0]?.caseTypeName || "null", description: "" } : null,
     status: item.status,
     createAt: item.createAt,
     totalSessions: item.totalSessions,
     pendingRequests: item.pendingRequests,
     imageUrls: item.imageUrls,
     gender: undefined,
-    diagnoses: item.diagnoses || item.diagnosisdto || null,
-    diagnosisdto: item.diagnoses || item.diagnosisdto || null,
+    diagnosisdto: item.diagnosisdto || null,
 });
 
 export default function MyCasesPatientScreen() {
@@ -54,13 +53,13 @@ export default function MyCasesPatientScreen() {
     const casesColumns: Column<PatientCaseItem>[] = [
         {
             header: "Diagnosis",
-            accessor: "diagnoses",
+            accessor: "diagnosisdto",
             render: (_, row) => {
                 const sc = getCaseStatusConfig(row.processStatus || row.status);
                 const StatusIcon = sc.icon || Activity;
                 return (
                     <div className="flex flex-col gap-1.5 items-start">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnoses?.[0]?.caseTypeName || "Pending"}</span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnosisdto?.[0]?.caseTypeName || "Pending"}</span>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
                             <StatusIcon size={10} className={sc.text} />
                             {row.processStatus || sc.label}

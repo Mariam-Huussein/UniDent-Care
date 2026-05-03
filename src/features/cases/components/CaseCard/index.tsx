@@ -20,7 +20,7 @@ export default function CaseCard({ caseItem, hideRequestButton, customBadge, nav
             {/* Content */}
             <div className="flex flex-col flex-1 p-3.5 sm:p-4">
                 <CaseContent caseItem={caseItem} />
-                <CaseActions caseId={caseItem.id} patientName={caseItem.patientName} caseType={(caseItem.diagnoses || caseItem.diagnosisdto)?.[0]?.caseTypeName || (caseItem.diagnoses || caseItem.diagnosisdto)?.[0]?.caseType || null} hideRequestButton={hideRequestButton} navigationPath={navigationPath} />
+                <CaseActions caseId={caseItem.id} patientName={caseItem.patientName} caseType={caseItem.diagnosisdto?.[0]?.caseTypeName || caseItem.diagnosisdto?.[0]?.caseType || null} hideRequestButton={hideRequestButton} navigationPath={navigationPath} />
             </div>
         </div>
     );

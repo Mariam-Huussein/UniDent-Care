@@ -67,7 +67,7 @@ export default function StudentActions({ patient, onRefetch }: StudentActionsPro
                 <SendRequestModal
                     caseId={patient.id}
                     patientName={patient.patientName}
-                    caseType={patient.diagnoses?.[0]?.caseTypeName || "Uncategorized"}
+                    caseType={patient.diagnosisdto?.[0]?.caseTypeName || "Uncategorized"}
                     onClose={() => {
                         setShowRequestModal(false);
                         onRefetch();
