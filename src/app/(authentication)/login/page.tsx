@@ -48,13 +48,19 @@ export default function Login() {
         dispatch(login(response.data));
 
         try {
-          const user = await getProfileByRole(roles[0], publicId);
-          dispatch(setUserFromReload({ user, role: roles[0] }));
+          if (roles[0] != "ClinicalDoctor") {
+            const user = await getProfileByRole(roles[0], publicId);
+            dispatch(setUserFromReload({ user, role: roles[0] }));
+          }
         } catch (err: any) {
           console.error(err);
-          // Silent gracefully
         }
-        router.replace("/dashboard");
+        if (roles[0] != "ClinicalDoctor") {
+          router.replace("/dashboard");
+        }
+        else {
+          router.replace("/cases");
+        }
         toast.success(isRtl ? "مرحباً بك مرة أخرى!" : "Welcome back!");
       }
     },
@@ -86,9 +92,9 @@ export default function Login() {
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               className="mb-4"
             >
-              <Logo 
-                iconClassName="w-16 sm:w-24" 
-                textClassName="text-3xl sm:text-4xl" 
+              <Logo
+                iconClassName="w-16 sm:w-24"
+                textClassName="text-3xl sm:text-4xl"
                 className="flex-col gap-2"
               />
             </motion.div>

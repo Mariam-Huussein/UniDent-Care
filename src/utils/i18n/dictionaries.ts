@@ -62,6 +62,7 @@ export const dictionaries = {
     navCasesList: "Cases List",
     navMyCases: "My Cases",
     navAddCase: "Add My Case",
+    navAddCaseGeneral: "Add Case",
 
     // Dashboard Patient
     dashStatsActive: "Active Cases",
@@ -162,6 +163,7 @@ export const dictionaries = {
       Doctor: "Doctor",
       Student: "Student",
       Patient: "Patient",
+      ClinicalDoctor: "Clinical Doctor",
     },
     specialty: "Specialty",
     universityId: "University ID",
@@ -243,6 +245,7 @@ export const dictionaries = {
     navCasesList: "قائمة الحالات",
     navMyCases: "حالاتي",
     navAddCase: "إضافة حالة جديدة",
+    navAddCaseGeneral: "إضافة حالة",
 
     // Dashboard Patient
     dashStatsActive: "الحالات النشطة",
@@ -343,6 +346,7 @@ export const dictionaries = {
       Doctor: "طبيب",
       Student: "طالب",
       Patient: "مريض",
+      ClinicalDoctor: "طبيب العيادة",
     },
     specialty: "التخصص",
     universityId: "الرقم الجامعي",

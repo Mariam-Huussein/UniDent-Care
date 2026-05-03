@@ -4,9 +4,9 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
     '/my-students-cases': ['Doctor'],
     '/pending-request': ['Doctor'],
     '/my-cases': ['Student','Patient'],
-    '/add-case': ['Patient'],
-    '/cases': ['Doctor', 'Student'],
-    '/dashboard': ['Doctor', 'Student', 'Patient'],
+    '/add-case': ['Patient', 'ClinicalDoctor'],
+    '/cases': ['Doctor', 'Student', 'ClinicalDoctor'],
+    '/dashboard': ['Doctor', 'Student', 'Patient', 'ClinicalDoctor'],
     '/profile': ['Doctor', 'Student', 'Patient'],
-    '/settings': ['Doctor', 'Student', 'Patient'],
+    '/settings': ['Doctor', 'Student', 'Patient', 'ClinicalDoctor'],
 };

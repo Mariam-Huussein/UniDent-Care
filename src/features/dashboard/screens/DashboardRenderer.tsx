@@ -35,6 +35,6 @@ export default function DashboardRenderer() {
 
     if (!mounted) return null;
 
-    const Dashboard = dashboards[normalizedRole] ?? PatientDashboardScreen;
+    const Dashboard = (dashboards as any)[normalizedRole] ?? PatientDashboardScreen;
     return <Dashboard />;
 }

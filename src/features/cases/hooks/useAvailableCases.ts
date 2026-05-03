@@ -7,10 +7,11 @@ import { getAvailableCases } from "../server/case.action";
 import { CasesQueryParams } from "../types/caseCardProps.types";
 import { useFilterCases } from "./useFilterCases";
 import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
-
+import { fetchCasesForClinicalDoctor } from "../services/clinicalDoctorCases.service";
 
 export const useAvailableCases = () => {
     const token = (useSelector((state: RootState) => state.auth.token) || getUserDetailsFromCookies().token) as string;
+    const role = useSelector((state: RootState) => state.auth.role) || getUserDetailsFromCookies().userRole;
 
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
     const [currentPage, setCurrentPage] = useState(1);
@@ -34,7 +35,12 @@ export const useAvailableCases = () => {
 
     const { data, isPending, isError, refetch } = useQuery({
         queryKey: ["availableCases", queryParams],
-        queryFn: () => getAvailableCases(queryParams),
+        queryFn: () => {
+            if (role === "ClinicalDoctor") {
+                return fetchCasesForClinicalDoctor(queryParams);
+            }
+            return getAvailableCases(queryParams);
+        },
         enabled: !!token,
         placeholderData: (prev) => prev,
     });

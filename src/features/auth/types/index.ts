@@ -34,12 +34,12 @@ export type PatientUser = UserBase & {
 
 export type User = StudentUser | DoctorUser | PatientUser;
 
-export interface AuthData<TUser = User> {
+export interface AuthData<TUser = User | null> {
     token: string;
     roles: string[];
     publicId: string;
     universityId: string;
-    user: TUser;
+    user?: TUser | null;
 }
 
 export interface LoginRequest {

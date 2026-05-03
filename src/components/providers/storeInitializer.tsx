@@ -21,6 +21,16 @@ export default function StoreInitializer() {
 
     const init = async () => {
       try {
+        if (role === "ClinicalDoctor") {
+          dispatch(
+            setUserFromReload({
+              user: null,
+              role,
+            }),
+          );
+          return;
+        }
+
         const user = await getProfileByRole(role, publicId);
         dispatch(
           setUserFromReload({

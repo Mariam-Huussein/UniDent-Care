@@ -22,8 +22,8 @@ const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
-        login: (state, action: PayloadAction<AuthData>) => {
-            state.user = action.payload.user;
+        login: (state, action: PayloadAction<AuthData | AuthData<null>>) => {
+            state.user = action.payload.user ?? null;
             state.token = action.payload.token;
             state.role = action.payload.roles[0];
             state.isAuthenticated = true;
@@ -57,7 +57,7 @@ const authSlice = createSlice({
 
         setUserFromReload: (
             state,
-            action: PayloadAction<{ user: User; role: string }>
+            action: PayloadAction<{ user: User | null; role: string }>
         ) => {
             state.user = action.payload.user;
             state.role = action.payload.role;

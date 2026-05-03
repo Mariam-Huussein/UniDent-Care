@@ -33,9 +33,16 @@ export default function Sidebar() {
     if (!mounted) return null;
     if (!role) return null;
 
-    const userRole = (role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()) as UserRole;
-    const links = NAV_LINKS[userRole];
+    const normalizedRole = (() => {
+        const cleaned = role.trim();
+        if (/^clinicaldoctor$/i.test(cleaned)) return "ClinicalDoctor";
+        if (/^doctor$/i.test(cleaned)) return "Doctor";
+        if (/^student$/i.test(cleaned)) return "Student";
+        if (/^patient$/i.test(cleaned)) return "Patient";
+        return cleaned as UserRole;
+    })();
 
+    const links = NAV_LINKS[normalizedRole] ?? [];
 
     const getLinkName = (englishName: string) => {
         const map: Record<string, string> = {
@@ -47,6 +54,7 @@ export default function Sidebar() {
             "Cases List": t.navCasesList,
             "My Cases": t.navMyCases,
             "Add My Case": t.navAddCase,
+            "Add Case": t.navAddCaseGeneral,
         };
         return map[englishName] || englishName;
     };

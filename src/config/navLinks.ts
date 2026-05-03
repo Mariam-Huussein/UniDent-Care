@@ -52,7 +52,7 @@ export const NAV_LINKS: Record<UserRole[0], NavLink[]> = {
             name: "My Cases", path: "/my-cases", icon: ListCheck
         },
         {
-            name: "Add My Case", path: "/add-case", icon: PlusCircle
+            name: "Add My Case", path: "/add-my-case", icon: PlusCircle
         },
         {
             name: "Profile", path: "/profile", icon: User
@@ -61,6 +61,17 @@ export const NAV_LINKS: Record<UserRole[0], NavLink[]> = {
             name: "Settings", path: "/settings", icon: Settings
         },
     ],
+    ClinicalDoctor: [
+        {
+            name: "Cases List", path: "/cases", icon: List
+        },
+        {
+            name: "Add Case", path: "/add-case", icon: PlusCircle
+        },
+        {
+            name: "Settings", path: "/settings", icon: Settings
+        },
+    ],
 };
 
-export type UserRole = 'Doctor' | 'Student' | 'Patient';
+export type UserRole = 'Doctor' | 'Student' | 'Patient' | 'ClinicalDoctor';
