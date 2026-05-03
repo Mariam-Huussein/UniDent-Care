@@ -15,9 +15,9 @@ interface StudentActionsProps {
 export default function StudentActions({ patient, onRefetch }: StudentActionsProps) {
     const {
         showRequestModal, setShowRequestModal,
-        showSessionForm,  setShowSessionForm,
-        cancelLoading,    sessionLoading,
-        isAssignedToMe,   hasRequest,   requestStatus,
+        showSessionForm, setShowSessionForm,
+        cancelLoading, sessionLoading,
+        isAssignedToMe, hasRequest, requestStatus,
         handleCancelRequest, handleCreateSession,
         scheduledSession,
         showStartNowModal, setShowStartNowModal,
@@ -67,7 +67,7 @@ export default function StudentActions({ patient, onRefetch }: StudentActionsPro
                 <SendRequestModal
                     caseId={patient.id}
                     patientName={patient.patientName}
-                    caseType={patient.diagnoses ? patient.diagnoses[0].caseTypeName : "Uncategorized"}
+                    caseType={patient.diagnoses?.[0]?.caseTypeName || "Uncategorized"}
                     onClose={() => {
                         setShowRequestModal(false);
                         onRefetch();

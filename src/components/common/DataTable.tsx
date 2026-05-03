@@ -91,7 +91,7 @@ export default function DataTable<T extends Record<string, any>>({
 
     return (
         <div className="w-full bg-white dark:bg-transparent rounded-xl shadow-sm dark:shadow-none ring-1 ring-gray-200/60 dark:ring-slate-800 overflow-hidden transition-colors">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[300px]">
                 <table className="w-full md:min-w-max text-sm text-left md:whitespace-nowrap">
                     <thead className="bg-white dark:bg-slate-900/50 border-b border-gray-200 dark:border-slate-800 sticky top-0 z-10 transition-colors">
                         <tr>
