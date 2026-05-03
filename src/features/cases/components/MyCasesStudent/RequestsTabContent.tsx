@@ -23,10 +23,79 @@ interface RequestsTabContentProps {
     setRequestsViewMode: (val: "grid" | "table") => void;
 }
 
+import { useState, useMemo } from "react";
+import GridControlsToolbar from "../AvailableCases/GridControlsToolbar";
+import { SortConfig } from "../../hooks/useFilterCases";
+
 export function RequestsTabContent({
     requests, requestsLoading, requestStatus, setRequestStatus, requestsPage, setRequestsPage, requestsTotalPages,
     requestsViewMode, setRequestsViewMode
 }: RequestsTabContentProps) {
+
+    // --- Filter & Sort State ---
+    const [filters, setFilters] = useState<Record<string, string>>({ status: requestStatus });
+    const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+
+    const handleFilterChange = (key: string, value: string) => {
+        setFilters(prev => ({ ...prev, [key]: value }));
+        if (key === "status") {
+            setRequestStatus(value);
+            setRequestsPage(1);
+        }
+    };
+
+    const clearFilters = () => {
+        setFilters({ status: "Pending" });
+        setSortConfig(null);
+        setRequestStatus("Pending");
+        setRequestsPage(1);
+    };
+
+    const handleSort = (key: string) => {
+        setSortConfig(prev => {
+            if (!prev || prev.key !== key) return { key, direction: "asc" };
+            if (prev.direction === "asc") return { key, direction: "desc" };
+            return null;
+        });
+    };
+
+    const hasActiveFilters = Object.values(filters).some(v => v !== "") || sortConfig !== null;
+
+    const filteredAndSortedRequests = useMemo(() => {
+        let result = requests.filter(c => {
+            const nameFilter = filters["patientName"];
+            const typeFilter = filters["caseType"];
+            const genderFilter = filters["gender"]; // No gender available in requests, ignore
+
+            if (nameFilter && !c.patientName.toLowerCase().includes(nameFilter.toLowerCase())) return false;
+            if (typeFilter && !(c.caseName || "").toLowerCase().includes(typeFilter.toLowerCase())) return false;
+
+            return true;
+        });
+
+        if (sortConfig) {
+            result = [...result].sort((a, b) => {
+                let aVal: any; let bVal: any;
+                switch (sortConfig.key) {
+                    case "patientName":
+                        aVal = a.patientName.toLowerCase();
+                        bVal = b.patientName.toLowerCase();
+                        break;
+                    case "createAt":
+                        aVal = new Date(a.createAt).getTime();
+                        bVal = new Date(b.createAt).getTime();
+                        break;
+                    default:
+                        aVal = (a as any)[sortConfig.key] || "";
+                        bVal = (b as any)[sortConfig.key] || "";
+                }
+                if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+                if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+                return 0;
+            });
+        }
+        return result;
+    }, [requests, filters, sortConfig]);
 
   const REQUEST_STATUSES = ["Pending", "UnderReview", "Approved", "Rejected", "Taken", "Cancelled"];
 
@@ -94,6 +163,21 @@ export function RequestsTabContent({
       transition={{ duration: 0.3 }}
       className="flex flex-col gap-6"
     >
+      <GridControlsToolbar 
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          clearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+          sortConfig={sortConfig}
+          onSort={handleSort}
+          hideGender={true}
+          statusOptions={[
+              { label: "All Statuses", value: "" },
+              ...REQUEST_STATUSES.map(s => ({ label: s, value: s }))
+          ]}
+          defaultStatusLabel="All Statuses"
+      />
+
       {/* Content Area */}
       {requestsLoading ? (
          requestsViewMode === 'grid' ? (
@@ -103,20 +187,20 @@ export function RequestsTabContent({
          ) : (
              <div className="space-y-4 pt-4"><div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" /><div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" /></div>
          )
-      ) : requests.length === 0 ? (
+      ) : filteredAndSortedRequests.length === 0 ? (
          <MyCasesEmptyState message="No requests match your filter." />
       ) : (
           requestsViewMode === 'grid' ? (
               <motion.div layout className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 place-items-center">
                   <AnimatePresence>
-                      {requests.map((item, i) => (
+                      {filteredAndSortedRequests.map((item, i) => (
                           <StudentRequestCard key={item.id} item={item} index={i} />
                       ))}
                   </AnimatePresence>
               </motion.div>
           ) : (
                <motion.div initial={{opacity:0}} animate={{opacity:1}} transition={{duration:0.4}}>
-                  <DataTable columns={requestColumns} data={requests} />
+                  <DataTable columns={requestColumns} data={filteredAndSortedRequests} />
               </motion.div>
           )
       )}

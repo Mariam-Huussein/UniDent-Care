@@ -414,7 +414,7 @@ export default function SettingsPage() {
         )}
       </AnimatePresence>
 
-      <div className="pt-6 border-t border-slate-100 dark:border-slate-800">
+      <div className="pt-6 border-t border-slate-100 dark:border-red-800">
         <h3 className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-4">
           {t.sessionManagement}
         </h3>

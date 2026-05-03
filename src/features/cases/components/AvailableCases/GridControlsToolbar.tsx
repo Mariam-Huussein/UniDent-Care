@@ -17,6 +17,9 @@ interface GridControlsToolbarProps {
   hasActiveFilters: boolean;
   sortConfig: SortConfig;
   onSort: (key: string) => void;
+  hideGender?: boolean;
+  statusOptions?: { label: string, value: string }[];
+  defaultStatusLabel?: string;
 }
 
 const SORT_OPTIONS = [
@@ -33,11 +36,15 @@ const GENDER_OPTIONS = [
 
 export default function GridControlsToolbar({
   filters, onFilterChange, clearFilters,
-  hasActiveFilters, sortConfig, onSort
+  hasActiveFilters, sortConfig, onSort,
+  hideGender, statusOptions, defaultStatusLabel
 }: GridControlsToolbarProps) {
   const patientSearch = filters["patientName"] || "";
   const gender = filters["gender"] != null ? String(filters["gender"]) : "";
   const selectedGenderLabel = GENDER_OPTIONS.find(opt => opt.value === gender)?.label || "All Genders";
+
+  const currentStatus = filters["status"] != null ? String(filters["status"]) : "";
+  const selectedStatusLabel = statusOptions?.find(opt => opt.value === currentStatus)?.label || defaultStatusLabel || "All Statuses";
 
   return (
     <div className="w-full mb-6 relative z-60">
@@ -89,18 +96,32 @@ export default function GridControlsToolbar({
               />
             </div>
 
-            {/* Gender */}
-            <div className="relative z-40">
-              <SelectItems
-                value={selectedGenderLabel}
-                onChange={(selectedLabel) => {
-                  const opt = GENDER_OPTIONS.find(o => o.label === selectedLabel);
-                  onFilterChange("gender", opt ? opt.value : "");
-                }}
-                options={GENDER_OPTIONS.map(o => o.label)}
-                placeholder="All Genders"
-              />
-            </div>
+            {/* Status or Gender */}
+            {statusOptions ? (
+              <div className="relative z-40">
+                <SelectItems
+                  value={selectedStatusLabel}
+                  onChange={(selectedLabel) => {
+                    const opt = statusOptions.find(o => o.label === selectedLabel);
+                    onFilterChange("status", opt ? opt.value : "");
+                  }}
+                  options={statusOptions.map(o => o.label)}
+                  placeholder={defaultStatusLabel || "All Statuses"}
+                />
+              </div>
+            ) : !hideGender ? (
+              <div className="relative z-40">
+                <SelectItems
+                  value={selectedGenderLabel}
+                  onChange={(selectedLabel) => {
+                    const opt = GENDER_OPTIONS.find(o => o.label === selectedLabel);
+                    onFilterChange("gender", opt ? opt.value : "");
+                  }}
+                  options={GENDER_OPTIONS.map(o => o.label)}
+                  placeholder="All Genders"
+                />
+              </div>
+            ) : null}
           </div>
         </div>
 

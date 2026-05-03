@@ -41,8 +41,8 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
                         {caseData?.patientName}
                     </h2>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        {caseData?.caseType} Case
-                        {caseData?.diagnoses?.[0]?.stage ? ` · ${caseData.diagnoses[0].stage}` : ""}
+                        {caseData?.diagnosisdto?.[0]?.caseTypeName} Case
+                        {caseData?.diagnosisdto?.[0]?.stage ? ` · ${caseData.diagnosisdto[0].stage}` : ""}
                     </p>
                 </div>
             </div>
@@ -60,7 +60,7 @@ export default function PatientSummaryCard({ patient }: PatientSummaryCardProps)
 
             {/* Treatment Progress */}
             <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80">
-                <ProgressTracker status={patient?.status} createdByRole={patient?.createdByRole} diagnoses={patient?.diagnoses} />
+                <ProgressTracker status={patient?.status} createdByRole={patient?.createdByRole} diagnosisdto={patient?.diagnosisdto} />
             </div>
         </motion.div>
     );

@@ -25,7 +25,7 @@ interface CasesTabContentProps {
 }
 
 const mapStudentCaseToCaseItem = (item: StudentDashboardCaseItem): CaseItem => {
-    const firstDiagnosis = item.diagnoses?.[0];
+    const firstDiagnosis = item.diagnosisdto?.[0];
     return {
         id: item.id,
         patientId: item.patientId,
@@ -36,7 +36,7 @@ const mapStudentCaseToCaseItem = (item: StudentDashboardCaseItem): CaseItem => {
             name: firstDiagnosis.caseTypeName || firstDiagnosis.caseType || "",
             description: ""
         } : null, 
-        diagnoses: item.diagnoses,
+        diagnosisdto: item.diagnosisdto,
         status: item.status,
         createAt: item.createAt,
         totalSessions: item.totalSessions,
@@ -44,13 +44,90 @@ const mapStudentCaseToCaseItem = (item: StudentDashboardCaseItem): CaseItem => {
         imageUrls: item.imageUrls,
         gender: undefined,
         // The user manually modified CaseItem's diagnosisdto to be an array of DiagnosisStage
-        diagnosisdto: item.diagnoses ? item.diagnoses.map(d => d.stage as any) : null,
     };
 };
+
+import { useState, useMemo } from "react";
+import GridControlsToolbar from "../AvailableCases/GridControlsToolbar";
+import { SortConfig } from "../../hooks/useFilterCases";
 
 export function CasesTabContent({
     cases, casesLoading, caseType, setCaseType, casesPage, setCasesPage, casesTotalPages, casesViewMode, setCasesViewMode
 }: CasesTabContentProps) {
+
+    // --- Filter & Sort State ---
+    const [filters, setFilters] = useState<Record<string, string>>({ caseType: caseType });
+    const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+
+    const handleFilterChange = (key: string, value: string) => {
+        setFilters(prev => ({ ...prev, [key]: value }));
+        if (key === "caseType") {
+            setCaseType(value);
+            setCasesPage(1);
+        }
+    };
+
+    const clearFilters = () => {
+        setFilters({});
+        setSortConfig(null);
+        setCaseType("");
+        setCasesPage(1);
+    };
+
+    const handleSort = (key: string) => {
+        setSortConfig(prev => {
+            if (!prev || prev.key !== key) return { key, direction: "asc" };
+            if (prev.direction === "asc") return { key, direction: "desc" };
+            return null;
+        });
+    };
+
+    const hasActiveFilters = Object.values(filters).some(v => v !== "") || sortConfig !== null;
+
+    const filteredAndSortedCases = useMemo(() => {
+        let result = cases.filter(c => {
+            const nameFilter = filters["patientName"];
+            const typeFilter = filters["caseType"];
+            const statusFilter = filters["status"];
+
+            if (nameFilter && !c.patientName.toLowerCase().includes(nameFilter.toLowerCase())) return false;
+            if (typeFilter && !(c.diagnosisdto?.[0]?.caseTypeName || "").toLowerCase().includes(typeFilter.toLowerCase())) return false;
+            
+            if (statusFilter) {
+                const currentStatus = c.processStatus || c.status;
+                if (!currentStatus || currentStatus.toLowerCase() !== statusFilter.toLowerCase()) return false;
+            }
+
+            return true;
+        });
+
+        if (sortConfig) {
+            result = [...result].sort((a, b) => {
+                let aVal: any; let bVal: any;
+                switch (sortConfig.key) {
+                    case "patientName":
+                        aVal = a.patientName.toLowerCase();
+                        bVal = b.patientName.toLowerCase();
+                        break;
+                    case "patientAge":
+                        aVal = a.patientAge;
+                        bVal = b.patientAge;
+                        break;
+                    case "createAt":
+                        aVal = new Date(a.createAt).getTime();
+                        bVal = new Date(b.createAt).getTime();
+                        break;
+                    default:
+                        aVal = (a as any)[sortConfig.key];
+                        bVal = (b as any)[sortConfig.key];
+                }
+                if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+                if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+                return 0;
+            });
+        }
+        return result;
+    }, [cases, filters, sortConfig]);
 
     const casesColumns: Column<StudentDashboardCaseItem>[] = [
         {
@@ -70,13 +147,13 @@ export function CasesTabContent({
         },
         {
             header: "Diagnosis",
-            accessor: "diagnoses",
+            accessor: "diagnosisdto",
             render: (_, row) => {
                 const sc = getCaseStatusConfig(row.status);
                 const StatusIcon = sc.icon || Activity;
                 return (
                     <div className="flex flex-col gap-1.5 items-start">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnoses?.[0]?.caseTypeName || "Pending"}</span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnosisdto?.[0]?.caseTypeName || "Pending"}</span>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
                             <StatusIcon size={10} className={sc.text} />
                             {sc.label}
@@ -125,6 +202,22 @@ export function CasesTabContent({
             transition={{ duration: 0.3 }}
             className="flex flex-col gap-6"
         >
+            <GridControlsToolbar 
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                clearFilters={clearFilters}
+                hasActiveFilters={hasActiveFilters}
+                sortConfig={sortConfig}
+                onSort={handleSort}
+                hideGender={true}
+                statusOptions={[
+                    { label: "All Statuses", value: "" },
+                    { label: "In Progress", value: "InProgress" },
+                    { label: "Completed", value: "Completed" }
+                ]}
+                defaultStatusLabel="All Statuses"
+            />
+
             {/* Content Area */}
             {casesLoading ? (
                 casesViewMode === 'grid' ? (
@@ -134,13 +227,13 @@ export function CasesTabContent({
                 ) : (
                     <div className="space-y-4 pt-4"><div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" /><div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" /></div>
                 )
-            ) : cases.length === 0 ? (
+            ) : filteredAndSortedCases.length === 0 ? (
                 <MyCasesEmptyState message="No cases found in this category." />
             ) : (
                 casesViewMode === 'grid' ? (
                     <motion.div layout className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 place-items-center">
                         <AnimatePresence>
-                            {cases.map((item, i) => {
+                            {filteredAndSortedCases.map((item, i) => {
                                 const sc = getCaseStatusConfig(item.processStatus || item.status);
                                 const StatusIcon = sc.icon || Activity;
                                 return (
@@ -174,7 +267,7 @@ export function CasesTabContent({
                     </motion.div>
                 ) : (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }}>
-                        <DataTable columns={casesColumns} data={cases} />
+                        <DataTable columns={casesColumns} data={filteredAndSortedCases} />
                     </motion.div>
                 )
             )}

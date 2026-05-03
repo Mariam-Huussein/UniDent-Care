@@ -20,7 +20,7 @@ export default function Odontogram() {
     console.log(patient)
 
     // ── Derive from context ────────────────────────────────────────────────
-    const diagnoses           = patient?.diagnoses ?? null;
+    const diagnoses           = patient?.diagnosisdto ?? null;
     const status              = patient?.status;
     const readonly            = DiagnosisFlag;
     const assignedStudentName = studentOwnerData?.data?.fullName ?? null;

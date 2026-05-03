@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
-// import ProgressTracker from "./ProgressTracker";
 import InfoCard from "../Shared/InfoCard";
 import StudentActions from "./StudentActions";
 import DoctorActions from "./DoctorActions/DoctorActions";
@@ -54,7 +53,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                     <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight truncate">
                         {patient.patientName}
                     </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{patient.caseType} Case{patient.diagnoses?.[0]?.stage == 0 ? ` · AI Exam` : ''}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{patient.caseType} Case{patient.diagnosisdto?.[0]?.stage == 0 ? ` · AI Exam` : ''}</p>
                 </div>
             </div>
 
@@ -116,7 +115,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
             {/* Treatment Progress */}
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80">
             {/* status, createdByRole, diagnoses  */}
-                <ProgressTracker status={patient.status} createdByRole={patient.createdByRole} diagnoses={patient.diagnoses} />
+                <ProgressTracker status={patient.status} createdByRole={patient.createdByRole} diagnosisdto={patient.diagnosisdto} />
             </div>
             {/* Divider */}
             <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-6" />
