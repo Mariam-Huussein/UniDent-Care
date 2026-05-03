@@ -16,17 +16,15 @@ export interface PatientCaseDto {
   id: string;
   patientId: string;
   patientName?: string | null;
-  status?: CaseStatus;
-  caseType?: string | null;
-  caseTypeName?: string | null;
-  description?: string | null;
-  notes?: string | null;
+  status?: CaseStatus | string;
+  processStatus?: string | null;
+  createAt: string;
   totalSessions: number;
   hasEvaluatedSession: boolean;
   pendingRequests: number;
   assignedStudentId?: string | null;
   assignedDoctorId?: string | null;
-  createAt: string;
+  diagnosisdto?: DiagnosisDto[] | null;
   imageUrls?: string[] | null;
 }
 
@@ -38,6 +36,8 @@ export interface SessionDto {
   patientName?: string | null;
   studentId?: string | null;
   studentName?: string | null;
+  assignedDoctorId?: string | null;
+  assignedDoctorName?: string | null;
   scheduledAt: string;
   endAt?: string | null;
   status?: string | null; // e.g. "Completed", "Pending", "Scheduled"
@@ -58,6 +58,7 @@ export interface DiagnosisDto {
   role?: string | null;
   isAccepted?: boolean | null;
   teethNumbers?: number[] | null;
+  createAt?: string; // Fallback or injected
 }
 
 // ---------------------------------------------------------
@@ -125,12 +126,15 @@ export function generatePatientDashboardData(
   cases: PatientCaseDto[],
   sessions: SessionDto[],
   upcomingSessions: SessionDto[],
-  diagnoses: DiagnosisDto[]
+  diagnoses: DiagnosisDto[],
+  userNamesMap: Record<string, string> = {}
 ): DashboardData {
   // --- 1. Cases KPIs ---
   const totalCases = cases.length;
-  // Assuming CaseStatus.Completed is 5, adjust if needed based on real backend behavior.
-  const completedCases = cases.filter(c => c.status === CaseStatus.Completed).length;
+  // Handle both numeric and string status from API
+  const completedCases = cases.filter(c => 
+    c.status === CaseStatus.Completed || c.status === 'Completed'
+  ).length;
   const activeCases = totalCases - completedCases;
   
   const activeCasesPercentage = totalCases ? Math.round((activeCases / totalCases) * 100) : 0;
@@ -161,35 +165,68 @@ export function generatePatientDashboardData(
   const activities: RecentActivityWidget[] = [];
 
   sessions.forEach(s => {
+    // API returns 'Done' for completed sessions
+    const isCompleted = s.status && (s.status.toLowerCase() === 'completed' || s.status.toLowerCase() === 'done');
+    const doctorDisplay = s.studentName ? `with ${s.studentName}` : (s.assignedDoctorName ? `with Dr. ${s.assignedDoctorName}` : '');
+    
+    // Use createAt for completed sessions to avoid future scheduled dates in history
+    const activityDate = isCompleted ? (s.createAt || s.scheduledAt) : (s.scheduledAt || s.createAt);
+    
     activities.push({
       type: 'session',
-      date: s.scheduledAt || s.createAt,
-      description: s.status === 'Completed' 
-        ? `Session completed for treatment ${s.treatmentType || 'Unknown'}` 
-        : `Session scheduled for treatment ${s.treatmentType || 'Unknown'}`
+      date: activityDate,
+      description: isCompleted 
+        ? `Session completed ${doctorDisplay}: ${s.treatmentType && s.treatmentType !== "" ? s.treatmentType : 'Dental Treatment'}` 
+        : `Session scheduled ${doctorDisplay}: ${s.treatmentType && s.treatmentType !== "" ? s.treatmentType : 'Dental Treatment'}`
     });
   });
 
   diagnoses.forEach(d => {
+    const relatedCase = cases.find(c => c.id === d.patientCaseId);
+    const stageDisplay = (d.stage !== undefined && d.stage !== null) ? `Stage ${d.stage}` : 'Initial';
+    
+    // Get assigned names from the related case
+    let assignedInfo = '';
+    if (relatedCase) {
+      if (relatedCase.assignedStudentId && userNamesMap[relatedCase.assignedStudentId]) {
+        assignedInfo = ` (Student: ${userNamesMap[relatedCase.assignedStudentId]})`;
+      } else if (relatedCase.assignedDoctorId && userNamesMap[relatedCase.assignedDoctorId]) {
+        assignedInfo = ` (Doctor: ${userNamesMap[relatedCase.assignedDoctorId]})`;
+      }
+    }
+
     activities.push({
       type: 'diagnosis',
-      // Since diagnosis doesn't have an explicit date in the DTO schema returned natively,
-      // mapping it to a current timestamp or default. Usually diagnoses are mapped differently.
-      // Assuming we can use Date.now() or maybe the related Case creation date. We'll leave it as ISO string if missing.
-      date: new Date().toISOString(), 
-      description: `Diagnosis added: ${d.caseTypeName || 'Unknown'} - Stage ${d.stage || 'Initial'}`
+      date: d.createAt || relatedCase?.createAt || new Date().toISOString(), 
+      description: `New Diagnosis: ${d.caseTypeName || 'General Diagnosis'} ${assignedInfo} - ${stageDisplay}`
     });
   });
 
   cases.forEach(c => {
+    let assignedName = '';
+    if (c.assignedStudentId && userNamesMap[c.assignedStudentId]) {
+      assignedName = ` (Assigned to: ${userNamesMap[c.assignedStudentId]})`;
+    } else if (c.assignedDoctorId && userNamesMap[c.assignedDoctorId]) {
+      assignedName = ` (Assigned to: Dr. ${userNamesMap[c.assignedDoctorId]})`;
+    }
+
     activities.push({
       type: 'case',
       date: c.createAt,
-      description: `Case creation: ${c.caseTypeName || 'General'}`
+      description: `Case Opened: New file created for patient${assignedName}`
     });
   });
 
-  activities.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  // Sort descending: Newest to Oldest
+  activities.sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    // Handle potential invalid dates
+    if (isNaN(dateA)) return 1;
+    if (isNaN(dateB)) return -1;
+    return dateB - dateA;
+  });
+  
   const recentActivity = activities.slice(0, 10);
 
   // --- 5. Diagnoses Count ---

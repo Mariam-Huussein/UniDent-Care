@@ -43,7 +43,7 @@ export function PatientProfileView({ patient, t }: PatientProfileViewProps) {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">{t?.profile?.phoneNumber || "Phone"}</p>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{patient?.phone || "01000000000"}</p>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{patient?.phone || "__"}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -52,7 +52,7 @@ export function PatientProfileView({ patient, t }: PatientProfileViewProps) {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">{t?.profile?.nationalId || "National ID"}</p>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{patient?.nationalId || "12345678901234"}</p>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{patient?.nationalId || "__"}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -61,7 +61,7 @@ export function PatientProfileView({ patient, t }: PatientProfileViewProps) {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">{t?.profile?.age || "Age"}</p>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{patient?.age ? `${patient.age} ${t?.profile?.yearsOld || "years old"}` : "50 years old"}</p>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{patient?.age ? `${patient.age} ${t?.profile?.yearsOld || "years old"}` : "__"}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -70,7 +70,7 @@ export function PatientProfileView({ patient, t }: PatientProfileViewProps) {
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider truncate">{t?.profile?.gender || "Gender"}</p>
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{(getGenderText(patient?.gender)&&false) || "Female"}</p>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{getGenderText(patient?.gender) || "__"}</p>
             </div>
           </div>
         </div>

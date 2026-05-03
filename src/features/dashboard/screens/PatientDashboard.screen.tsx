@@ -64,7 +64,35 @@ export default function PatientDashboardScreen() {
         }
 
         setRawSessions(sessions);
-        const dashboardData = generatePatientDashboardData(cases, sessions, upcomingSessions, allDiagnoses);
+
+        // --- Fetch Assigned User Names ---
+        const studentIds = [...new Set(cases.map((c: any) => c.assignedStudentId).filter((id: any) => !!id))];
+        const doctorIds = [...new Set(cases.map((c: any) => c.assignedDoctorId).filter((id: any) => !!id))];
+        
+        const userNamesMap: Record<string, string> = {};
+        
+        await Promise.all([
+          ...studentIds.map(async (id: any) => {
+            try {
+              const res = await api.get(`/Students/${id}`);
+              if (res?.data?.data?.fullName) {
+                userNamesMap[id] = res.data.data.fullName;
+              }
+            } catch (e) { console.error(`Error fetching student ${id}`, e); }
+          }),
+          ...doctorIds.map(async (id: any) => {
+            try {
+              const res = await api.get(`/Doctors/${id}`);
+              if (res?.data?.data?.fullName) {
+                userNamesMap[id] = res.data.data.fullName;
+              }
+            } catch (e) { console.error(`Error fetching doctor ${id}`, e); }
+          })
+        ]);
+
+        console.log('User Names Map:', userNamesMap);
+
+        const dashboardData = generatePatientDashboardData(cases, sessions, upcomingSessions, allDiagnoses, userNamesMap);
         setData(dashboardData);
 
       } catch (error) {

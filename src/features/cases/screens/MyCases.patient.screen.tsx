@@ -15,6 +15,8 @@ import { MyCasesEmptyState } from "../components/MyCasesStudent/MyCasesEmptyStat
 import { getCaseStatusConfig } from "../components/MyCasesStudent/getCaseStatusConfig";
 import { PatientCaseItem, CaseItem } from "../types/caseCardProps.types";
 import Link from "next/link";
+import api from "@/utils/api";
+import SearchableSelect from "@/components/common/SearchableSelect";
 
 const mapPatientCaseToCaseItem = (item: PatientCaseItem): CaseItem => ({
     id: item.id,
@@ -41,6 +43,25 @@ export default function MyCasesPatientScreen() {
 
     const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
     const [searchInput, setSearchInput] = useState(search);
+    const [caseTypes, setCaseTypes] = useState<{id: string, label: string}[]>([]);
+
+    useEffect(() => {
+        const fetchCaseTypes = async () => {
+            try {
+                const res = await api.get('/CaseTypes', { params: { page: 1, pageSize: 100 } });
+                if (res.data?.success) {
+                    const types = res.data.data.items.map((t: any) => ({
+                        id: t.name,
+                        label: t.name
+                    }));
+                    setCaseTypes(types);
+                }
+            } catch (err) {
+                console.error("Failed to fetch case types", err);
+            }
+        };
+        fetchCaseTypes();
+    }, []);
 
     // Debounce search input
     useEffect(() => {
@@ -103,7 +124,7 @@ export default function MyCasesPatientScreen() {
     return (
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
             {/* Header */}
-            <div className="relative z-10 rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 mb-8 overflow-hidden backdrop-blur-xl transition-all duration-300">
+            <div className="relative z-[1000] rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 mb-8 backdrop-blur-xl transition-all duration-300">
                 <div className="absolute top-0 right-0 -mt-24 -mr-24 w-96 h-96 rounded-full bg-indigo-50 dark:bg-indigo-500/5 blur-3xl opacity-60 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 -mb-24 -ml-24 w-96 h-96 rounded-full bg-emerald-50 dark:bg-emerald-500/5 blur-3xl opacity-60 pointer-events-none" />
 
@@ -127,32 +148,35 @@ export default function MyCasesPatientScreen() {
 
                     {/* Controls */}
                     <div className="flex flex-col sm:flex-row items-center gap-3">
-                        <div className="relative w-full sm:w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                            <input
-                                type="text"
-                                placeholder="Search case type..."
+                        <div className="w-full sm:w-72 relative z-[9999]">
+                            <SearchableSelect
+                                options={[{ id: "", label: "All Case Types" }, ...caseTypes]}
                                 value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400"
+                                onChange={(val) => setSearchInput(val as string)}
+                                placeholder="Search case type..."
+                                searchPlaceholder="Search..."
+                                accentColor="indigo"
                             />
                         </div>
 
                         <div className="flex items-center gap-3 w-full sm:w-auto">
-                            <div className="w-full sm:w-40">
-                                <select
-                                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-700 dark:text-slate-200 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM5NDkzYjgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cG9seWxpbmUgcG9pbnRzPSI2IDkgMTIgMTUgMTggOSI+PC9wb2x5bGluZT48L3N2Zz4=')] bg-no-repeat bg-position-[right_12px_center] bg-size[16px] pr-10 hover:border-indigo-500"
+                            <div className="w-full sm:w-56 relative z-[9999]">
+                                <SearchableSelect
+                                    options={[
+                                        { id: "", label: "All Statuses" },
+                                        { id: "Pending", label: "Pending" },
+                                        { id: "Approved", label: "Approved" },
+                                        { id: "Completed", label: "Completed" },
+                                    ]}
                                     value={status}
-                                    onChange={(e) => {
-                                        setStatus(e.target.value);
+                                    onChange={(val) => {
+                                        setStatus(val as string);
                                         setPage(1);
                                     }}
-                                >
-                                    <option value="">All Statuses</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Approved">Approved</option>
-                                    <option value="Completed">Completed</option>
-                                </select>
+                                    placeholder="Filter by status..."
+                                    accentColor="indigo"
+                                    showSearch={false}
+                                />
                             </div>
 
                             <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />

@@ -94,7 +94,7 @@ export function RecentCases({ recentActivity }: RecentCasesProps) {
                   </h4>
                   <p className="text-xs font-bold text-slate-400 mt-2 uppercase tracking-wide">
                     {new Date(activity.date).toLocaleString(isRtl ? 'ar-EG' : 'en-US', {
-                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
                     })}
                   </p>
                 </div>

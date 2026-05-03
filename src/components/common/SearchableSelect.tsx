@@ -18,6 +18,7 @@ interface SearchableSelectProps {
   error?: string;
   isRtl?: boolean;
   accentColor?: "indigo" | "teal" | "blue";
+  showSearch?: boolean;
 }
 
 export default function SearchableSelect({
@@ -29,6 +30,7 @@ export default function SearchableSelect({
   error,
   isRtl = false,
   accentColor = "indigo",
+  showSearch = true,
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -122,42 +124,44 @@ export default function SearchableSelect({
             transition={{ duration: 0.2, ease: "easeOut" }}
             className="absolute z-[100] w-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40 overflow-hidden"
           >
-            <div className="p-3 border-b border-slate-100 dark:border-slate-800">
-              <div className="relative">
-                <Search
-                  className={`absolute ${
-                    isRtl ? "right-3" : "left-3"
-                  } top-1/2 -translate-y-1/2 text-slate-400`}
-                  size={16}
-                />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={searchPlaceholder}
-                  className={`w-full bg-slate-50 dark:bg-slate-950 text-sm border-none rounded-xl ${
-                    isRtl ? "pr-9 pl-8" : "pl-9 pr-8"
-                  } py-2.5 outline-none focus:ring-2 ${
-                    accentColor === "indigo"
-                      ? "focus:ring-indigo-500/20"
-                      : accentColor === "teal"
-                      ? "focus:ring-teal-500/20"
-                      : "focus:ring-blue-500/20"
-                  }`}
-                  autoFocus
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
+            {showSearch && (
+              <div className="p-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="relative">
+                  <Search
                     className={`absolute ${
-                      isRtl ? "left-3" : "right-3"
-                    } top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200`}
-                  >
-                    <X size={14} />
-                  </button>
-                )}
+                      isRtl ? "right-3" : "left-3"
+                    } top-1/2 -translate-y-1/2 text-slate-400`}
+                    size={16}
+                  />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={searchPlaceholder}
+                    className={`w-full bg-slate-50 dark:bg-slate-950 text-sm border-none rounded-xl ${
+                      isRtl ? "pr-9 pl-8" : "pl-9 pr-8"
+                    } py-2.5 outline-none focus:ring-2 ${
+                      accentColor === "indigo"
+                        ? "focus:ring-indigo-500/20"
+                        : accentColor === "teal"
+                        ? "focus:ring-teal-500/20"
+                        : "focus:ring-blue-500/20"
+                    }`}
+                    autoFocus
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className={`absolute ${
+                        isRtl ? "left-3" : "right-3"
+                      } top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200`}
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
 
             <ul className="max-h-60 overflow-auto py-2 custom-scrollbar">
               {filteredOptions.length > 0 ? (
