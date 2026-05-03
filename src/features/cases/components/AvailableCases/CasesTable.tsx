@@ -181,7 +181,7 @@ export default function CasesTable({
                     <SendRequestModal
                         caseId={selectedCase.id}
                         patientName={selectedCase.patientName}
-                        caseType={(selectedCase.diagnoses || selectedCase.diagnosisdto)?.[0]?.caseTypeName || (selectedCase.diagnoses || selectedCase.diagnosisdto)?.[0]?.caseType || undefined}
+                        caseType={(selectedCase.diagnoses || selectedCase.diagnosisdto)?.[0]?.caseTypeName || (selectedCase.diagnoses || selectedCase.diagnosisdto)?.[0]?.caseType || "UnCategorised"}
                         onClose={() => setSelectedCaseId(null)}
                     />
                 ) : null;
