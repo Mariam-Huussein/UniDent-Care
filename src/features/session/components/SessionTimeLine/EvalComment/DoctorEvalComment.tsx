@@ -1,46 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Award, MoreHorizontal, Star } from "lucide-react";
+import { Award, MoreHorizontal } from "lucide-react";
 import { TimelineSessionItem } from "@/features/session/types/Sessions.types";
-import { gradeStyle } from "./SessionGradePanel";
-
-/* ── Star row ── */
-function StarRow({ grade, max = 20 }: { grade: number; max?: number }) {
-    const filled = Math.round((grade / max) * 5);
-    return (
-        <div className="flex items-center gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-                <Star
-                    key={i}
-                    size={11}
-                    className={
-                        i < filled
-                            ? "text-amber-400 fill-amber-400"
-                            : "text-slate-200 dark:text-slate-700 fill-slate-200 dark:fill-slate-700"
-                    }
-                />
-            ))}
-        </div>
-    );
-}
-
-/* ── Avatar ── */
-function Avatar({ name, gradient }: { name: string; gradient: string }) {
-    const initials = name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-    return (
-        <div
-            className={`shrink-0 w-9 h-9 rounded-full bg-linear-to-br ${gradient} flex items-center justify-center shadow-sm ring-2 ring-white dark:ring-slate-900`}
-        >
-            <span className="text-white font-bold text-[11px]">{initials}</span>
-        </div>
-    );
-}
+import StarRow from "../sessionCardParts/StarRow";
+import CustomAvatar from "../sessionCardParts/Avatar";
+import { gradeStyle } from "@/features/session/services/gradeStyle";
 
 interface Props {
     session: TimelineSessionItem;
@@ -62,7 +27,7 @@ export default function DoctorEvalComment({ session, isDoctor, onEdit }: Props) 
             transition={{ duration: 0.3 }}
             className="flex items-start gap-3"
         >
-            <Avatar name={session.evaluteDoctorName} gradient="from-teal-500 to-emerald-600" />
+            <CustomAvatar name={session.evaluteDoctorName} gradient="from-teal-500 to-emerald-600" />
 
             <div className="flex-1 min-w-0">
                 {/* Bubble */}

@@ -2,8 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Clock, Paperclip } from "lucide-react";
-import { SessionNoteItem } from "../../types/Sessions.types";
+import { SessionNoteItem } from "../../../types/Sessions.types";
 import MediaSlider from "@/components/ui/MediaSlider";
+import { customeFormatTime } from "../../../services/sessionHelper";
 
 interface NoteCardProps {
     note: SessionNoteItem;
@@ -11,11 +12,7 @@ interface NoteCardProps {
 }
 
 export default function NoteCard({ note, index }: NoteCardProps) {
-    const time = new Date(note.createAt).toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-    });
+    const time = customeFormatTime(note.createAt);
 
     return (
         <motion.div
