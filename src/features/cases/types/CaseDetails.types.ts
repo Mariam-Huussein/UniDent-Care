@@ -4,7 +4,7 @@ import { UserFlags } from "./caseCardProps.types";
 export type CaseStatus = 'Pending' | 'InProgress' | 'Completed' | 'Cancelled' | 'UnderReview' | 'Rejected';
 
 export type ToothStatus = 'healthy' | 'needs-treatment' | 'in-progress' | 'treated';
-export type DiagnosisStage = 'BasicClinic' | 'AI' | '';
+export type DiagnosisStage = 'BasicClinic' | 'AI' | '' | 0 | 1;
 
 export interface ToothData {
     number: number;

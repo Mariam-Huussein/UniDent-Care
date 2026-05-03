@@ -21,14 +21,15 @@ const mapPatientCaseToCaseItem = (item: PatientCaseItem): CaseItem => ({
     patientId: item.patientId,
     patientName: item.patientName,
     patientAge: item.patientAge,
-    caseType: item.diagnoses?.[0] ? { publicId: "", name: item.diagnoses[0].caseType, description: "" } : null,
+    caseType: item.diagnoses?.[0] ? { publicId: "", name: item.diagnoses[0]?.caseTypeName || "null", description: "" } : null,
     status: item.status,
     createAt: item.createAt,
     totalSessions: item.totalSessions,
     pendingRequests: item.pendingRequests,
     imageUrls: item.imageUrls,
     gender: undefined,
-    diagnoses: item.diagnoses || null,
+    diagnoses: item.diagnoses || item.diagnosisdto || null,
+    diagnosisdto: item.diagnoses || item.diagnosisdto || null,
 });
 
 export default function MyCasesPatientScreen() {

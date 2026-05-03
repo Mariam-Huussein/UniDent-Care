@@ -19,6 +19,7 @@ export interface CaseItem {
     createAt: string;
     gender: 0 | 1 | undefined;
     diagnoses: DiagnosisDto[] | null;
+    diagnosisdto?: DiagnosisDto[] | null;
     imageUrls: string[];
     totalSessions?: number;
     pendingRequests?: number;
@@ -55,15 +56,6 @@ export type Cases = CaseCardProps["caseItem"][];
 export interface AvailableCasesResponse extends ApiResponse<MetaData> { }
 
 
-export interface Diagnosis {
-    id: string;
-    patientCaseId: string;
-    diagnosisStage: string;
-    caseType: string;
-    teethNumbers: number[];
-}
-
-
 export interface UserFlags {
     isOwner: boolean;
     role: string;
@@ -81,6 +73,7 @@ export interface CaseDetailData {
     patientName: string;
     patientAge: number;
     status: string;
+    description?: string;
     processStatus: string;
     phone: string;
     city: string;
@@ -198,6 +191,7 @@ export interface StudentCaseItem {
     assignedStudentId: string;
     assignedDoctorId: string;
     diagnoses: DiagnosisDto[] | null;
+    diagnosisdto?: DiagnosisDto[] | null;
     imageUrls: string[];
     createdById: string;
     createdByRole: string;

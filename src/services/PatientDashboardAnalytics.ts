@@ -1,3 +1,5 @@
+import { DiagnosisStage } from "@/features/cases/types/CaseDetails.types";
+
 export enum CaseStatus {
   Draft = 0,
   Pending = 1,
@@ -47,9 +49,10 @@ export interface SessionDto {
 export interface DiagnosisDto {
   id: string;
   patientCaseId: string;
-  stage?: number;
-  caseTypeId: string;
+  stage?: number | DiagnosisStage;
+  caseTypeId?: string;
   caseTypeName?: string | null;
+  caseType?: string;
   notes?: string | null;
   createdById?: string | null;
   role?: string | null;

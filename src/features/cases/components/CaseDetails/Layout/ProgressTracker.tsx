@@ -8,11 +8,10 @@ import { Check, Circle } from "lucide-react";
 interface ProgressTrackerProps {
     status: CaseStatus;
     createdByRole: string;
-    diagnoses: DiagnosisDto[] | DiagnosisDto | null;
+    diagnoses: DiagnosisDto[] | null;
     supervisingDoctorName?: string;
     StudentName?: string;
 }
-
 
 export default function ProgressTracker({ status, createdByRole, diagnoses, supervisingDoctorName }: ProgressTrackerProps) {
     let currentStep = 0;
@@ -27,20 +26,33 @@ export default function ProgressTracker({ status, createdByRole, diagnoses, supe
         currentStep = 0;
     }
 
+    const getInitialStageDesc = () => {
+        if (!diagnoses || diagnoses.length === 0) {
+            return createdByRole === "Patient" ? "AI Exam" : `By ${createdByRole}`;
+        }
+        
+        const firstStage = diagnoses[0].stage;
+        if (firstStage === 0 || firstStage === "AI") {
+            return "AI Exam";
+        }
+        return "By Doctor";
+    };
+    
     const isReviewed = (diagnoses && diagnoses !== null) && status === 'InProgress';
+
     const diagnosisLabel = isReviewed
-        ? `Reviewed By ${supervisingDoctorName || 'Supervising Doctor'}`
+        ? `Reviewed By Supervisor`
         : `Clinical Diagnosis`;
 
     const diagnosisDesc = isReviewed
         ? `Verified Review`
-        : "Initial exam";
+        : "Clinical Exam";
 
     const STEPS = [
-        { label: "Case Added", desc: `${createdByRole === "Patient" ? "AI Exam" : `By ${createdByRole}`}` },
+        { label: "Case Added", desc: getInitialStageDesc() },
         { label: diagnosisLabel, desc: diagnosisDesc },
         { label: "Treatment", desc: "Active care" },
-        { label: "Follow-up", desc: "Post-review" },
+        { label: "Case Closed", desc: "Completed" },
     ];
 
     return (

@@ -16,6 +16,9 @@ const getGenderLabel = (gender?: 0 | 1): string => {
 };
 
 export default function CaseContent({ caseItem }: CaseContentProps) {
+    const diagnosesArray = caseItem.diagnoses || caseItem.diagnosisdto || [];
+    const firstDiagnosis = diagnosesArray[0];
+    const displayName = firstDiagnosis?.caseTypeName || firstDiagnosis?.caseType || 'Uncategorized';
     return (
         <div className="flex flex-col gap-2">
             {/* Title & Time */}
@@ -38,7 +41,7 @@ export default function CaseContent({ caseItem }: CaseContentProps) {
             <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">
                     <PiTooth size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
-                    <span className="font-medium">{caseItem.diagnosisdto && caseItem.diagnosisdto.length > 0 ? caseItem.diagnosisdto[0].caseTypeName : "Uncategorized"}</span>
+                    <span className="font-medium">{displayName}</span>
                 </div>
 
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">

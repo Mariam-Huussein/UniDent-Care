@@ -54,7 +54,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                     <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight truncate">
                         {patient.patientName}
                     </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{patient.caseType} Case{patient.diagnoses?.[0]?.stage ? ` · ${patient.diagnoses[0].stage}` : ''}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{patient.caseType} Case{patient.diagnoses?.[0]?.stage == 0 ? ` · AI Exam` : ''}</p>
                 </div>
             </div>
 

@@ -7,6 +7,7 @@ export interface StudentDashboardCaseItem {
     patientId: string;
     patientName: string;
     patientAge: number;
+    description?: string;
     status: string;
     processStatus: string;
     phone: string;

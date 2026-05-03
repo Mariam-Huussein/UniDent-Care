@@ -7,11 +7,12 @@ import {
 } from "lucide-react";
 import PersonRow from "./PersonRow";
 import InfoRow from "./InfoRow";
+import { DiagnosisStage } from "@/features/cases/types/CaseDetails.types";
 
 export interface ToothPanelData {
     toothNumber: number;
     caseType: string;
-    diagnosisStage: string;
+    diagnosisStage: DiagnosisStage;
     notes: string;
     assignedStudentName?: string | null;
     assignedDoctorName?: string | null;
@@ -21,6 +22,16 @@ interface ToothInfoPanelProps {
     data: ToothPanelData | null;
     onClose: () => void;
 }
+
+const getStageLabel = (data : ToothPanelData | null) => {
+    const stage = data?.diagnosisStage;
+    
+    if (stage === 0 || stage === "AI") return "AI";
+    
+    if (stage === 1 || stage === "BasicClinic") return "Basic Clinic";
+    
+    return "Unknown";
+};
 
 export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
     return (
@@ -66,14 +77,14 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                         <InfoRow
                             icon={<Tag size={13} className="text-indigo-500 dark:text-indigo-400" />}
                             label="Case Type"
-                            value={data.caseType || "—"}
+                            value={data.caseType || "Unkown"}
                         />
 
                         {/* Diagnosis Stage */}
                         <InfoRow
                             icon={<AlertCircle size={13} className="text-amber-500" />}
                             label="Stage"
-                            value={data.diagnosisStage || "—"}
+                            value={getStageLabel(data)}
                         />
 
                         {/* Divider */}

@@ -1,5 +1,5 @@
 import { ToothConditionGroup } from "react-odontogram";
-import { ToothData } from "../types/CaseDetails.types";
+import { DiagnosisStage, ToothData } from "../types/CaseDetails.types";
 import { getToothStatusColor } from "./CaseDetails.utils";
 import { ToothPanelData } from "../components/CaseDetails/Clinical/OdontogramParts/ToothInfoPanel";
 import { DiagnosisDto } from "@/services/PatientDashboardAnalytics";
@@ -33,7 +33,7 @@ export function buildDiagnosedTeethMap(
             map.set(num, {
                 toothNumber: num,
                 caseType: diagnosis.caseTypeName || "",
-                diagnosisStage: String(diagnosis.stage ?? ""),
+                diagnosisStage: diagnosis.stage as DiagnosisStage,
                 notes: diagnosis.notes || "",
                 assignedStudentName: assignedStudentName ?? null,
                 assignedDoctorName: assignedDoctorName ?? null,

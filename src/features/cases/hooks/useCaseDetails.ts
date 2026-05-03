@@ -55,7 +55,7 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     universityName: apiData.universityName,
                     createdAt: apiData.createAt,
                     imageUrls: apiData.imageUrls || [],
-                    description: apiData.diagnoses[0]?.notes || null,
+                    description: apiData.description || apiData.diagnoses?.[0]?.notes || "Not Providing Description.",
                     phone: apiData.phone,
                     city: apiData.city,
                     nationalId: apiData.nationalId,
