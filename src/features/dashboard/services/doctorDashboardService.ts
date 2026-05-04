@@ -46,11 +46,53 @@ export interface PaginatedRequests {
 export interface MyRequestsParams {
     page?: number;
     pageSize?: number;
-    /** 0=All 1=Pending 2=Approved 3=Rejected 4=? 5=? */
+    /** 0=All 1=Pending 2=Approved 3=Rejected */
     status?: number;
     sortDirection?: "asc" | "desc";
-    /** client-side search query (filtered locally since API doesn't support text search) */
     search?: string;
+}
+
+// ──────────────────────────────────────────────
+// Session types — based on SessionDto in swagger.json
+// ──────────────────────────────────────────────
+export interface SessionNoteDto {
+    id: string;
+    content: string | null;
+    createdAt: string;
+    studentName?: string | null;
+}
+
+export interface SessionDto {
+    id: string;
+    caseId: string;
+    treatmentType: string | null;
+    patientId: string;
+    patientName: string | null;
+    studentId: string;
+    studentName: string | null;
+    grade: number;
+    doctorNote: string | null;
+    evaluteDoctorId: string | null;
+    evaluteDoctorName: string | null;
+    assignedDoctorId: string | null;
+    assignedDoctorName: string | null;
+    scheduledAt: string;
+    endAt: string;
+    status: string | null;
+    totalNotes: number;
+    totalMedia: number;
+    createAt: string;
+    updateAt: string | null;
+    notes: SessionNoteDto[] | null;
+}
+
+export interface SessionPagedResult {
+    totalCount: number;
+    currentPage: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+    items: SessionDto[];
 }
 
 export const doctorDashboardService = {
@@ -59,7 +101,7 @@ export const doctorDashboardService = {
         return response.data.data;
     },
 
-    /** Primary endpoint for doctor requests – supports status filter & sort */
+    /** GET /api/Doctors/my-requests — supports status filter & sort */
     getDoctorRequests: async (params: MyRequestsParams = {}): Promise<PaginatedRequests> => {
         const { page = 1, pageSize = 10, status, sortDirection = "desc" } = params;
         const query: Record<string, any> = { page, pageSize, sortDirection };
@@ -78,9 +120,17 @@ export const doctorDashboardService = {
         return response.data.data;
     },
 
-    getCaseRequestsByDoctor: async (doctorId: string, page: number = 1, pageSize: number = 10): Promise<PaginatedRequests> => {
-        const response = await api.get(`/CaseRequests/doctor/${doctorId}`, { params: { page, pageSize, sort: "desc" } });
-        return response.data.data;
+    getCaseRequestsByDoctor: async (
+        doctorId: string,
+        params: { page?: number; pageSize?: number; search?: string; caseType?: string; status?: number } = {}
+    ) => {
+        const { page = 1, pageSize = 10, search, caseType, status } = params;
+        const query: Record<string, any> = { page, pageSize, sort: "desc" };
+        if (search) query.PatientName = search;
+        if (caseType) query.CaseType = caseType;
+        if (status !== undefined) query.status = status;
+        const response = await api.get(`/CaseRequests/doctor/${doctorId}`, { params: query });
+        return response.data;
     },
 
     getCaseRequestById: async (id: string): Promise<CaseRequest> => {
@@ -93,13 +143,37 @@ export const doctorDashboardService = {
         return response.data.data;
     },
 
-    getDoctorCases: async (doctorId: string, params: { page?: number; pageSize?: number; status?: string; search?: string; caseType?: string } = {}) => {
+    /** GET /api/Cases/doctor/{docId} */
+    getDoctorCases: async (
+        doctorId: string,
+        params: { page?: number; pageSize?: number; status?: string; search?: string; caseType?: string } = {}
+    ) => {
         const { page = 1, pageSize = 10, status, search, caseType } = params;
         const query: Record<string, any> = { page, pageSize };
         if (status) query.status = status;
-        if (search) query.PatientName = search; // التغيير هنا ليتوافق مع الـ Backend
-        if (caseType) query.CaseType = caseType; // التغيير هنا ليتوافق مع الـ Backend
+        if (search) query.PatientName = search;
+        if (caseType) query.CaseType = caseType;
         const response = await api.get(`/Cases/doctor/${doctorId}`, { params: query });
         return response.data;
+    },
+
+    // ──────────────────────────────────────────────
+    // Calendar Dashboard — new methods
+    // ──────────────────────────────────────────────
+
+    /** GET /api/Sessions/schedule — all sessions, optional status filter */
+    getScheduleSessions: async (params: { page?: number; pageSize?: number; status?: string } = {}): Promise<SessionPagedResult> => {
+        const { page = 1, pageSize = 200, status } = params;
+        const query: Record<string, any> = { page, pageSize };
+        if (status) query.status = status;
+        const response = await api.get(`/Sessions/schedule`, { params: query });
+        return response.data.data;
+    },
+
+    /** GET /api/Doctors/sessions-to-evaluate — sessions needing evaluation */
+    getSessionsToEvaluate: async (params: { page?: number; pageSize?: number } = {}): Promise<SessionPagedResult> => {
+        const { page = 1, pageSize = 200 } = params;
+        const response = await api.get(`/Doctors/sessions-to-evaluate`, { params: { page, pageSize } });
+        return response.data.data;
     },
 };

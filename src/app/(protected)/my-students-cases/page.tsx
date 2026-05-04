@@ -1,23 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Loader2, Users, LayoutGrid, List, Activity, GraduationCap, Calendar } from "lucide-react";
+import { Loader2, Users, LayoutGrid, List, Activity, GraduationCap, Calendar, Briefcase, CheckCircle2, Clock } from "lucide-react";
 import CaseCard from "@/features/cases/components/CaseCard";
 import Pagination from "@/components/common/pagination";
 import DataTable, { Column } from "@/components/common/DataTable";
-import SearchableSelect from "@/components/common/SearchableSelect";
-import api from "@/utils/api";
 import { useDoctorCases } from "@/features/cases/hooks/useDoctorCases";
-import { PatientCaseItem, CaseItem } from "@/features/cases/types/caseCardProps.types";
+import { CaseItem } from "@/features/cases/types/caseCardProps.types";
 import { getCaseStatusConfig } from "@/features/cases/components/MyCasesStudent/getCaseStatusConfig";
 import { MyCasesSkeleton } from "@/features/cases/components/MyCasesStudent/MyCasesSkeleton";
 import { MyCasesEmptyState } from "@/features/cases/components/MyCasesStudent/MyCasesEmptyState";
 import Link from "next/link";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import GridControlsToolbar from "@/features/cases/components/AvailableCases/GridControlsToolbar";
+import { SortConfig } from "@/features/cases/hooks/useFilterCases";
 
 const mapDoctorCaseToCaseItem = (item: any): CaseItem => ({
     id: item.id,
@@ -34,7 +34,24 @@ const mapDoctorCaseToCaseItem = (item: any): CaseItem => ({
     diagnosisdto: item.diagnoses || item.diagnosisdto || null,
 });
 
-const TABS = ["Under Review", "In Progress", "Completed"];
+const mapCaseRequestToCaseItem = (item: any): CaseItem => ({
+    id: item.patientCasePublicId || item.id,
+    patientId: "",
+    patientName: item.patientName || item.studentName || "Unknown",
+    patientAge: 0,
+    caseType: item.caseName ? { publicId: "", name: item.caseName, description: item.description || "" } : null,
+    status: item.status || "Pending",
+    createAt: item.createAt,
+    imageUrls: [],
+    gender: undefined,
+    diagnosisdto: null,
+});
+
+const TABS = [
+    { id: "Under Review", label: "Under Review", icon: Clock },
+    { id: "In Progress", label: "In Progress", icon: Activity },
+    { id: "Completed", label: "Completed", icon: CheckCircle2 },
+];
 
 export default function MyStudentCasesPage() {
     const user = useSelector((state: RootState) => state.auth.user);
@@ -42,43 +59,41 @@ export default function MyStudentCasesPage() {
     const { language } = useLanguage();
     const isRtl = language === "ar";
 
-    const [activeTab, setActiveTab] = useState(TABS[0]);
+    const [activeTab, setActiveTab] = useState(TABS[0].id);
     const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
-    
-    // Filters State for UI input
-    const [searchInput, setSearchInput] = useState("");
-    const [caseTypes, setCaseTypes] = useState<{id: string, label: string}[]>([]);
+    const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
     const {
         cases, loading, search, setSearch, caseType, setCaseType,
         page, setPage, totalPages, totalCount
     } = useDoctorCases(doctorId, activeTab);
 
-    // Debounce search input
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setSearch(searchInput);
-        }, 500);
-        return () => clearTimeout(handler);
-    }, [searchInput, setSearch]);
+    // Filter bridge
+    const filters = {
+        patientName: search,
+        caseType: caseType
+    };
 
-    useEffect(() => {
-        const fetchCaseTypes = async () => {
-            try {
-                const res = await api.get('/CaseTypes', { params: { page: 1, pageSize: 100 } });
-                if (res.data?.success) {
-                    const types = res.data.data.items.map((t: any) => ({
-                        id: t.name,
-                        label: t.name
-                    }));
-                    setCaseTypes(types);
-                }
-            } catch (err) {
-                console.error("Failed to fetch case types", err);
-            }
-        };
-        fetchCaseTypes();
-    }, []);
+    const handleFilterChange = (key: string, value: string) => {
+        if (key === "patientName") setSearch(value);
+        if (key === "caseType") setCaseType(value);
+        setPage(1);
+    };
+
+    const clearFilters = () => {
+        setSearch("");
+        setCaseType("");
+        setSortConfig(null);
+        setPage(1);
+    };
+
+    const handleSort = (key: string) => {
+        setSortConfig(prev => {
+            if (!prev || prev.key !== key) return { key, direction: "asc" };
+            if (prev.direction === "asc") return { key, direction: "desc" };
+            return null;
+        });
+    };
 
     const casesColumns: Column<any>[] = [
         {
@@ -130,94 +145,107 @@ export default function MyStudentCasesPage() {
 
     return (
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300" dir={isRtl ? "rtl" : "ltr"}>
-            {/* Header */}
-            <div className="relative z-20 rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 mb-8 backdrop-blur-xl transition-all duration-300">
+            
+            {/* ── Dashboard Header (Synced with Student UI) ── */}
+            <div className="relative z-50 rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 mb-8 overflow-hidden backdrop-blur-xl transition-all duration-300">
+                {/* Decorative BG */}
                 <div className="absolute top-0 right-0 -mt-24 -mr-24 w-96 h-96 rounded-full bg-indigo-50 dark:bg-indigo-500/5 blur-3xl opacity-60 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 -mb-24 -ml-24 w-96 h-96 rounded-full bg-emerald-50 dark:bg-emerald-500/5 blur-3xl opacity-60 pointer-events-none" />
 
-                <div className="relative flex flex-col xl:flex-row xl:items-end justify-between gap-6">
-                    <div className="flex flex-1 items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 text-white shrink-0">
-                            <Users size={24} strokeWidth={2.5} />
+                <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    
+                    {/* Left Side: Title and Syncing Loader */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 shrink-0 rounded-2xl bg-linear-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 text-white">
+                                <Users size={24} strokeWidth={2.5} />
+                            </div>
+                            <div>
+                                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+                                    Student Cases
+                                </h1>
+                                <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-medium">
+                                    Review and manage cases assigned to you.
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                                Student Cases
-                            </h1>
-                            <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base font-medium flex items-center gap-2 mt-1">
-                                Review and manage cases assigned to you
-                                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300">
-                                    {totalCount} Total
-                                </span>
-                            </p>
-                        </div>
+
+                        <AnimatePresence>
+                            {loading && (
+                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full w-fit">
+                                    <Loader2 size={14} className="animate-spin text-indigo-500" />
+                                    <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">Syncing...</span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
-                    {/* Tabs only in this area */}
-                    <div className="flex bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl self-start overflow-x-auto max-w-full custom-scrollbar ring-1 ring-slate-200 dark:ring-slate-800">
-                        {TABS.map(tab => (
+                    {/* Right Side: Controls (Tabs & View Mode) */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Tabs */}
+                        <div className="flex bg-slate-100/80 dark:bg-slate-950/50 p-1 rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 w-fit">
+                            {TABS.map((tab) => {
+                                const isActive = activeTab === tab.id;
+                                const Icon = tab.icon;
+                                return (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`relative flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 ${isActive ? "text-indigo-600 dark:text-indigo-300" : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"}`}
+                                    >
+                                        {isActive && (
+                                            <motion.div layoutId="header-active-pill" className="absolute inset-0 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200/50 dark:border-slate-700" transition={{ type: "spring", stiffness: 380, damping: 30 }} />
+                                        )}
+                                        <span className="relative z-10 flex items-center gap-2">
+                                            <Icon size={14} className={isActive ? "text-indigo-600 dark:text-indigo-400" : "opacity-60"} />
+                                            {tab.label}
+                                            {isActive && activeTab === tab.id && (
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300" : "bg-slate-200 dark:bg-slate-800 text-slate-500"}`}>
+                                                    {totalCount}
+                                                </span>
+                                            )}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Vertical Divider */}
+                        <div className="hidden sm:block h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+
+                        {/* View Mode Toggle */}
+                        <div className="flex bg-slate-100 dark:bg-slate-950/50 p-1 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
                             <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-6 py-2.5 rounded-xl text-sm font-black whitespace-nowrap transition-all duration-300 ${
-                                    activeTab === tab
-                                        ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md ring-1 ring-slate-200 dark:ring-slate-600"
-                                        : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-800"
-                                }`}
+                                onClick={() => setViewMode('grid')}
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 text-indigo-600 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'text-slate-400 hover:text-slate-600'}`}
                             >
-                                {tab} Cases
+                                <LayoutGrid size={18} />
                             </button>
-                        ))}
+                            <button
+                                onClick={() => setViewMode('table')}
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white dark:bg-slate-800 text-indigo-600 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'text-slate-400 hover:text-slate-600'}`}
+                            >
+                                <List size={18} />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Filters Section - Moved Below Header */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white/50 dark:bg-slate-900/30 p-4 rounded-3xl border border-slate-100 dark:border-slate-800 backdrop-blur-sm relative z-30">
-                <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
-                    <div className="relative w-full sm:w-80">
-                        <Search className={`absolute ${isRtl ? "right-3" : "left-3"} top-1/2 -translate-y-1/2 text-slate-400`} size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search by name..."
-                            value={searchInput}
-                            onChange={(e) => setSearchInput(e.target.value)}
-                            className={`w-full ${isRtl ? "pr-10 pl-4" : "pl-10 pr-4"} py-3 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl text-sm font-semibold focus:ring-2 focus:ring-indigo-500 transition-all outline-none text-slate-700 dark:text-slate-200 placeholder:text-slate-400 shadow-sm`}
-                        />
-                    </div>
+            {/* ── Filters Section (Using GridControlsToolbar) ── */}
+            <GridControlsToolbar 
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                clearFilters={clearFilters}
+                hasActiveFilters={!!search || !!caseType || !!sortConfig}
+                sortConfig={sortConfig}
+                onSort={handleSort}
+                hideGender={true}
+            />
 
-                    <div className="w-full sm:w-80 relative z-[100]">
-                        <SearchableSelect
-                            options={[{ id: "", label: "All Case Types" }, ...caseTypes]}
-                            value={caseType}
-                            onChange={(val) => setCaseType(val as string)}
-                            placeholder="Search case type..."
-                            searchPlaceholder="Search..."
-                            accentColor="indigo"
-                            isRtl={isRtl}
-                        />
-                    </div>
-                </div>
-
-                <div className="flex bg-slate-100 dark:bg-slate-950/50 p-1 rounded-xl ring-1 ring-slate-200 dark:ring-slate-800 shrink-0 self-end md:self-center">
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'text-slate-400'}`}
-                    >
-                        <LayoutGrid size={18} />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('table')}
-                        className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:shadow-sm ring-1 ring-slate-200 dark:ring-slate-700' : 'text-slate-400'}`}
-                    >
-                        <List size={18} />
-                    </button>
-                </div>
-            </div>
-
-            {/* List / Grid Content */}
+            {/* ── Content Area ── */}
             <motion.div
-                key="cases"
+                key={activeTab}
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
@@ -255,9 +283,9 @@ export default function MyStudentCasesPage() {
                                             className="w-full flex justify-center h-full"
                                         >
                                             <CaseCard
-                                                caseItem={mapDoctorCaseToCaseItem(item)}
+                                                caseItem={activeTab === "Under Review" ? mapCaseRequestToCaseItem(item) : mapDoctorCaseToCaseItem(item)}
                                                 hideRequestButton={true}
-                                                navigationPath="/my-students-cases"
+                                                navigationPath={activeTab === "Under Review" ? `/my-students-cases/${item.patientCasePublicId || item.id}` : "/my-students-cases"}
                                                 customBadge={
                                                     <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-full p-0.5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-none ring-1 ring-white/50 dark:ring-slate-700">
                                                         <span className={`shrink-0 flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
@@ -291,3 +319,4 @@ export default function MyStudentCasesPage() {
         </div>
     );
 }
+

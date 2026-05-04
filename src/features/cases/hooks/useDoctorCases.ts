@@ -32,19 +32,29 @@ export function useDoctorCases(doctorId: string, activeTab: string) {
         }
         setLoading(true);
         try {
-            // Map tab to status. Ensure backend expects these statuses or map them accordingly.
-            let statusQuery = "";
-            if (activeTab === "Under Review") statusQuery = "Pending";
-            else if (activeTab === "In Progress") statusQuery = "InProgress";
-            else if (activeTab === "Completed") statusQuery = "Completed";
+            let res: any;
+            
+            if (activeTab === "Under Review") {
+                res = await doctorDashboardService.getCaseRequestsByDoctor(doctorId, {
+                    search: search || undefined,
+                    caseType: caseType || undefined,
+                    status: 0, // Pending
+                    page,
+                    pageSize: PAGE_SIZE,
+                });
+            } else {
+                let statusQuery = "";
+                if (activeTab === "In Progress") statusQuery = "InProgress";
+                else if (activeTab === "Completed") statusQuery = "Completed";
 
-            const res = await doctorDashboardService.getDoctorCases(doctorId, {
-                status: statusQuery,
-                search: search || undefined,
-                caseType: caseType || undefined,
-                page,
-                pageSize: PAGE_SIZE,
-            });
+                res = await doctorDashboardService.getDoctorCases(doctorId, {
+                    status: statusQuery,
+                    search: search || undefined,
+                    caseType: caseType || undefined,
+                    page,
+                    pageSize: PAGE_SIZE,
+                });
+            }
             
             if (res.success && res.data) {
                 setCases(res.data.items || []);

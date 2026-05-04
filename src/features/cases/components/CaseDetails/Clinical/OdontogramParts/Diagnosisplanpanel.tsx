@@ -13,13 +13,13 @@ import { submitDiagnoses } from "@/features/cases/server/diagnoses.action";
 import toast from "react-hot-toast";
 import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 
-interface DiagnosisPlanPanelProps {
+export interface DiagnosisPlanPanelProps {
     selected: ToothDetail[];
     teethMap: Map<number, ToothData>;
     onClearAll: () => void;
     onRemoveTooth: (fdiNum: number) => void;
     onUpdateTooth: (num: number, updates: Partial<ToothData>) => void;
-    onSubmitSuccess: () => void;
+    onSubmitSuccess: () => void | Promise<void>;
 }
 
 export default function DiagnosisPlanPanel({
@@ -80,7 +80,7 @@ export default function DiagnosisPlanPanel({
 
             toast.success("Diagnosis plan submitted successfully!");
             setSubmitted(true);
-            onSubmitSuccess()
+            await onSubmitSuccess()
             setTimeout(() => { setSubmitted(false); onClearAll(); }, 1800);
         } catch (error: any) {
             toast.error("Failed to submit: " + error.message);
