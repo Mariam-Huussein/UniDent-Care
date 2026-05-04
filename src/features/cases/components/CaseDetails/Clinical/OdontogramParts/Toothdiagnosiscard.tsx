@@ -50,13 +50,13 @@ export default function ToothDiagnosisCard({
     const colors = getToothStatusColor(t.status);
 
     return (
-        <div className="bg-white dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl overflow-hidden shadow-sm hover:border-indigo-200 dark:hover:border-indigo-700/50 hover:shadow-md transition-all duration-200">
+        <div className="relative z-10 bg-white dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl shadow-sm hover:border-indigo-200 dark:hover:border-indigo-700/50 hover:shadow-md transition-all duration-200 overflow-visible">
             {/* Card accent stripe + header */}
             <div
-                className="h-1 w-full"
+                className="h-1 w-full rounded-t-x"
                 style={{ background: `linear-gradient(to right, ${colors.stroke}90, ${colors.stroke}30)` }}
             />
-            <div className="p-4">
+            <div className="p-4 overflow-visible">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-3.5">
                     <div className="flex items-center gap-2.5">
@@ -89,8 +89,8 @@ export default function ToothDiagnosisCard({
                 </div>
 
                 {/* Status Select */}
-                <div className="space-y-3">
-                    <div>
+                <div className="space-y-3 overflow-visible">
+                    <div className="relative z-30">
                         <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                             Status
                         </label>
@@ -108,9 +108,9 @@ export default function ToothDiagnosisCard({
                             animate={{ opacity: 1, height: "auto", transitionEnd: { overflow: "visible" } }}
                             style={{ overflow: "hidden" }}
                             transition={{ duration: 0.2 }}
-                            className="space-y-3"
+                            className="space-y-3 overflow-visible"
                         >
-                            <div>
+                            <div className="relative z-20">
                                 <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
                                     Treatment Type
                                 </label>

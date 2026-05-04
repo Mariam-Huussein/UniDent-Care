@@ -39,7 +39,7 @@ export default function ProgressTracker({ status, createdByRole, diagnosisdto, s
 
     const getInitialStageDesc = () => {
         if (!diagnosisdto || diagnosisdto.length === 0) {
-            const roleKey = createdByRole.toLowerCase() as keyof typeof dict;
+            const roleKey = (createdByRole || "").toLowerCase() as keyof typeof dict;
             return createdByRole === "Patient" ? dict.aiExam : `${dict.by} ${dict[roleKey] || createdByRole}`;
         }
 

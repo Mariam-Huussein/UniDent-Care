@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { submitDiagnoses } from "@/features/cases/server/diagnoses.action";
 import toast from "react-hot-toast";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 
 interface DiagnosisPlanPanelProps {
     selected: ToothDetail[];
@@ -18,6 +19,7 @@ interface DiagnosisPlanPanelProps {
     onClearAll: () => void;
     onRemoveTooth: (fdiNum: number) => void;
     onUpdateTooth: (num: number, updates: Partial<ToothData>) => void;
+    onSubmitSuccess: () => void;
 }
 
 export default function DiagnosisPlanPanel({
@@ -26,6 +28,7 @@ export default function DiagnosisPlanPanel({
     onClearAll,
     onRemoveTooth,
     onUpdateTooth,
+    onSubmitSuccess,
 }: DiagnosisPlanPanelProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -35,9 +38,9 @@ export default function DiagnosisPlanPanel({
     const handleSubmit = async () => {
         if (selected.length === 0) return;
         setIsSubmitting(true);
-
+        const {userId , userRole} = getUserDetailsFromCookies();
         try {
-            const groups: Record<string, { caseTypeId: string; notes: string; teethNumbers: number[] }> = {};
+            const groups: Record<string, { patientCaseId:string; stage: number; caseTypeId: string; notes: string; createdById:string; role:string; teethNumbers: number[] }> = {};
 
             for (const selTooth of selected) {
                 const fdiNum = Number(selTooth.notations.fdi);
@@ -46,7 +49,7 @@ export default function DiagnosisPlanPanel({
                 if (toothData && toothData.status !== "healthy" && toothData.caseTypeId) {
                     const key = `${toothData.caseTypeId}_${toothData.notes || ""}`;
                     if (!groups[key]) {
-                        groups[key] = { caseTypeId: toothData.caseTypeId, notes: toothData.notes || "", teethNumbers: [] };
+                        groups[key] = { patientCaseId:caseData?.id || "", stage:1, caseTypeId: toothData.caseTypeId, notes: toothData.notes || "",createdById: userId ||"", role:userRole||"", teethNumbers: [] };
                     }
                     groups[key].teethNumbers.push(fdiNum);
                 }
@@ -62,19 +65,22 @@ export default function DiagnosisPlanPanel({
             for (const group of groupValues) {
                 const payload = {
                     patientCaseId: caseData?.id || "",
-                    stage: 0,
+                    stage: 1,
                     caseTypeId: group.caseTypeId,
                     notes: group.notes,
-                    createdById: auth.user?.publicId || "",
-                    role: auth.role || "",
+                    createdById: userId || auth.user?.publicId || "",
+                    role: userRole || "",
                     teethNumbers: group.teethNumbers,
                 };
+                console.log(payload);
                 const res = await submitDiagnoses(payload);
+                console.log(res);
                 if (!res.success) throw new Error(res.message);
             }
 
             toast.success("Diagnosis plan submitted successfully!");
             setSubmitted(true);
+            onSubmitSuccess()
             setTimeout(() => { setSubmitted(false); onClearAll(); }, 1800);
         } catch (error: any) {
             toast.error("Failed to submit: " + error.message);
@@ -84,8 +90,7 @@ export default function DiagnosisPlanPanel({
     };
 
     return (
-        <div className="bg-white dark:bg-slate-900/80 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] flex flex-col min-h-[420px] max-h-[620px] lg:max-h-[calc(100vh-250px)] overflow-hidden">
-
+        <div className="bg-white dark:bg-slate-900/80 border border-slate-100 dark:border-slate-800 rounded-[24px] shadow-2xl flex flex-col h-auto overflow-visible relative">
             {/* ── Header ── */}
             <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/60 dark:bg-slate-800/30">
                 <div className="flex items-center gap-2.5">
@@ -114,7 +119,7 @@ export default function DiagnosisPlanPanel({
             </div>
 
             {/* ── Body ── */}
-            <div className="flex-1 overflow-y-auto patient-details-scrollbar p-4 space-y-3">
+            <div className="p-5 space-y-5 h-auto overflow-visible">
                 <AnimatePresence mode="popLayout">
                     {selected.length === 0 ? (
                         <motion.div
@@ -146,6 +151,7 @@ export default function DiagnosisPlanPanel({
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     transition={{ duration: 0.18 }}
+                                    className="overflow-visible"
                                 >
                                     <ToothDiagnosisCard
                                         selTooth={selTooth}
@@ -162,15 +168,14 @@ export default function DiagnosisPlanPanel({
 
             {/* ── Footer ── */}
             {selected.length > 0 && (
-                <div className="px-4 py-4 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/40 dark:bg-slate-800/20">
+                <div className="px-5 py-5 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-slate-50/40 dark:bg-slate-800/20 mt-auto rounded-b-2xl">
                     <button
                         onClick={handleSubmit}
                         disabled={isSubmitting || submitted}
-                        className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all shadow-sm ${
-                            submitted
-                                ? "bg-emerald-500 dark:bg-emerald-600 text-white shadow-emerald-200 dark:shadow-emerald-900/30"
-                                : "bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-50 text-white shadow-indigo-200 dark:shadow-indigo-900/40"
-                        }`}
+                        className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all shadow-sm ${submitted
+                            ? "bg-emerald-500 dark:bg-emerald-600 text-white shadow-emerald-200 dark:shadow-emerald-900/30"
+                            : "bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-50 text-white shadow-indigo-200 dark:shadow-indigo-900/40"
+                            }`}
                     >
                         {submitted ? (
                             <>

@@ -12,19 +12,22 @@ import OdontogramChart from "./OdontogramParts/Odontogramchart";
 import DiagnosisPlanPanel from "./OdontogramParts/Diagnosisplanpanel";
 import { useCase } from "@/features/cases/context/CaseContext";
 import OdontogramEmptyState from "./OdontogramParts/OdontogramEmptyState";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
+import { useDiagnoses } from "@/features/cases/hooks/useDiagnoses";
 
 export default function Odontogram() {
-    const { caseData, studentOwnerData, doctorOwnerData } = useCase();
-    const DiagnosisFlag = false
+    const { caseData, studentOwnerData, doctorOwnerData, refetch } = useCase();
+    const { userRole } = getUserDetailsFromCookies();
+    const DiagnosisFlag = userRole === "ClinicalDoctor"
     const patient = caseData as PatientCase;
-    console.log(patient)
 
     // ── Derive from context ────────────────────────────────────────────────
-    const diagnoses           = patient?.diagnosisdto ?? null;
-    const status              = patient?.status;
-    const readonly            = DiagnosisFlag;
+    const { diagnoses, loading, refresh } = useDiagnoses(caseData?.id);
+    console.log(diagnoses)
+    const status = patient?.status;
+    const readonly = !DiagnosisFlag;
     const assignedStudentName = studentOwnerData?.data?.fullName ?? null;
-    const assignedDoctorName  = doctorOwnerData?.data?.fullName  ?? null;
+    const assignedDoctorName = doctorOwnerData?.data?.fullName ?? null;
 
     const teeth: ToothData[] = useMemo(() => {
         if (!diagnoses || !Array.isArray(diagnoses)) return [];
@@ -33,22 +36,26 @@ export default function Odontogram() {
             status: "needs-treatment" as ToothStatus,
             treatmentType: d.caseTypeName || "",
             notes: d.notes || "",
+            caseTypeId: d.caseTypeId,
         })));
     }, [diagnoses]);
 
     // ── Local state ────────────────────────────────────────────────────────
-    const [selected, setSelected]   = useState<ToothDetail[]>([]);
+    const [selected, setSelected] = useState<ToothDetail[]>([]);
     const [localTeeth, setLocalTeeth] = useState<ToothData[]>(teeth);
     const [panelData, setPanelData] = useState<ToothPanelData | null>(null);
-    const [chartKey, setChartKey]   = useState(0);
+    const [chartKey, setChartKey] = useState(0);
 
-    useEffect(() => { setLocalTeeth(teeth); }, [teeth]);
+    useEffect(() => {
+        setLocalTeeth(teeth);
+        setSelected([]); // **
+    }, [teeth]);
 
     // ── Derived ────────────────────────────────────────────────────────────
     const isDiagnosisActive = DiagnosisFlag && !readonly;
-    const isUnassigned      = status === "Pending";
-    const hasDiagnosisData  = !!diagnoses && diagnoses.length > 0;
-    const showRightPanel    = isDiagnosisActive || hasDiagnosisData;
+    const isUnassigned = status === "Pending";
+    const hasDiagnosisData = !!diagnoses && diagnoses.length > 0;
+    const showRightPanel = isDiagnosisActive || hasDiagnosisData;
 
     const conditions: ToothConditionGroup[] = useMemo(
         () => buildConditions(localTeeth),
@@ -102,11 +109,9 @@ export default function Odontogram() {
     // ── Empty state: no diagnosis recorded yet ─────────────────────────────
     if (!hasDiagnosisData && !isDiagnosisActive) {
         return (
-            <OdontogramEmptyState/>
+            <OdontogramEmptyState />
         );
     }
-
-    console.log(patient)
 
     return (
         <div className={`grid grid-cols-1 gap-6 lg:gap-8 ${showRightPanel ? "lg:grid-cols-[1fr_340px]" : ""}`}>
@@ -138,6 +143,7 @@ export default function Odontogram() {
                             onClearAll={handleClearAll}
                             onRemoveTooth={handleRemoveTooth}
                             onUpdateTooth={handleUpdateTooth}
+                            onSubmitSuccess={refresh}
                         />
                     ) : (
                         <ToothInfoPanel

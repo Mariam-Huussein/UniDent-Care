@@ -19,10 +19,23 @@ export function proxy(request: NextRequest) {
     }
 
     if (token && userRole && isPublicRoute && (pathname === '/login' || pathname === '/signup')) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        if (userRole !== 'ClinicalDoctor') {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        } else {
+            return NextResponse.redirect(new URL('/cases', request.url));
+        }
     }
 
     if (token && userRole) {
+        if (userRole === 'ClinicalDoctor') {
+            const allowedForClinical = ['/cases', '/settings', '/add-case'];
+
+            const isAllowed = allowedForClinical.some(path => pathname.startsWith(path));
+
+            if (!isAllowed && !isPublicRoute) {
+                return NextResponse.redirect(new URL('/forbidden', request.url));
+            }
+        }
         const isSessionRoute = pathname.startsWith('/my-cases/') && pathname.includes('/session');
         if (isSessionRoute) {
             if (userRole.toLowerCase() !== 'student') {
