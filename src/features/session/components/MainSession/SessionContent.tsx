@@ -8,7 +8,7 @@ import SessionWorkspace from "./SessionWorkspace";
 import { SessionNoteItem, SessionStatus } from "../../types/Sessions.types";
 import SessionTopBar from "./SessionTopBar";
 import SessionContentSkeleton from "./SessionContentSkeleton";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useCase } from "@/features/cases/context/CaseContext";
 import { addNoteMedia, addSessionNote, getSessionNotes } from "@/features/cases/server/sessionNotes.action";

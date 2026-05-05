@@ -48,7 +48,6 @@ const mapCaseRequestToCaseItem = (item: any): CaseItem => ({
 });
 
 const TABS = [
-    { id: "Under Review", label: "Under Review", icon: Clock },
     { id: "In Progress", label: "In Progress", icon: Activity },
     { id: "Completed", label: "Completed", icon: CheckCircle2 },
 ];
@@ -283,9 +282,9 @@ export default function MyStudentCasesPage() {
                                             className="w-full flex justify-center h-full"
                                         >
                                             <CaseCard
-                                                caseItem={activeTab === "Under Review" ? mapCaseRequestToCaseItem(item) : mapDoctorCaseToCaseItem(item)}
+                                                caseItem={mapDoctorCaseToCaseItem(item)}
                                                 hideRequestButton={true}
-                                                navigationPath={activeTab === "Under Review" ? `/my-students-cases/${item.patientCasePublicId || item.id}` : "/my-students-cases"}
+                                                navigationPath="/my-students-cases"
                                                 customBadge={
                                                     <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-full p-0.5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] dark:shadow-none ring-1 ring-white/50 dark:ring-slate-700">
                                                         <span className={`shrink-0 flex items-center gap-1.5 text-[10px] font-extrabold px-3 py-1.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
