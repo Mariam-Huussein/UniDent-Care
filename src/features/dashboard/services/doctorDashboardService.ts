@@ -16,7 +16,18 @@ export interface CaseRequest {
     id: string;
     patientCasePublicId: string;
     patientName: string;
-    caseName: string;
+    diagnosisdto?: Array<{
+        id: string;
+        patientCaseId: string;
+        stage: number;
+        caseTypeId: string;
+        caseTypeName: string;
+        notes: string;
+        createdById?: string | null;
+        role: string;
+        isAccepted?: boolean | null;
+        teethNumbers?: number[];
+    }>;
     studentPublicId: string;
     studentName: string;
     university: string;
@@ -27,6 +38,7 @@ export interface CaseRequest {
     status: string;
     createAt: string;
     isRejectedStudent?: boolean;
+    imageUrls?: string[];
 }
 
 export interface UniversityLookup {
@@ -46,10 +58,12 @@ export interface PaginatedRequests {
 export interface MyRequestsParams {
     page?: number;
     pageSize?: number;
-    /** 0=All 1=Pending 2=Approved 3=Rejected */
+    /** 0=Pending 1=Approved 2=Rejected (leave undefined for All) */
     status?: number;
     sortDirection?: "asc" | "desc";
     search?: string;
+    caseType?: string;
+    gender?: number;
 }
 
 // ──────────────────────────────────────────────
@@ -101,11 +115,15 @@ export const doctorDashboardService = {
         return response.data.data;
     },
 
-    /** GET /api/Doctors/my-requests — supports status filter & sort */
+    /** GET /api/Doctors/my-requests — supports status filter, search, caseType, gender & sort */
     getDoctorRequests: async (params: MyRequestsParams = {}): Promise<PaginatedRequests> => {
-        const { page = 1, pageSize = 10, status, sortDirection = "desc" } = params;
+        const { page = 1, pageSize = 10, status, sortDirection = "desc", search, caseType, gender } = params;
         const query: Record<string, any> = { page, pageSize, sortDirection };
         if (status !== undefined) query.status = status;
+        if (search) query.PatientName = search;
+        if (caseType) query.CaseType = caseType;
+        if (gender !== undefined) query.Gender = gender;
+        
         const response = await api.get(`/Doctors/my-requests`, { params: query });
         return response.data.data;
     },

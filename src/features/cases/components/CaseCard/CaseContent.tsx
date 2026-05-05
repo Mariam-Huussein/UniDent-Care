@@ -7,6 +7,7 @@ import { timeAgo } from "../../utils/caseCard.utils";
 
 interface CaseContentProps {
     caseItem: CaseCardProps["caseItem"];
+    additionalInfo?: React.ReactNode;
 }
 
 const getGenderLabel = (gender?: 0 | 1): string => {
@@ -15,7 +16,7 @@ const getGenderLabel = (gender?: 0 | 1): string => {
     return "Unknown";
 };
 
-export default function CaseContent({ caseItem }: CaseContentProps) {
+export default function CaseContent({ caseItem, additionalInfo }: CaseContentProps) {
     const diagnosesArray = caseItem.diagnosisdto || [];
     const firstDiagnosis = diagnosesArray[0];
     const displayName = firstDiagnosis?.caseTypeName || firstDiagnosis?.caseType || 'Uncategorized';
@@ -31,6 +32,13 @@ export default function CaseContent({ caseItem }: CaseContentProps) {
                     <span className="font-medium text-gray-500 dark:text-slate-400 transition-colors">{timeAgo(caseItem.createAt)}</span>
                 </span>
             </div>
+
+            {/* Additional Info (e.g., student name) */}
+            {additionalInfo && (
+                <div className="mt-0.5">
+                    {additionalInfo}
+                </div>
+            )}
 
             {/* Description */}
             <p className="text-xs text-gray-400 dark:text-slate-500 mb-1 line-clamp-2 transition-colors">
