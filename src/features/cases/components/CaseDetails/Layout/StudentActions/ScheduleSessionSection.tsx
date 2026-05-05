@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CalendarPlus, Play, CalendarClock, Trash2 } from "lucide-react";
+import { CalendarPlus, Play, CalendarClock, Trash2, RefreshCw } from "lucide-react";
 import ActionModal from "@/components/ui/ActionModal";
 import SessionBookingDialog from "./Booking";
-import { SessionBookingData, SessionItem } from "../../../../../session/types/Sessions.types";
+import { SessionBookingData, SessionItem, SessionStatus } from "../../../../../session/types/Sessions.types";
 
 interface Props {
     showForm: boolean;
@@ -41,9 +41,8 @@ export default function ScheduleSessionSection({
     cancelSessionLoading = false,
 }: Props) {
     const hasScheduledSession = !!scheduledSession;
-
-    const status = scheduledSession?.status?.toString().toLowerCase();
-    const isExpired = status === "expired" || status === "3" || (() => {
+    const status: SessionStatus = scheduledSession?.status as SessionStatus;
+    const isExpired = status === 3 || (() => {
         if (!scheduledSession) return false;
         const sd = new Date(scheduledSession.scheduledAt);
         sd.setHours(0, 0, 0, 0);
@@ -107,12 +106,12 @@ export default function ScheduleSessionSection({
                         </button>
 
                         <button
-                            disabled={startNowLoading}
-                            onClick={() => onToggleStartNowModal?.(true)}
+                            disabled={sessionLoading}
+                            onClick={() => onToggleForm(true)}
                             className="my-btn flex items-center justify-center gap-1.5 py-2.5 text-xs group cursor-pointer"
                         >
-                            <Play size={13} className="group-hover:scale-110 transition-transform" />
-                            {locale === "ar" ? "ابدأ الآن" : "Start Now"}
+                            <RefreshCw size={13} className="group-hover:rotate-180 transition-transform duration-500" />
+                            {locale === "ar" ? "تغيير الموعد" : "Reschedule"}
                         </button>
                     </div>
                 </motion.div>
@@ -147,15 +146,6 @@ export default function ScheduleSessionSection({
                             <CalendarPlus size={13} />
                             {locale === "ar" ? "جدولة جديدة" : "Reschedule"}
                         </button>
-
-                        <button
-                            disabled={startNowLoading}
-                            onClick={() => onToggleStartNowModal?.(true)}
-                            className="my-btn flex items-center justify-center gap-1.5 py-2.5 text-xs group cursor-pointer"
-                        >
-                            <Play size={13} className="group-hover:scale-110 transition-transform" />
-                            {locale === "ar" ? "ابدأ الآن" : "Start Now"}
-                        </button>
                     </div>
                 </motion.div>
             ) : (
@@ -176,6 +166,8 @@ export default function ScheduleSessionSection({
                 open={showForm}
                 onOpenChange={onToggleForm}
                 onSubmit={onSubmit}
+                onStartNow={onStartNow}
+                onToggleStartNowModal={onToggleStartNowModal}
                 isLoading={sessionLoading}
                 locale={locale}
             />

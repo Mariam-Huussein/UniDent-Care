@@ -1,77 +1,19 @@
-"use client";
-
-import { useState, useCallback, useEffect } from "react";
+import ActionModal from "@/components/ui/ActionModal";
+import { updateSessionStatus } from "@/features/cases/server/sessions.action";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-import { useCaseDetails } from "../../cases/hooks/useCaseDetails";
-import { CaseProvider, useCase } from "../../cases/context/CaseContext";
-import { SessionNoteItem } from "../types/Sessions.types";
-import {
-    addSessionNote,
-    getSessionNotes,
-    addNoteMedia,
-} from "../../cases/server/sessionNotes.action";
-import { updateSessionStatus } from "../../cases/server/sessions.action";
-import ActionModal from "@/components/ui/ActionModal";
-import SessionTopBar from "@/features/session/components/StartSession/SessionTopBar";
-import PatientSummaryCard from "@/features/session/components/StartSession/PatientSummaryCard";
+import PatientSummaryCard from "./PatientSummaryCard";
 import DentalImageGallery from "@/features/cases/components/CaseDetails/Clinical/DentalImageGallery";
-import SessionWorkspace from "@/features/session/components/StartSession/SessionWorkspace";
+import SessionWorkspace from "./SessionWorkspace";
+import { SessionNoteItem, SessionStatus } from "../../types/Sessions.types";
+import SessionTopBar from "./SessionTopBar";
+import SessionContentSkeleton from "./SessionContentSkeleton";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useState } from "react";
+import { useCase } from "@/features/cases/context/CaseContext";
+import { addNoteMedia, addSessionNote, getSessionNotes } from "@/features/cases/server/sessionNotes.action";
 
-interface StartSessionScreenProps {
-    caseId: string;
-    sessionId: string;
-}
-
-export default function StartSessionScreen({ caseId, sessionId }: StartSessionScreenProps) {
-    const { patient, isLoading, refetch } = useCaseDetails(caseId);
-
-    // Loading state
-    if (isLoading) {
-        return (
-            <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
-                <div className="max-w-[1200px] mx-auto flex items-center justify-center min-h-[60vh]">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center gap-4"
-                    >
-                        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-400 to-indigo-600 flex items-center justify-center shadow-lg">
-                            <Loader2 size={28} className="text-white animate-spin" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Loading Session</p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Preparing your workspace...</p>
-                        </div>
-                    </motion.div>
-                </div>
-            </div>
-        );
-    }
-
-    // Error state
-    if (!patient) {
-        return (
-            <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
-                <div className="max-w-[1200px] mx-auto flex items-center justify-center min-h-[60vh]">
-                    <p className="text-slate-500 dark:text-slate-400">Case not found.</p>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <CaseProvider caseData={patient} caseId={caseId} isLoading={false} refetch={refetch}>
-            <SessionContent caseId={caseId} sessionId={sessionId} />
-        </CaseProvider>
-    );
-}
-
-/** Inner component that has access to CaseContext */
-function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: string }) {
+export default function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: string }) {
     const { caseData: patient, getSessionById, sessionsLoading, refetchSessions } = useCase();
     const router = useRouter();
     const [notes, setNotes] = useState<SessionNoteItem[]>([]);
@@ -168,23 +110,7 @@ function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: stri
 
     if (sessionsLoading) {
         return (
-            <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
-                <div className="max-w-[1200px] mx-auto flex items-center justify-center min-h-[60vh]">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center gap-4"
-                    >
-                        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-indigo-400 to-indigo-600 flex items-center justify-center shadow-lg">
-                            <Loader2 size={28} className="text-white animate-spin" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">Loading Session Data</p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Fetching session details...</p>
-                        </div>
-                    </motion.div>
-                </div>
-            </div>
+            <SessionContentSkeleton />
         );
     }
 
@@ -201,17 +127,22 @@ function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: stri
                     endSessionLoading={endSessionLoading}
                     sessionStatus={session?.status}
                 />
-
                 {/* End Session Confirmation Modal */}
                 <ActionModal
                     isOpen={showEndModal}
                     onClose={() => setShowEndModal(false)}
                     onAction={async () => {
+                        if (notes.length === 0) {
+                            toast.error("You must add at least one clinical note before ending the session.");
+                            setShowEndModal(false);
+                            return;
+                        }
+
                         setEndSessionLoading(true);
                         try {
                             const res = await updateSessionStatus(sessionId, {
                                 sessionId,
-                                status: "Done",
+                                status: "Done" as SessionStatus,
                             });
                             if (res.success) {
                                 toast.success("Session completed successfully");
@@ -228,13 +159,16 @@ function SessionContent({ caseId, sessionId }: { caseId: string; sessionId: stri
                         }
                     }}
                     title="End Session"
-                    message="Are you sure you want to end this session? Make sure you have saved all your clinical notes before proceeding."
+                    message={
+                        notes.length === 0
+                            ? "Warning: You haven't added any notes yet. Clinical notes are mandatory."
+                            : "Are you sure you want to end this session? Make sure you have saved all your clinical notes before proceeding."
+                    }
                     actionText="End Session"
                     cancelText="Continue Session"
                     isLoading={endSessionLoading}
                     variant="danger"
                 />
-
                 {/* ═══ Main Content ═══ */}
                 <AnimatePresence mode="wait">
                     <motion.div

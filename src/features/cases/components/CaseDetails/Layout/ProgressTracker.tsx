@@ -16,12 +16,6 @@ interface ProgressTrackerProps {
 }
 
 export default function ProgressTracker({ status, createdByRole, diagnosisdto, supervisingDoctorName }: ProgressTrackerProps) {
-    console.log("diagnosisdto", diagnosisdto);
-    console.log("status", status);
-    console.log("createdByRole", createdByRole);
-    console.log("supervisingDoctorName", supervisingDoctorName);
-
-
     const { language } = useLanguage();
     const dict = progressTrackerTranslations[language as "ar" | "en"] || progressTrackerTranslations.en;
     const isAr = language === "ar";
@@ -99,9 +93,9 @@ export default function ProgressTracker({ status, createdByRole, diagnosisdto, s
                                 animate={{ scale: 1, opacity: 1 }}
                                 transition={{ delay: i * 0.15, type: "spring", stiffness: 300, damping: 20 }}
                                 className={`relative z-10 w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${done
-                                    ? "bg-indigo-600 dark:bg-indigo-50 border-indigo-600 dark:border-indigo-500 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
+                                    ? "bg-indigo-600 border-indigo-600 dark:border-indigo-500 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50"
                                     : active
-                                        ? "bg-white dark:bg-slate-900 border-indigo-500 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 shadow-lg shadow-indigo-100 dark:shadow-indigo-900/20 ring-4 ring-indigo-50 dark:ring-indigo-900/10"
+                                        ? "bg-white dark:bg-slate-900 border-indigo-600 dark:border-indigo-400 text-indigo-600 dark:text-indigo-400 shadow-lg shadow-indigo-100 dark:shadow-indigo-900/20 ring-4 ring-indigo-50 dark:ring-indigo-900/10"
                                         : "bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600"
                                     }`}
                             >

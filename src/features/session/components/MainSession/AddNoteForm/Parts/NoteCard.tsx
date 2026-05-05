@@ -2,9 +2,9 @@
 
 import { motion } from "framer-motion";
 import { Clock, Paperclip } from "lucide-react";
-import { SessionNoteItem } from "../../../types/Sessions.types";
+import { SessionNoteItem } from "../../../../types/Sessions.types";
 import MediaSlider from "@/components/ui/MediaSlider";
-import { customeFormatTime } from "../../../services/sessionHelper";
+import { customeFormatTime } from "../../../../services/sessionHelper";
 
 interface NoteCardProps {
     note: SessionNoteItem;

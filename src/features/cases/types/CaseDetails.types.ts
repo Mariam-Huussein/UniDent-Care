@@ -7,6 +7,7 @@ export type ToothStatus = 'healthy' | 'needs-treatment' | 'in-progress' | 'treat
 export type DiagnosisStage = 'BasicClinic' | 'AI' | '' | 0 | 1;
 
 export interface ToothData {
+    id?: string;  // Diagnosis Id
     number: number;
     status: ToothStatus;
     treatmentType?: string;
@@ -51,8 +52,6 @@ export interface PatientCase {
     medicalHistory?: string[];
     medications?: string[];
     imageUrls: string[];
-    beforeImageUrls?: string[];
-    afterImageUrls?: string[];
     student?: StudentAssignment;
     sessions: SessionInfo[];
     progressStep: string; // 0=diagnosis, 1=treatment, 2=follow-up

@@ -3,8 +3,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText } from "lucide-react";
 import { SessionItem, SessionNoteItem } from "@/features/session/types/Sessions.types";
-import NoteCard from "./AddNoteFormPart/NoteCard";
-import AddNoteForm from "./AddNoteForm";
+import NoteCard from "./AddNoteForm/Parts/NoteCard";
+import AddNoteForm from "./AddNoteForm/AddNoteForm";
 
 interface SessionWorkspaceProps {
     session: SessionItem | null;

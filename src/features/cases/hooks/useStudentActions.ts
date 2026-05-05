@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { PatientCase } from "../types/CaseDetails.types";
 import { cancelCaseRequest } from "../server/caseRequest.action";
-import { cancelSession, createSession, updateSessionStatus } from "../server/sessions.action";
+import { cancelSession, createSession, rescheduleSession, updateSessionStatus } from "../server/sessions.action";
 import { SessionBookingData } from "../../session/types/Sessions.types";
 import { useCase } from "../context/CaseContext";
 
@@ -38,6 +38,7 @@ export function useStudentActions(
 
     // ── Auto-expire session if the scheduled day has passed ──
     useEffect(() => {
+        if (startNowLoading) return;
         if (scheduledSession) {
             const status = scheduledSession.status?.toLowerCase();
             // Only expire if still "scheduled" — never touch InProgress sessions
@@ -68,7 +69,7 @@ export function useStudentActions(
                     });
             }
         }
-    }, [scheduledSession, refetchSessions]);
+    }, [scheduledSession, refetchSessions, startNowLoading]);
 
     const handleCancelRequest = async () => {
         if (!requestId || !studentId) {
@@ -101,10 +102,13 @@ export function useStudentActions(
             const [hours, minutes, seconds] = bookingData.startTime.split(":").map(Number);
             bookingDateTime.setHours(hours, minutes, seconds || 0);
 
+            const offset = bookingDateTime.getTimezoneOffset() * 60000;
+            const localISOTime = new Date(bookingDateTime.getTime() - offset).toISOString();
+
             const res = await createSession({
                 studentId,
                 patientCaseId: patient.id,
-                sessionDate: bookingDateTime.toISOString(),
+                sessionDate: localISOTime,
                 location: bookingData.location,
             });
 
@@ -124,14 +128,28 @@ export function useStudentActions(
         }
     };
 
-    // ── Start Now: navigate to the start-session page ──
-    // Status is NOT changed here. The student will mark it as "Done" via "End Session" button.
     const handleStartNow = async () => {
-        if (!scheduledSession) return;
+        if (!scheduledSession || !studentId) {
+            toast.error("Not Found Session!");
+            return;
+        }
         setStartNowLoading(true);
         try {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() + 5);
+
+            const localTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString();
+            const res = await rescheduleSession(
+                scheduledSession.id,
+                studentId,
+                localTime
+            );
+            toast.success("Session Updated Successfuly");
             setShowStartNowModal(false);
             router.push(`/my-cases/${patient.id}/start-session/${scheduledSession.id}`);
+        } catch (err: any) {
+            toast.error(err.message || "Failed to update session");
+            console.error("Reschedule Error:", err);
         } finally {
             setStartNowLoading(false);
         }

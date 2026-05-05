@@ -1,4 +1,5 @@
-import { CaseStatus, ToothStatus } from "../types/CaseDetails.types";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
+import { CaseStatus, PatientCase, ToothStatus } from "../types/CaseDetails.types";
 
 export function formatTimestamp(ts: string) {
     const d = new Date(ts);
@@ -9,41 +10,51 @@ export function formatTimestamp(ts: string) {
 }
 
 type TabDef = { key: string; label: string };
-export function getTabsForStatus(status: CaseStatus): TabDef[] {
-    switch (status) {
-        case "Pending":
+export function getTabsForStatus(status: CaseStatus, patient: PatientCase): TabDef[] {
+    switch (status.toLowerCase()) {
+        case "pending":
             return [
                 { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
+                // { key: "medical", label: "Medical Info" },
             ];
-        case "UnderReview":
+        case "underReview":
             return [
                 { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
+                // { key: "medical", label: "Medical Info" },
             ];
-        case "InProgress":
+        case "inprogress":
+            if (patient.userFlags.isAssignedDoctor || patient.hasEvaluatedSession) {
+                console.log("here")
+                return [
+                    { key: "timeline", label: "Timeline" },
+                    { key: "odontogram", label: "Odontogram" },
+                    // { key: "medical", label: "Medical Info" },
+                ];
+            }
             return [
                 { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
+                // { key: "medical", label: "Medical Info" },
                 { key: "timeline", label: "Timeline" },
             ];
-        case "Completed":
+        case "completed":
             return [
                 { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
+                // { key: "medical", label: "Medical Info" },
                 { key: "timeline", label: "Timeline" },
+                { key: "beforeAfter", label: "Before After" },
             ];
         default:
             return [
                 { key: "odontogram", label: "Odontogram" },
-                { key: "medical", label: "Medical Info" },
+
+                // { key: "medical", label: "Medical Info" },
             ];
     }
 }
 
 export function getPatientStatusConfig(status: CaseStatus) {
-    switch (status) {
-        case 'Pending':
+    switch (status.toLowerCase()) {
+        case 'pending':
             return {
                 label: 'Unassigned',
                 bg: 'bg-gray-100',
@@ -52,7 +63,7 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-gray-200',
                 gradient: 'from-gray-400 to-gray-500',
             };
-        case 'UnderReview':
+        case 'underreview':
             return {
                 label: 'Diagnosis',
                 bg: 'bg-blue-50',
@@ -61,7 +72,7 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-blue-200',
                 gradient: 'from-blue-400 to-blue-600',
             };
-        case 'InProgress':
+        case 'inprogress':
             return {
                 label: 'In Progress',
                 bg: 'bg-amber-50',
@@ -70,7 +81,7 @@ export function getPatientStatusConfig(status: CaseStatus) {
                 border: 'border-amber-200',
                 gradient: 'from-amber-400 to-orange-500',
             };
-        case 'Completed':
+        case 'completed':
             return {
                 label: 'Completed',
                 bg: 'bg-emerald-50',

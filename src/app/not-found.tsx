@@ -9,7 +9,7 @@ import Footer from "@/components/ui/Footer";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden px-6 transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-slate-950 flex flex-col items-center justify-center relative overflow-hidden px-6 transition-colors mt-2 duration-300">
       <Navbar/>
       {/* Background decorations */}
       <div className="absolute top-0 right-0 -translate-y-1/3 translate-x-1/4 w-[500px] h-[500px] bg-blue-50 dark:bg-blue-900/10 rounded-full blur-[120px] -z-10 transition-colors duration-300" />
@@ -77,7 +77,7 @@ export default function NotFound() {
         className="flex flex-col sm:flex-row gap-4 items-center"
       >
         <Link
-          href="/dashboard"
+          href="/"
           className="group my-btn px-10"
         >
           <Home size={20} />

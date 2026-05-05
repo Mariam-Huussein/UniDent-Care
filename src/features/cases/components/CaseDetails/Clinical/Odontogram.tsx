@@ -16,14 +16,14 @@ import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import { useDiagnoses } from "@/features/cases/hooks/useDiagnoses";
 
 export default function Odontogram() {
-    const { caseData, studentOwnerData, doctorOwnerData, refetch } = useCase();
+    const { caseData, studentOwnerData, doctorOwnerData } = useCase();
     const { userRole } = getUserDetailsFromCookies();
     const DiagnosisFlag = userRole === "ClinicalDoctor"
     const patient = caseData as PatientCase;
 
     // ── Derive from context ────────────────────────────────────────────────
     const { diagnoses, loading, refresh } = useDiagnoses(caseData?.id);
-    console.log(diagnoses)
+    console.log(patient.patientId)
     const status = patient?.status;
     const readonly = !DiagnosisFlag;
     const assignedStudentName = studentOwnerData?.data?.fullName ?? null;
@@ -32,6 +32,7 @@ export default function Odontogram() {
     const teeth: ToothData[] = useMemo(() => {
         if (!diagnoses || !Array.isArray(diagnoses)) return [];
         return diagnoses.flatMap(d => (d.teethNumbers ?? []).map(num => ({
+            id: d.id || "",
             number: num,
             status: "needs-treatment" as ToothStatus,
             treatmentType: d.caseTypeName || "",
@@ -119,7 +120,29 @@ export default function Odontogram() {
             {/* ── Left: Header + Chart ── */}
             <div className="space-y-5">
                 <OdontogramHeader readonly={readonly} />
+
                 <OdontogramChart
+                    key={chartKey}
+                    conditions={conditions}
+                    teethMap={teethMap}
+                    diagnosedTeethMap={diagnosedTeethMap}
+                    selected={selected}
+                    isUnassigned={isUnassigned}
+                    isDiagnosisActive={isDiagnosisActive}
+                    onSelectionChange={(newSelection) => {
+                        if (newSelection.length > 0) {
+                            const lastToothClicked = newSelection[newSelection.length - 1];
+                            setSelected([lastToothClicked]);
+                            setChartKey((prev) => prev + 1);
+                        } else {
+                            setSelected([]);
+                            setChartKey((prev) => prev + 1);
+                        }
+                    }}
+                    onToothClick={handleToothClick}
+                    onAfterViewClick={handleAfterViewClick}
+                />
+                {/* <OdontogramChart
                     key={chartKey}
                     conditions={conditions}
                     teethMap={teethMap}
@@ -130,7 +153,7 @@ export default function Odontogram() {
                     onSelectionChange={setSelected}
                     onToothClick={handleToothClick}
                     onAfterViewClick={handleAfterViewClick}
-                />
+                /> */}
             </div>
 
             {/* ── Right: edit plan OR view info ── */}
@@ -140,7 +163,6 @@ export default function Odontogram() {
                         <DiagnosisPlanPanel
                             selected={selected}
                             teethMap={teethMap}
-                            onClearAll={handleClearAll}
                             onRemoveTooth={handleRemoveTooth}
                             onUpdateTooth={handleUpdateTooth}
                             onSubmitSuccess={refresh}

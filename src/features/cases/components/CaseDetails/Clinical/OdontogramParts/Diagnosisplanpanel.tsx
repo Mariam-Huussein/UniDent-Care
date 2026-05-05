@@ -7,16 +7,13 @@ import { ClipboardList, Trash2, Loader2, CheckCircle2, ChevronDown } from "lucid
 import type { ToothDetail } from "react-odontogram";
 import ToothDiagnosisCard from "./Toothdiagnosiscard";
 import { useCase } from "@/features/cases/context/CaseContext";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { submitDiagnoses } from "@/features/cases/server/diagnoses.action";
+import { submitDiagnoses, updateDiagnosis, deleteDiagnosis } from "@/features/cases/server/diagnoses.action";
 import toast from "react-hot-toast";
 import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 
 export interface DiagnosisPlanPanelProps {
     selected: ToothDetail[];
     teethMap: Map<number, ToothData>;
-    onClearAll: () => void;
     onRemoveTooth: (fdiNum: number) => void;
     onUpdateTooth: (num: number, updates: Partial<ToothData>) => void;
     onSubmitSuccess: () => void | Promise<void>;
@@ -25,7 +22,6 @@ export interface DiagnosisPlanPanelProps {
 export default function DiagnosisPlanPanel({
     selected,
     teethMap,
-    onClearAll,
     onRemoveTooth,
     onUpdateTooth,
     onSubmitSuccess,
@@ -33,55 +29,60 @@ export default function DiagnosisPlanPanel({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const { caseData } = useCase();
-    const auth = useSelector((state: RootState) => state.auth);
 
     const handleSubmit = async () => {
         if (selected.length === 0) return;
         setIsSubmitting(true);
-        const {userId , userRole} = getUserDetailsFromCookies();
+        const { userId, userRole } = getUserDetailsFromCookies();
         try {
-            const groups: Record<string, { patientCaseId:string; stage: number; caseTypeId: string; notes: string; createdById:string; role:string; teethNumbers: number[] }> = {};
-
-            for (const selTooth of selected) {
-                const fdiNum = Number(selTooth.notations.fdi);
-                const toothData = teethMap.get(fdiNum);
-
-                if (toothData && toothData.status !== "healthy" && toothData.caseTypeId) {
-                    const key = `${toothData.caseTypeId}_${toothData.notes || ""}`;
-                    if (!groups[key]) {
-                        groups[key] = { patientCaseId:caseData?.id || "", stage:1, caseTypeId: toothData.caseTypeId, notes: toothData.notes || "",createdById: userId ||"", role:userRole||"", teethNumbers: [] };
-                    }
-                    groups[key].teethNumbers.push(fdiNum);
-                }
+            const selTooth = selected[0];
+            const fdiNum = Number(selTooth.notations.fdi);
+            const toothData = teethMap.get(fdiNum);
+            console.log("Current Tooth Data:", toothData);
+            if (!toothData) {
+                throw new Error("Tooth data not found");
             }
 
-            const groupValues = Object.values(groups);
-
-            if (groupValues.length === 0) {
-                toast.error("Please select a treatment type for the unhealthy teeth before submitting.");
-                return;
-            }
-
-            for (const group of groupValues) {
+            if (toothData.status === "healthy" && toothData.id) {
+                console.log("this is delete ")
+                const res = await deleteDiagnosis(toothData.id);
+                console.log("this is delete res ", res)
+                if (!res.success) throw new Error(res.message);
+            } else if (toothData.status !== "healthy" && toothData.id && toothData.caseTypeId) {
+                console.log("this is update ")
+                const payload = {
+                    id: toothData.id,
+                    stage: 1,
+                    caseTypeId: toothData.caseTypeId,
+                    notes: toothData.notes || "",
+                    teethNumbers: [fdiNum]
+                };
+                console.log("this is update payload ", payload)
+                const res = await updateDiagnosis(payload);
+                console.log("this is update res ", res)
+                if (!res.success) throw new Error(res.message);
+            } else if (toothData.status !== "healthy" && !toothData.id && toothData.caseTypeId) {
+                console.log("this is submit ")
                 const payload = {
                     patientCaseId: caseData?.id || "",
                     stage: 1,
-                    caseTypeId: group.caseTypeId,
-                    notes: group.notes,
-                    createdById: userId || auth.user?.publicId || "",
+                    caseTypeId: toothData.caseTypeId,
+                    notes: toothData.notes || "",
+                    createdById: userId || "",
                     role: userRole || "",
-                    teethNumbers: group.teethNumbers,
+                    teethNumbers: [fdiNum]
                 };
-                console.log(payload);
+                console.log("this is submit payload ", payload)
                 const res = await submitDiagnoses(payload);
-                console.log(res);
+                console.log("this is submit res ", res)
                 if (!res.success) throw new Error(res.message);
             }
 
-            toast.success("Diagnosis plan submitted successfully!");
+            toast.success("Diagnosis saved successfully!");
             setSubmitted(true);
-            await onSubmitSuccess()
-            setTimeout(() => { setSubmitted(false); onClearAll(); }, 1800);
+            await onSubmitSuccess();
+
+            setTimeout(() => { setSubmitted(false); }, 1800);
         } catch (error: any) {
             toast.error("Failed to submit: " + error.message);
         } finally {
@@ -102,20 +103,10 @@ export default function DiagnosisPlanPanel({
                             Diagnosis Plan
                         </h3>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                            {selected.length} {selected.length === 1 ? "tooth" : "teeth"} selected
+                            {selected.length === 1 ? "1 tooth selected" : "No tooth selected"}
                         </p>
                     </div>
                 </div>
-
-                {selected.length > 0 && (
-                    <button
-                        onClick={onClearAll}
-                        className="flex items-center gap-1.5 text-[11px] font-semibold text-rose-500 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 px-2.5 py-1.5 rounded-lg transition-colors"
-                    >
-                        <Trash2 size={13} />
-                        Clear all
-                    </button>
-                )}
             </div>
 
             {/* ── Body ── */}
@@ -140,7 +131,8 @@ export default function DiagnosisPlanPanel({
                             </p>
                         </motion.div>
                     ) : (
-                        selected.map((selTooth) => {
+                        (() => {
+                            const selTooth = selected[0];
                             const fdiNum = Number(selTooth.notations.fdi);
                             const toothData = teethMap.get(fdiNum) || ({ number: fdiNum, status: "healthy" } as ToothData);
                             return (
@@ -161,7 +153,7 @@ export default function DiagnosisPlanPanel({
                                     />
                                 </motion.div>
                             );
-                        })
+                        })()
                     )}
                 </AnimatePresence>
             </div>
@@ -188,7 +180,7 @@ export default function DiagnosisPlanPanel({
                                 Submitting…
                             </>
                         ) : (
-                            "Submit Diagnosis Plan"
+                            "Submit Diagnosis"
                         )}
                     </button>
                 </div>

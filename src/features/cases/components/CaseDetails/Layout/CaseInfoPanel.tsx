@@ -37,6 +37,8 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
         .toUpperCase()
         .slice(0, 2);
 
+console.log(patient.status)
+
     return (
         <motion.div
             initial={{ opacity: 0, x: 16 }}
@@ -121,17 +123,17 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
             <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-6" />
 
             {/* Role-Based Actions */}
-            {(patient.userFlags?.isAssignedStudent || patient.userFlags?.hasRequest || !patient.assignedStudentId) && role === "Student" && (
+            {(patient.userFlags?.isAssignedStudent || patient.userFlags?.hasRequest || !patient.assignedStudentId) && role === "Student" && patient.status.toLowerCase() !== "completed" && (
                 <StudentActions patient={patient} onRefetch={onRefetch} />
             )}
 
-            {(patient.userFlags?.isAssignedDoctor || patient.userFlags?.hasRequest) && role === "Doctor" && (
+            {(patient.userFlags?.isAssignedDoctor || patient.userFlags?.hasRequest || patient.hasEvaluatedSession) && role === "Doctor" && patient.status.toLowerCase() !== "completed" && (
                 <DoctorActions patient={patient} onRefetch={onRefetch} />
             )}
 
 
             {/* Completed */}
-            {patient.status === "Completed" && (
+            {patient.status.toLowerCase() === "completed" && (
                 <div className="space-y-4">
                     <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/50 p-4 space-y-2">
                         <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">

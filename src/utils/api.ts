@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { getUserDetailsFromCookies } from "./sharedHelper";
 
 const axiosInstance = axios.create({
-    baseURL: "https://dental-hup1.runasp.net/api",
+    baseURL: "https://dental-hup1.runasp.net/api/v1/",
 });
 
 axiosInstance.interceptors.request.use(

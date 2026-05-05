@@ -18,6 +18,7 @@ import { StepLocation } from "./parts/StepLocation";
 import { SessionBookingData } from "@/features/session/types/Sessions.types";
 import { normalizeTime } from "@/features/cases/utils/caseDetailsBooking.utils";
 import { Locale, translations } from "@/features/cases/types/Booking.types";
+import { PlayIcon } from "lucide-react";
 
 // ─── Props ────────────────────────────────────────────────────
 
@@ -25,6 +26,8 @@ interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit: (data: SessionBookingData) => Promise<void>;
+    onStartNow?: () => void;
+    onToggleStartNowModal?: (open: boolean) => void;
     initialData?: SessionBookingData;
     isLoading?: boolean;
     locale?: Locale;
@@ -54,6 +57,7 @@ export default function SessionBookingDialog({
     open,
     onOpenChange,
     onSubmit,
+    onToggleStartNowModal,
     initialData,
     isLoading = false,
     locale = "en",
@@ -205,13 +209,37 @@ export default function SessionBookingDialog({
                                 initial="enter"
                                 animate="center"
                                 exit="exit"
+                                className="flex flex-col gap-4"
                             >
+                                {!isUpdateMode && (
+                                    <div className="flex items-center justify-between mb-3 px-1">
+                                        <p className="text-[13px] font-medium text-muted-foreground">
+                                            {isRTL ? "اختر التاريخ" : "Select Date"}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                onOpenChange(false);
+                                                onToggleStartNowModal?.(true);
+                                            }}
+                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors border border-primary/20"
+                                        >
+                                            <PlayIcon size={12} fill="currentColor" />
+                                            <span className="text-[11px] font-bold uppercase tracking-wider">
+                                                {isRTL ? "ابدأ الآن" : "Start Now"}
+                                            </span>
+                                        </button>
+                                    </div>
+                                )}
+                                <div className="rounded-xl border border-border/50 bg-card p-1">
+                                    
                                 <StepDate
                                     selectedDate={selectedDate}
                                     onSelect={setSelectedDate}
                                     today={today}
                                     locale={locale}
                                 />
+                                </div>
                             </motion.div>
                         )}
 

@@ -17,14 +17,14 @@ interface ToothDiagnosisCardProps {
     onUpdate: (num: number, updates: Partial<ToothData>) => void;
 }
 
-const STATUS_OPTIONS = ["Healthy", "Needs Treatment", "In Progress", "Treated"];
+const STATUS_OPTIONS = ["Healthy", "Needs Treatment"];
 
 const statusToDisplay = (status: string) => {
     switch (status) {
         case "healthy":         return "Healthy";
         case "needs-treatment": return "Needs Treatment";
-        case "in-progress":     return "In Progress";
-        case "treated":         return "Treated";
+        // case "in-progress":     return "In Progress";
+        // case "treated":         return "Treated";
         default:                return "Healthy";
     }
 };
@@ -33,8 +33,8 @@ const displayToStatus = (display: string): ToothStatus => {
     switch (display) {
         case "Healthy":          return "healthy";
         case "Needs Treatment":  return "needs-treatment";
-        case "In Progress":      return "in-progress";
-        case "Treated":          return "treated";
+        // case "In Progress":      return "in-progress";
+        // case "Treated":          return "treated";
         default:                 return "healthy";
     }
 };

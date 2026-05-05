@@ -1,4 +1,4 @@
-import StartSessionScreen from "@/features/session/Screens/StartSession.Screen";
+import StartSessionScreen from "@/features/session/Screens/Session.Screen";
 
 export default async function StartSession({
     params,

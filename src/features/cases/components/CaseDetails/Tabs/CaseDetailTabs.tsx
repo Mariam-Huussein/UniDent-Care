@@ -7,8 +7,6 @@ import { RootState } from "@/store";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import Odontogram from "../Clinical/Odontogram";
 import ActivityTimeline from "../Tracking/ActivityTimeline";
-import MedicalInfoTab from "./parts/MedicalInfoTab";
-import BeforeAfterTab from "./parts/BeforeAfterTab";
 import { useCase } from "@/features/cases/context/CaseContext";
 import { getTabsForStatus } from "@/features/cases/utils/CaseDetails.utils";
 
@@ -18,12 +16,12 @@ export default function PatientDetailTabs() {
     const { caseData } = useCase();
     const patient = caseData as PatientCase;
 
-    const tabs = getTabsForStatus(patient.status);
+    const tabs = getTabsForStatus(patient.status,patient);
     const [activeTab, setActiveTab] = useState(tabs[0].key);
 
     // Reset tab when status changes
     useEffect(() => {
-        setActiveTab(getTabsForStatus(patient.status)[0].key);
+        setActiveTab(getTabsForStatus(patient.status,patient)[0].key);
     }, [patient.status]);
 
     return (
@@ -71,16 +69,16 @@ export default function PatientDetailTabs() {
                             transition={{ duration: 0.2 }}
                         >
                             {activeTab === "odontogram" && <Odontogram />}
-                            {activeTab === "medical" && <MedicalInfoTab medicalHistory={patient.medicalHistory} medications={patient.medications} />}
+                            {/* {activeTab === "medical" && <MedicalInfoTab medicalHistory={patient.medicalHistory} medications={patient.medications} />} */}
                             {activeTab === "timeline" && <ActivityTimeline caseId={patient.id} />}
 
-                            {activeTab === "beforeAfter" && (
+                            {/* {activeTab === "beforeAfter" && (
                                 <BeforeAfterTab
                                     beforeImageUrls={patient.beforeImageUrls}
                                     afterImageUrls={patient.afterImageUrls}
                                     defaultImageUrls={patient.imageUrls}
                                 />
-                            )}
+                            )} */}
                         </motion.div>
                     </AnimatePresence>
                 </div>

@@ -58,6 +58,30 @@ export async function updateSessionStatus(
     }
 }
 
+export async function rescheduleSession(sessionId: string, studentId: string, newDate: string): Promise<UpdateSessionStatusBody> {
+    try {
+        const response = await axiosInstance.patch(`/Sessions/${sessionId}/schedule`, {
+            sessionId: sessionId,
+            studentId: studentId,
+            newScheduledAt: newDate,
+        });
+
+        if (response.data.success) {
+            return response.data;
+        } else {
+            throw new Error(response.data.message);
+        }
+
+    } catch (error: any) {
+        const data = error.response?.data;
+        const validationErrors = data?.error?.errors;
+        if (validationErrors?.length) {
+            throw new Error(validationErrors.join(", "));
+        }
+        throw new Error(data?.message || "Failed to update session status");
+    }
+}
+
 export async function getCaseSessions(
     caseId: string,
     params?: { page?: number; pageSize?: number }

@@ -3,11 +3,11 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, X, FileImage, UploadCloud, AlertCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { NoteFilePreview } from "./AddNoteFormPart/NoteFilePreview";
-import { NoteDropZone } from "./AddNoteFormPart/NoteDropZone";
-import { NoteErrorMessage } from "./AddNoteFormPart/NoteErrorMessage";
-import { NoteCharacterCounter } from "./AddNoteFormPart/NoteCharacterCounter";
-import { useAddNote } from "../../hooks/useAddNote";
+import { NoteFilePreview } from "./Parts/NoteFilePreview";
+import { NoteDropZone } from "./Parts/NoteDropZone";
+import { NoteErrorMessage } from "./Parts/NoteErrorMessage";
+import { NoteCharacterCounter } from "./Parts/NoteCharacterCounter";
+import { useAddNote } from "../../../hooks/useAddNote";
 
 interface AddNoteFormProps {
     onSubmit: (note: string, files?: File[]) => Promise<void>;

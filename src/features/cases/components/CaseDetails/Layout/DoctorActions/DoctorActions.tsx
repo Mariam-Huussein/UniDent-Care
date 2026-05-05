@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, StarHalf, Info, Star } from "lucide-react";
 import { PatientCase } from "../../../../types/CaseDetails.types";
 import { approveRequest, rejectRequest } from "@/features/cases/server/caseRequest.action";
 import PendingRequestCard from "./PendingRequestCard";
@@ -113,9 +113,30 @@ export default function DoctorActions({ patient, onRefetch }: DoctorActionsProps
             ) : null}
 
             {/* ── Session needs evaluation ── */}
-            {/* {patient.userFlags?.isAssignedDoctor && patient.hasEvaluatedSession === false && patient.assignedStudentId && (
-                <EvaluationCard />
-            )} */}
+            {patient.userFlags?.isAssignedDoctor && patient.hasEvaluatedSession && patient.assignedStudentId && (
+                                <div className="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-800/50 dark:bg-indigo-900/10 space-y-3 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                        <div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+                            <Star size={18} />
+                        </div>
+                        <span className="text-[11px] font-bold uppercase tracking-wider">
+                            Action Required
+                        </span>
+                    </div>
+
+                    <div className="space-y-1">
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                            You have a Session to Evaluate
+                        </p>
+                        <div className="flex items-start gap-1.5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                            <Info size={14} className="mt-0.5 shrink-0 text-indigo-500" />
+                            <p>
+                                Check the <span className="font-bold text-indigo-600 dark:text-indigo-400">Timeline Tab</span> below to select the session and start evaluation.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

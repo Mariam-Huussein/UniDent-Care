@@ -1,5 +1,11 @@
 import { ApiResponse } from "@/types/api";
 
+export type SessionStatus =
+    "Scheduled" | 0 |
+    "Done" | 1 |
+    "Cancelled" | 2 |
+    "Expired" | 3;
+
 export interface SessionItem {
     id: string;
     caseId: string;
