@@ -19,6 +19,7 @@ import {
 } from "../types/caseCardProps.types";
 import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import axiosInstance from "@/utils/api";
+import axios from "axios";
 
 export async function getAvailableCases(params: CasesQueryParams): Promise<AvailableCasesResponse> {
     try {
@@ -31,7 +32,10 @@ export async function getAvailableCases(params: CasesQueryParams): Promise<Avail
 
 export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
     try {
-        const response = await axiosInstance.get(`/Cases/${caseId}`);
+        const apiV2 = axios.create({
+            baseURL: "https://dental-hup1.runasp.net/api/v2/",
+        });
+        const response = await apiV2.get(`/Cases/${caseId}`);
         return response.data;
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to fetch case details");

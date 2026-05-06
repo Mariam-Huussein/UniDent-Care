@@ -163,6 +163,7 @@ export default function ScheduleSessionSection({
             )}
 
             <SessionBookingDialog
+                hasScheduledSession={!!hasScheduledSession}
                 open={showForm}
                 onOpenChange={onToggleForm}
                 onSubmit={onSubmit}

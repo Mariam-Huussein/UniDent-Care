@@ -90,7 +90,6 @@ export function useCaseDetails(caseId: string): UseCaseDetailsReturn {
                     progressStep: apiData.processStatus,
                     sessions: [],
                 };
-
                 setPatient(mappedPatient);
             } else {
                 toast.error(caseResponse.message || "Failed to load case details.");

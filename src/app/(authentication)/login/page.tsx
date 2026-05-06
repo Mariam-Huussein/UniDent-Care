@@ -48,7 +48,7 @@ export default function Login() {
         dispatch(login(response.data));
 
         try {
-          if (roles[0] != "ClinicalDoctor") {
+          if (roles[1] != "ClinicalDoctor") {
             const user = await getProfileByRole(roles[0], publicId);
             dispatch(setUserFromReload({ user, role: roles[0] }));
           }

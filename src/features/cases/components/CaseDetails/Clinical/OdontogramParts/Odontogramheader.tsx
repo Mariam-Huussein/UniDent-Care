@@ -34,7 +34,7 @@ export default function OdontogramHeader({ readonly }: OdontogramHeaderProps) {
             </div>
 
             {/* Legend pills */}
-            <div className="flex items-center gap-2.5 flex-wrap">
+            {/* <div className="flex items-center gap-2.5 flex-wrap">
                 {TOOTH_STATUSES.map((status) => {
                     const c = getToothStatusColor(status);
                     return (
@@ -55,7 +55,7 @@ export default function OdontogramHeader({ readonly }: OdontogramHeaderProps) {
                         </div>
                     );
                 })}
-            </div>
+            </div> */}
         </div>
     );
 }

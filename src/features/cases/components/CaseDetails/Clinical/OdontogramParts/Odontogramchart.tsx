@@ -48,7 +48,7 @@ export default function OdontogramChart({
             )}
 
             <div
-                className={`relative rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 p-5 max-w-[480px] mx-auto overflow-x-auto odontogram-wrapper transition-all duration-300 shadow-sm ${
+                className={`relative rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 p-5 max-w-120 mx-auto overflow-x-auto odontogram-wrapper transition-all duration-300 shadow-sm ${
                     isUnassigned ? "opacity-40 pointer-events-none select-none" : ""
                 }`}
             >
@@ -91,12 +91,6 @@ export default function OdontogramChart({
                 <ReactOdontogram
                     notation="FDI"
                     showTooltip
-                    /*
-                     * Always false — with readOnly=true the library disables pointer-events
-                     * on SVG elements, making it impossible to detect which tooth was clicked.
-                     * Visual selection is suppressed instead by remounting via chartKey
-                     * (see onAfterViewClick → handleAfterViewClick in Odontogram.tsx).
-                     */
                     readOnly={false}
                     teethConditions={conditions}
                     defaultSelected={selected.map((s) => `teeth-${s.notations.fdi}`)}

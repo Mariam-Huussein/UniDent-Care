@@ -15,7 +15,7 @@ import { BookingStepper } from "./parts/Bookingstepper";
 import { StepDate } from "./parts/StepDate";
 import { StepTime } from "./parts/StepTime";
 import { StepLocation } from "./parts/StepLocation";
-import { SessionBookingData } from "@/features/session/types/Sessions.types";
+import { SessionBookingData, SessionItem } from "@/features/session/types/Sessions.types";
 import { normalizeTime } from "@/features/cases/utils/caseDetailsBooking.utils";
 import { Locale, translations } from "@/features/cases/types/Booking.types";
 import { PlayIcon } from "lucide-react";
@@ -23,6 +23,7 @@ import { PlayIcon } from "lucide-react";
 // ─── Props ────────────────────────────────────────────────────
 
 interface Props {
+    hasScheduledSession: boolean;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSubmit: (data: SessionBookingData) => Promise<void>;
@@ -54,6 +55,7 @@ const DEFAULT_START = "08:00";
 const DEFAULT_END = "09:00";
 
 export default function SessionBookingDialog({
+    hasScheduledSession,
     open,
     onOpenChange,
     onSubmit,
@@ -63,7 +65,7 @@ export default function SessionBookingDialog({
     locale = "en",
 }: Props) {
     // ── Derived flags ──────────────────────────────────────────
-    const isUpdateMode = !!initialData;
+    const isUpdateMode = hasScheduledSession;
     const t = translations[locale];
     const isRTL = locale === "ar";
     const today = useMemo(() => {
@@ -211,7 +213,7 @@ export default function SessionBookingDialog({
                                 exit="exit"
                                 className="flex flex-col gap-4"
                             >
-                                {!isUpdateMode && (
+                                {(isUpdateMode ) && (
                                     <div className="flex items-center justify-between mb-3 px-1">
                                         <p className="text-[13px] font-medium text-muted-foreground">
                                             {isRTL ? "اختر التاريخ" : "Select Date"}
@@ -231,7 +233,7 @@ export default function SessionBookingDialog({
                                         </button>
                                     </div>
                                 )}
-                                <div className="rounded-xl border border-border/50 bg-card p-1">
+                                <div className={isUpdateMode ? `rounded-xl border border-border/50 bg-card p-1` : ""}>
                                     
                                 <StepDate
                                     selectedDate={selectedDate}

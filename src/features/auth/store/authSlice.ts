@@ -48,7 +48,7 @@ const authSlice = createSlice({
                 sameSite: "strict",
             });
 
-            Cookies.set("user_role", action.payload.roles[0], {
+            Cookies.set("user_role", action.payload.roles[1] || action.payload.roles[0], {
                 expires: 7,
                 secure: isProd,
                 sameSite: "strict",

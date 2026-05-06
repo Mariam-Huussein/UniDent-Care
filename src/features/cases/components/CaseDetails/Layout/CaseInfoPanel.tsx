@@ -5,6 +5,7 @@ import {
     User, Calendar, CheckCircle, Phone, MapPin,
     GraduationCap, Stethoscope, UserCircle,
     ClipboardList, BookUser, Clock,
+    Hash,
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
@@ -36,8 +37,6 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
         .join("")
         .toUpperCase()
         .slice(0, 2);
-
-console.log(patient.status)
 
     return (
         <motion.div
@@ -72,6 +71,7 @@ console.log(patient.status)
                 <InfoCard icon={User} label="Age" value={`${patient.patientAge} years`} color="text-blue-500" />
                 <InfoCard icon={Phone} label="Phone" value={patient.phone || "Not Provided"} color="text-emerald-500" />
                 <InfoCard icon={MapPin} label="City" value={patient.city || "Not Provided"} color="text-rose-500" />
+                {/* <InfoCard icon={Hash} label="National Id" value={patient.nationalId || "Not Provided"} color="text-rose-500" /> */}
                 <InfoCard icon={GraduationCap} label="University" value={patient.universityName || "Not Assigned"} color="text-indigo-500" />
                 <InfoCard icon={Calendar} label="Created At" value={new Date(patient.createdAt).toLocaleDateString()} color="text-violet-500" />
                 <InfoCard icon={ClipboardList} label="Total Sessions" value={`${patient.totalSessions}` || "0"} color="text-violet-500" />

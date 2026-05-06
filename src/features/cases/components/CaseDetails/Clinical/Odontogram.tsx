@@ -23,7 +23,6 @@ export default function Odontogram() {
 
     // ── Derive from context ────────────────────────────────────────────────
     const { diagnoses, loading, refresh } = useDiagnoses(caseData?.id);
-    console.log(patient.patientId)
     const status = patient?.status;
     const readonly = !DiagnosisFlag;
     const assignedStudentName = studentOwnerData?.data?.fullName ?? null;
