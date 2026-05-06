@@ -25,7 +25,10 @@ const authSlice = createSlice({
         login: (state, action: PayloadAction<AuthData | AuthData<null>>) => {
             state.user = action.payload.user ?? null;
             state.token = action.payload.token;
-            state.role = action.payload.roles[0];
+            // Prefer ClinicalDoctor over Student if both roles exist
+            const roles = action.payload.roles;
+            const effectiveRole = roles.includes("ClinicalDoctor") ? "ClinicalDoctor" : roles[0];
+            state.role = effectiveRole;
             state.isAuthenticated = true;
             state.uinversalId = action.payload.universityId;
 
@@ -48,7 +51,7 @@ const authSlice = createSlice({
                 sameSite: "strict",
             });
 
-            Cookies.set("user_role", action.payload.roles[1] || action.payload.roles[0], {
+            Cookies.set("user_role", effectiveRole, {
                 expires: 7,
                 secure: isProd,
                 sameSite: "strict",

@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, X, Loader2 } from "lucide-react";
+import { ChevronDown, X, Loader2, Plus } from "lucide-react";
 import { CaseType } from "../../types/caseCardProps.types";
-import { getCaseTypes } from "@/server/caseTypes.action";
+import { getCaseTypes, createCaseType } from "@/server/caseTypes.action";
 import { createPortal } from "react-dom";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
+import toast from "react-hot-toast";
 
 interface CaseTypeDropdownProps {
     selectedCaseType: string;
@@ -26,6 +28,14 @@ export default function CaseTypeDropdown({
     const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
     const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+
+    // ── "Add New" state ──────────────────────────────────────────────────────
+    const { userRole } = getUserDetailsFromCookies();
+    const isClinicalDoctor = userRole === "ClinicalDoctor";
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [newTypeName, setNewTypeName] = useState("");
+    const [newTypeDesc, setNewTypeDesc] = useState("");
+    const [isCreating, setIsCreating] = useState(false);
 
     // Fetch case types on mount
     useEffect(() => {
@@ -94,6 +104,26 @@ export default function CaseTypeDropdown({
         setSearchInput("");
         inputRef.current?.focus();
         setIsOpen(true);
+    };
+
+    const handleCreate = async () => {
+        if (!newTypeName.trim()) return;
+        setIsCreating(true);
+        try {
+            const res = await createCaseType(newTypeName.trim(), newTypeDesc.trim());
+            if (res.success && res.data) {
+                setCaseTypes((prev) => [...prev, { publicId: res.data!.publicId, name: res.data!.name, description: res.data!.description }]);
+                handleSelect(res.data.name, res.data.publicId);
+                toast.success(`"${res.data.name}" added successfully`);
+                setShowAddForm(false);
+                setNewTypeName("");
+                setNewTypeDesc("");
+            }
+        } catch (err: any) {
+            toast.error(err.message || "Failed to create case type");
+        } finally {
+            setIsCreating(false);
+        }
     };
 
     const containerClasses = variant === "inline"
@@ -180,7 +210,7 @@ export default function CaseTypeDropdown({
                             pointerEvents: 'auto' // لضمان إمكانية الضغط على العناصر
                         }}
                     >
-                        <ul className="py-1 overflow-y-auto max-h-[240px] patient-details-scrollbar">
+                        <ul className="py-1 overflow-y-auto max-h-60 patient-details-scrollbar">
                             <li
                                 onClick={() => handleSelect("All Types")}
                                 className="px-4 py-2.5 cursor-pointer text-xs font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors border-b border-slate-50 dark:border-slate-700"
@@ -199,9 +229,60 @@ export default function CaseTypeDropdown({
                                     {item.name}
                                 </li>
                             ))}
-                            {filteredTypes.length === 0 && (
+                            {filteredTypes.length === 0 && !showAddForm && (
                                 <li className="px-4 py-8 text-center text-slate-400 text-xs">
                                     No results found
+                                </li>
+                            )}
+
+                            {/* Add New Case Type — ClinicalDoctor only */}
+                            {isClinicalDoctor && (
+                                <li className="border-t border-slate-100 dark:border-slate-700">
+                                    {!showAddForm ? (
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); setShowAddForm(true); }}
+                                            className="w-full flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
+                                        >
+                                            <Plus size={13} /> Add New Case Type
+                                        </button>
+                                    ) : (
+                                        <div className="p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+                                            <input
+                                                autoFocus
+                                                type="text"
+                                                value={newTypeName}
+                                                onChange={(e) => setNewTypeName(e.target.value)}
+                                                placeholder="Type name *"
+                                                className="w-full text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-400"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={newTypeDesc}
+                                                onChange={(e) => setNewTypeDesc(e.target.value)}
+                                                placeholder="Description (optional)"
+                                                className="w-full text-xs px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-400"
+                                            />
+                                            <div className="flex gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCreate}
+                                                    disabled={!newTypeName.trim() || isCreating}
+                                                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-bold disabled:opacity-50 hover:bg-indigo-700 transition-colors"
+                                                >
+                                                    {isCreating ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                                                    {isCreating ? "Adding..." : "Add"}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setShowAddForm(false); setNewTypeName(""); setNewTypeDesc(""); }}
+                                                    className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600 text-xs text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </li>
                             )}
                         </ul>

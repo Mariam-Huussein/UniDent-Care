@@ -11,3 +11,12 @@ export async function getCaseTypes(page: number = 1, pageSize: number = 100, sea
         throw new Error(error.response?.data?.message || "Failed to fetch case types");
     }
 }
+
+export async function createCaseType(name: string, description: string = ""): Promise<{ success: boolean; data?: { publicId: string; name: string; description: string } }> {
+    try {
+        const response = await axiosInstance.post(`CaseTypes`, { name, description });
+        return response.data;
+    } catch (error: any) {
+        throw new Error(error.response?.data?.message || "Failed to create case type");
+    }
+}

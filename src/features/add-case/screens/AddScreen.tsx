@@ -352,7 +352,7 @@ export default function AddCaseScreen() {
                   className="flex items-center gap-3 px-4 py-3 bg-amber-50 dark:bg-amber-900/15 border border-amber-200 dark:border-amber-800/40 rounded-2xl">
                   <AlertCircle size={16} className="text-amber-500 shrink-0" />
                   <p className="text-sm text-amber-700 dark:text-amber-400">
-                    No patient found with National ID <strong className="font-bold">{patientForm.watch("nationalId") || searchQuery}</strong>. Please fill in their details to register them.
+                    No patient found with National ID. Please fill in their details to register them.
                   </p>
                 </motion.div>
 

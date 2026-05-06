@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import { Briefcase, LayoutGrid, List } from "lucide-react";
 
 interface CasesHeaderProps {
@@ -8,6 +12,18 @@ interface CasesHeaderProps {
 }
 
 export default function CasesHeader({ totalCases, showingCases, viewMode, setViewMode }: CasesHeaderProps) {
+    const [role, setRole] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        setRole(getUserDetailsFromCookies().userRole);
+    }, []);
+
+    const isClinicalDoctor = role === 'ClinicalDoctor';
+    const headerTitle = isClinicalDoctor ? 'Manage Patient Cases' : 'Available Cases';
+    const headerDescription = isClinicalDoctor
+        ? 'Manage your active patient cases, review updates, and track clinical requirements.'
+        : 'Browse active patient cases, filter by type, and find the perfect match for your clinical requirements.';
+
     return (
         <div className="relative z-10 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900/50 border border-gray-100 dark:border-slate-800 shadow-xl shadow-gray-100/50 dark:shadow-none p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8 overflow-hidden backdrop-blur-xl transition-colors duration-300">
             {/* Decorative background elements */}
@@ -23,16 +39,16 @@ export default function CasesHeader({ totalCases, showingCases, viewMode, setVie
                             <Briefcase className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2.5} />
                         </div>
                         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-slate-100 tracking-tight transition-colors">
-                            Available Cases
+                            {headerTitle}                        
                         </h1>
                     </div>
-                    <p className="text-gray-500 dark:text-slate-400 text-sm sm:text-base max-w-lg sm:pl-[60px] transition-colors">
-                        Browse active patient cases, filter by type, and find the perfect match for your clinical requirements.
+                    <p className="text-gray-500 dark:text-slate-400 text-sm sm:text-base max-w-lg sm:pl-15 transition-colors">
+                        {headerDescription}
                     </p>
                 </div>
 
                 {/* Live Stats + View Toggle */}
-                <div className="flex items-center justify-between xl:justify-end flex-wrap gap-3 sm:pl-[60px] xl:pl-0 w-full xl:w-auto mt-2 xl:mt-0">
+                <div className="flex items-center justify-between xl:justify-end flex-wrap gap-3 sm:pl-15 xl:pl-0 w-full xl:w-auto mt-2 xl:mt-0">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs sm:text-sm font-medium border border-emerald-100 dark:border-emerald-500/20 transition-colors">
                         <span className="relative flex h-2 w-2 shrink-0">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>

@@ -8,7 +8,6 @@ import { NAV_LINKS, UserRole } from "@/config/navLinks";
 
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import Cookies from "js-cookie";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import Logo from "@/components/ui/Logo";
 import { getUserDetailsFromCookies } from "@/utils/sharedHelper";

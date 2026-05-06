@@ -47,20 +47,20 @@ export default function Login() {
       if (response.success && token && roles) {
         dispatch(login(response.data));
 
-        try {
-          if (roles[1] != "ClinicalDoctor") {
+        // If the user has ClinicalDoctor role, treat them as ClinicalDoctor only
+        // and skip fetching the Student profile
+        const isClinicalDoctor = roles.includes("ClinicalDoctor");
+
+        if (!isClinicalDoctor) {
+          try {
             const user = await getProfileByRole(roles[0], publicId);
             dispatch(setUserFromReload({ user, role: roles[0] }));
+          } catch (err: any) {
+            console.error(err);
           }
-        } catch (err: any) {
-          console.error(err);
         }
-        if (roles[0] != "ClinicalDoctor") {
-          router.replace("/dashboard");
-        }
-        else {
-          router.replace("/cases");
-        }
+
+        router.replace(isClinicalDoctor ? "/cases" : "/dashboard");
         toast.success(isRtl ? "مرحباً بك مرة أخرى!" : "Welcome back!");
       }
     },
@@ -82,7 +82,7 @@ export default function Login() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative z-10 w-full max-w-[450px]"
+        className="relative z-10 w-full max-w-112.5"
       >
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 p-8 sm:p-12 transition-all duration-300">
           <div className="text-center mb-10 flex flex-col items-center">
