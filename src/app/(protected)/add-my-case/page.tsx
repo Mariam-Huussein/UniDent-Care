@@ -99,10 +99,11 @@ export default function MyConsultations() {
 
                     <Link 
                         href="/ai-chatbot"
-                        className="my-btn px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 group"
+                        className="relative overflow-hidden px-6 py-3 bg-linear-to-r from-indigo-600 to-violet-700 hover:from-indigo-700 hover:to-violet-800 text-white rounded-2xl flex items-center gap-2 shadow-xl shadow-indigo-600/20 transition-all active:scale-95 group shrink-0"
                     >
-                        <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
-                        <span className="font-bold">{isRtl ? "بدء استشارة جديدة" : "New Consultation"}</span>
+                        <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]" />
+                        <Plus size={18} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-300" />
+                        <span className="font-bold text-sm tracking-tight">{isRtl ? "استشارة جديدة" : "New Consultation"}</span>
                     </Link>
                 </div>
             </div>
@@ -210,9 +211,10 @@ export default function MyConsultations() {
                                     </p>
                                     <Link 
                                         href="/ai-chatbot"
-                                        className="my-btn px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold shadow-lg shadow-indigo-600/20 transition-all active:scale-95"
+                                        className="relative overflow-hidden px-10 py-4 bg-linear-to-r from-indigo-600 to-violet-700 hover:from-indigo-700 hover:to-violet-800 text-white rounded-2xl font-bold shadow-xl shadow-indigo-600/25 transition-all active:scale-95 group"
                                     >
-                                        {isRtl ? "ابدأ استشارة جديدة" : "Start New Consultation"}
+                                        <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]" />
+                                        <span className="relative z-10">{isRtl ? "ابدأ استشارتك الأولى الآن" : "Start Your First Consultation"}</span>
                                     </Link>
                                 </div>
                             )}
