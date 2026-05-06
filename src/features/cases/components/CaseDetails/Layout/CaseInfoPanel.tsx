@@ -37,7 +37,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
         .join("")
         .toUpperCase()
         .slice(0, 2);
-
+    console.log(patient)
     return (
         <motion.div
             initial={{ opacity: 0, x: 16 }}

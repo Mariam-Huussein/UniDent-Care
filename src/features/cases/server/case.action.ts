@@ -28,12 +28,16 @@ export async function getAvailableCases(params: CasesQueryParams): Promise<Avail
     } catch (error: any) {
         throw new Error(error.response?.data?.message || "Failed to find available cases");
     }
-}
+} 
 
 export async function getCaseById(caseId: string): Promise<CaseDetailResponse> {
     try {
+        const {token} = getUserDetailsFromCookies();
         const apiV2 = axios.create({
             baseURL: "https://dental-hup1.runasp.net/api/v2/",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         });
         const response = await apiV2.get(`/Cases/${caseId}`);
         return response.data;

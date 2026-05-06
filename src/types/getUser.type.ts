@@ -24,6 +24,9 @@ export interface DoctorData {
     email: string;
     specialty: string;
     universityId: string;
+    universityName?: string;
+    phoneNumber?: string;
+    userName?: string;
     createAt: string;
     totalStudents: number;
     pendingRequests: number;

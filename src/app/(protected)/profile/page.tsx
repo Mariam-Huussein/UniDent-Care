@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { RootState } from "@/store";
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
-import { getStudentById, getDoctorById, getPatientById } from "@/server/getUsers.action";
+import { getMyProfile } from "@/server/getUsers.action";
 import { getUniversitiesLookup } from "@/server/getUniversities.action";
 
 import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
@@ -18,68 +19,55 @@ import { EditProfileModal } from "@/features/profile/components/EditProfileModal
 
 export default function Profile() {
   const { t } = useLanguage();
-  const user = useSelector((state: RootState) => state.auth.user);
+  const router = useRouter();
   const role = useSelector((state: RootState) => state.auth.role);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  // Fetch full user details based on role
-  const { data: fullUserData, isLoading, isError, refetch } = useQuery({
-    queryKey: ['profile', role, user?.publicId],
-    queryFn: async () => {
-      if (!user?.publicId) throw new Error("No User ID");
-      if (role === 'Doctor') return await getDoctorById(user.publicId);
-      if (role === 'Student') return await getStudentById(user.publicId);
-      if (role === 'Patient') return await getPatientById(user.publicId);
-      throw new Error("Invalid Role");
-    },
-    enabled: !!user?.publicId && !!role,
-    retry: 1
+  // ClinicalDoctor has no profile page — redirect away
+  if (role === "ClinicalDoctor") {
+    router.replace("/cases");
+    return null;
+  }
+
+  const { data: profileResp, isLoading, isError, refetch } = useQuery({
+    queryKey: ["my-profile", role],
+    queryFn: getMyProfile,
+    enabled: !!role && role !== "ClinicalDoctor",
+    retry: 1,
   });
 
   const { data: universitiesResp } = useQuery({
-    queryKey: ['universities'],
+    queryKey: ["universities"],
     queryFn: getUniversitiesLookup,
-    staleTime: 1000 * 60 * 60, // 1 hour cache
+    staleTime: 1000 * 60 * 60,
   });
 
-  if (!user || !role) {
-    return <ProfileSkeleton />;
-  }
+  if (!role || isLoading) return <ProfileSkeleton />;
+  if (isError) return <ProfileError onRetry={refetch} t={t} />;
 
-  if (isLoading) {
-    return <ProfileSkeleton />;
-  }
-
-  if (isError) {
-    return <ProfileError onRetry={refetch} t={t} />;
-  }
+  const profileData = profileResp?.data;
+  const universities = universitiesResp?.data || [];
 
   const isDoctor = role === "Doctor";
   const isStudent = role === "Student";
   const isPatient = role === "Patient";
 
-  // Use the fetched full data or fallback to the partial Redux state data
-  // fullUserData is an ApiResponse, so the actual user info is in fullUserData.data
-  const fetchedData = fullUserData?.data;
-  const profileData = fetchedData || user;
-  const universities = universitiesResp?.data || [];
-
   return (
     <div className="max-w-5xl mx-auto p-4 md:p-6 space-y-8">
-      <ProfileHeader 
-        user={profileData} 
-        role={role} 
-        onEditClick={() => setIsEditModalOpen(true)} 
-        t={t} 
+      <ProfileHeader
+        user={profileData}
+        role={role}
+        onEditClick={() => setIsEditModalOpen(true)}
+        t={t}
       />
 
       <div className="w-full">
-        {isDoctor && <DoctorProfileView doctor={profileData as any} t={t} universities={universities} />}
+        {isDoctor  && <DoctorProfileView  doctor={profileData as any}  t={t} universities={universities} />}
         {isStudent && <StudentProfileView student={profileData as any} t={t} universities={universities} />}
         {isPatient && <PatientProfileView patient={profileData as any} t={t} />}
       </div>
 
-      <EditProfileModal 
+      <EditProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         role={role}
