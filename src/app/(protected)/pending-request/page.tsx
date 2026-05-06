@@ -150,10 +150,12 @@ export default function PendingRequestsPage() {
     const columns: Column<CaseRequest>[] = [
         {
             header: isRtl ? "الحالة" : "Case",
-            accessor: "caseTypeName",
-            render: (val, row) => (
+            accessor: "diagnosisdto",
+            render: (_, row) => (
                 <div className="flex flex-col gap-1">
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{val || row.caseName || 'Uncategorized'}</span>
+                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        {row.diagnosisdto?.[0]?.caseTypeName || 'Uncategorized'}
+                    </span>
                     <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
                         <Calendar size={10} />
                         {new Date(row.createAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US")}
