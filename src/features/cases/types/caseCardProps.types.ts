@@ -6,6 +6,8 @@ export interface CaseCardProps {
     hideRequestButton?: boolean;
     customBadge?: React.ReactNode;
     navigationPath?: string;
+    additionalInfo?: React.ReactNode;
+    footer?: React.ReactNode;
 }
 
 export interface CaseItem {
