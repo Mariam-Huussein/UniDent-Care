@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
 import { Stethoscope } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function OdontogramEmptyState() {
+    const { t } = useLanguage();
     return (
         <>
             <motion.div
@@ -15,10 +17,10 @@ export default function OdontogramEmptyState() {
                 </div>
                 <div className="max-w-xs">
                     <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                        No Diagnosis Recorded
+                        {t.odontogramEmptyTitle}
                     </h3>
                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 leading-relaxed">
-                        No dental diagnosis has been submitted for this case yet. The chart will populate once a diagnosis plan is recorded.
+                        {t.odontogramEmptyDesc}
                     </p>
                 </div>
             </motion.div>

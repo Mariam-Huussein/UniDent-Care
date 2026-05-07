@@ -27,7 +27,7 @@ interface PatientCalendarWidgetProps {
 }
 
 export default function PatientCalendarWidget({ sessions }: PatientCalendarWidgetProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRtl = language === "ar";
 
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -79,7 +79,7 @@ export default function PatientCalendarWidget({ sessions }: PatientCalendarWidge
     id: s.id,
     title: s.studentName
       ? `${s.studentName}${s.treatmentType ? ` - ${s.treatmentType}` : ""}`
-      : s.treatmentType || (isRtl ? "جلسة" : "Session"),
+      : s.treatmentType || t.dashCalendarSessionFallback,
     start: s.scheduledAt,
     end: s.endAt || undefined,
     extendedProps: {
@@ -128,10 +128,10 @@ export default function PatientCalendarWidget({ sessions }: PatientCalendarWidge
           <div className="bg-blue-50/50 dark:bg-blue-950/20 px-6 pt-6 pb-4 border-b border-slate-100 dark:border-slate-800">
             <DialogHeader>
               <DialogTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">
-                {isRtl ? "تفاصيل الجلسة" : "Session Details"}
+                {t.dashCalendarSessionDetails}
               </DialogTitle>
               <DialogDescription className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                {isRtl ? "استعرض تفاصيل هذه الجلسة المجدولة." : "View the details of this scheduled session."}
+                {t.dashCalendarSessionDetailsDesc}
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -147,7 +147,7 @@ export default function PatientCalendarWidget({ sessions }: PatientCalendarWidge
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
-                        {isRtl ? "الطبيب / الطالب" : "Doctor / Student"}
+                        {t.dashCalendarDoctorStudent}
                       </span>
                       <span className="font-bold text-slate-800 dark:text-slate-100 text-lg">
                         {selectedEvent.extendedProps.studentName}
@@ -164,7 +164,7 @@ export default function PatientCalendarWidget({ sessions }: PatientCalendarWidge
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
-                        {isRtl ? "نوع العلاج" : "Treatment Type"}
+                        {t.dashCalendarTreatmentType}
                       </span>
                       <span className="font-medium text-slate-700 dark:text-slate-300 text-base">
                         {selectedEvent.extendedProps.treatmentType}
@@ -180,7 +180,7 @@ export default function PatientCalendarWidget({ sessions }: PatientCalendarWidge
                   </div>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
-                      {isRtl ? "الوقت" : "Time"}
+                      {t.dashCalendarTime}
                     </span>
                     <span className="font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-2 text-base">
                       {format(new Date(selectedEvent.start), "PPP p", { locale: isRtl ? ar : enUS })}
@@ -199,7 +199,7 @@ export default function PatientCalendarWidget({ sessions }: PatientCalendarWidge
                     </div>
                     <div className="flex flex-col gap-0.5">
                       <span className="text-[11px] uppercase tracking-wider font-bold text-slate-400 dark:text-slate-500">
-                        {isRtl ? "الحالة" : "Status"}
+                        {t.dashCalendarStatus}
                       </span>
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-black tracking-wider uppercase border w-fit ${getStatusColor(selectedEvent.extendedProps.status)}`}>
                         {selectedEvent.extendedProps.status}

@@ -59,7 +59,7 @@ export function RecentCases({ recentActivity }: RecentCasesProps) {
               {t.dashCasesTitle || "Recent Activity Timeline"}
             </h3>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-              {"Latest updates on your account"}
+              {t.dashRecentActivityDesc}
             </p>
           </div>
         </div>

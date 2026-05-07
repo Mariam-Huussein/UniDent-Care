@@ -10,7 +10,7 @@ interface DashboardChartsProps {
 }
 
 export function DashboardCharts({ charts }: DashboardChartsProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isRtl = language === "ar";
   
   const totalCases = charts.casesDistribution.active + charts.casesDistribution.completed || 1; // prevent div by zero
@@ -34,7 +34,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
             <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
               <PieChart size={20} />
             </div>
-            Cases Distribution
+            {t.dashCasesDistributionTitle}
           </h3>
         </div>
 
@@ -65,7 +65,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-2xl font-black text-slate-800 dark:text-white">{Math.round(activeCasesPerc)}%</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.dashCasesActiveShort}</span>
             </div>
           </div>
 
@@ -73,14 +73,14 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
-                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Active Cases</span>
+                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{t.dashCasesActiveLabel}</span>
               </div>
               <span className="font-black text-slate-800 dark:text-white">{charts.casesDistribution.active}</span>
             </div>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-700" />
-                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Completed</span>
+                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{t.dashCasesStatusCompleted}</span>
               </div>
               <span className="font-black text-slate-800 dark:text-white">{charts.casesDistribution.completed}</span>
             </div>
@@ -95,7 +95,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
             <div className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform">
               <Activity size={20} />
             </div>
-            Sessions Status
+            {t.dashSessionsStatusTitle}
           </h3>
         </div>
 
@@ -126,7 +126,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="text-2xl font-black text-slate-800 dark:text-white">{Math.round(completedSessionsPerc)}%</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Done</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{t.dashSessionsDoneShort}</span>
             </div>
           </div>
 
@@ -134,14 +134,14 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Completed</span>
+                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{t.dashCasesStatusCompleted}</span>
               </div>
               <span className="font-black text-slate-800 dark:text-white">{charts.sessionsStatus.completed}</span>
             </div>
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-slate-200 dark:bg-slate-700" />
-                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Pending</span>
+                <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{t.dashSessionsPending}</span>
               </div>
               <span className="font-black text-slate-800 dark:text-white">{charts.sessionsStatus.pending}</span>
             </div>

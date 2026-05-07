@@ -9,19 +9,21 @@ import Odontogram from "../Clinical/Odontogram";
 import ActivityTimeline from "../Tracking/ActivityTimeline";
 import { useCase } from "@/features/cases/context/CaseContext";
 import { getTabsForStatus } from "@/features/cases/utils/CaseDetails.utils";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 
 export default function PatientDetailTabs() {
     const role = useSelector((state: RootState) => state.auth.role);
     const { caseData } = useCase();
+    const { t } = useLanguage();
     const patient = caseData as PatientCase;
 
-    const tabs = getTabsForStatus(patient.status,patient);
+    const tabs = getTabsForStatus(patient.status, patient, t);
     const [activeTab, setActiveTab] = useState(tabs[0].key);
 
     // Reset tab when status changes
     useEffect(() => {
-        setActiveTab(getTabsForStatus(patient.status,patient)[0].key);
+        setActiveTab(getTabsForStatus(patient.status, patient, t)[0].key);
     }, [patient.status]);
 
     return (

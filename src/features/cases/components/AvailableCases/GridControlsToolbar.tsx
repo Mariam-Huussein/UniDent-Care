@@ -9,6 +9,7 @@ import {
 import CaseTypeDropdown from "./CaseTypeDropdown";
 import { SortConfig } from "../../hooks/useFilterCases";
 import SelectItems from "@/components/common/SelectItems";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface GridControlsToolbarProps {
   filters: Record<string, string>;
@@ -22,29 +23,31 @@ interface GridControlsToolbarProps {
   defaultStatusLabel?: string;
 }
 
-const SORT_OPTIONS = [
-  { key: "patientName", label: "Name" },
-  { key: "patientAge", label: "Age" },
-  { key: "createAt", label: "Date" },
-];
-
-const GENDER_OPTIONS = [
-  { value: "", label: "All Genders" },
-  { value: "0", label: "Male" },
-  { value: "1", label: "Female" },
-];
-
 export default function GridControlsToolbar({
   filters, onFilterChange, clearFilters,
   hasActiveFilters, sortConfig, onSort,
   hideGender, statusOptions, defaultStatusLabel
 }: GridControlsToolbarProps) {
+  const { t } = useLanguage();
+
+  const SORT_OPTIONS = [
+    { key: "patientName", label: t.toolbarSortName },
+    { key: "patientAge",  label: t.toolbarSortAge },
+    { key: "createAt",    label: t.toolbarSortDate },
+  ];
+
+  const GENDER_OPTIONS = [
+    { value: "",  label: t.toolbarAllGenders },
+    { value: "0", label: t.male },
+    { value: "1", label: t.female },
+  ];
+
   const patientSearch = filters["patientName"] || "";
   const gender = filters["gender"] != null ? String(filters["gender"]) : "";
-  const selectedGenderLabel = GENDER_OPTIONS.find(opt => opt.value === gender)?.label || "All Genders";
+  const selectedGenderLabel = GENDER_OPTIONS.find(opt => opt.value === gender)?.label || t.toolbarAllGenders;
 
   const currentStatus = filters["status"] != null ? String(filters["status"]) : "";
-  const selectedStatusLabel = statusOptions?.find(opt => opt.value === currentStatus)?.label || defaultStatusLabel || "All Statuses";
+  const selectedStatusLabel = statusOptions?.find(opt => opt.value === currentStatus)?.label || defaultStatusLabel || t.toolbarAllStatuses;
 
   return (
     <div className="w-full mb-6 relative z-60">
@@ -59,7 +62,7 @@ export default function GridControlsToolbar({
               <ListFilter className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
             </div>
             <span className="text-sm font-semibold text-gray-800 dark:text-slate-100">
-              Filters
+              {t.toolbarFilters}
             </span>
           </div>
 
@@ -73,7 +76,7 @@ export default function GridControlsToolbar({
               </div>
               <input
                 type="text"
-                placeholder="Search patient..."
+                placeholder={t.toolbarSearchPatient}
                 value={patientSearch}
                 onChange={(e) => onFilterChange("patientName", e.target.value)}
                 className="w-full pl-8 pr-8 py-2 bg-white/70 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl text-sm dark:text-slate-200 placeholder-gray-400 dark:placeholder-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-300 dark:focus:border-indigo-500/50 focus:ring-4 focus:ring-indigo-500/10 shadow-inner dark:shadow-none transition-all"
@@ -106,7 +109,7 @@ export default function GridControlsToolbar({
                     onFilterChange("status", opt ? opt.value : "");
                   }}
                   options={statusOptions.map(o => o.label)}
-                  placeholder={defaultStatusLabel || "All Statuses"}
+                  placeholder={defaultStatusLabel || t.toolbarAllStatuses}
                 />
               </div>
             ) : !hideGender ? (
@@ -118,7 +121,7 @@ export default function GridControlsToolbar({
                     onFilterChange("gender", opt ? opt.value : "");
                   }}
                   options={GENDER_OPTIONS.map(o => o.label)}
-                  placeholder="All Genders"
+                  placeholder={t.toolbarAllGenders}
                 />
               </div>
             ) : null}
@@ -131,7 +134,7 @@ export default function GridControlsToolbar({
           {/* Sort */}
           <div className="flex flex-wrap items-center gap-1 p-1 bg-white/60 dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 w-full sm:w-auto">
             <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest px-2 hidden sm:inline-block">
-              Sort
+              {t.toolbarSort}
             </span>
             <div className="w-px h-4 bg-gray-200 dark:bg-slate-700 hidden sm:block" />
             {SORT_OPTIONS.map((option) => {
@@ -164,7 +167,7 @@ export default function GridControlsToolbar({
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-300 transition-all"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset
+              {t.toolbarReset}
             </button>
           )}
         </div>

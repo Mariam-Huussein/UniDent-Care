@@ -16,7 +16,7 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function PatientDashboardScreen() {
   const patientId = useSelector((state: RootState) => state.auth.user?.publicId);
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
   const [rawSessions, setRawSessions] = useState<SessionDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,7 +110,7 @@ export default function PatientDashboardScreen() {
       <div className="flex justify-center items-center h-full min-h-[60vh]">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-blue-400" />
-          <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Loading dashboard elements...</p>
+          <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">{t.dashboardLoading}</p>
         </div>
       </div>
     );

@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Filter, Loader2, Briefcase, LayoutGrid, List, Activity, Calendar, GraduationCap } from "lucide-react";
+import { Loader2, Briefcase, LayoutGrid, List, Activity, Calendar, GraduationCap } from "lucide-react";
 import { useMyCasesPatient } from "../hooks/useMyCasesPatient";
 import CaseCard from "../components/CaseCard";
 import Pagination from "@/components/common/pagination";
@@ -17,6 +17,7 @@ import { PatientCaseItem, CaseItem } from "../types/caseCardProps.types";
 import Link from "next/link";
 import api from "@/utils/api";
 import SearchableSelect from "@/components/common/SearchableSelect";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 const mapPatientCaseToCaseItem = (item: PatientCaseItem): CaseItem => ({
     id: item.id,
@@ -34,6 +35,7 @@ const mapPatientCaseToCaseItem = (item: PatientCaseItem): CaseItem => ({
 });
 
 export default function MyCasesPatientScreen() {
+    const { t } = useLanguage();
     const patientId = useSelector((state: RootState) => state.auth.user?.publicId) || Cookies.get("user_id") || "";
     const {
         cases, loading, search, setSearch, status, setStatus,
@@ -49,9 +51,9 @@ export default function MyCasesPatientScreen() {
             try {
                 const res = await api.get('/CaseTypes', { params: { page: 1, pageSize: 100 } });
                 if (res.data?.success) {
-                    const types = res.data.data.items.map((t: any) => ({
-                        id: t.name,
-                        label: t.name
+                    const types = res.data.data.items.map((item: any) => ({
+                        id: item.name,
+                        label: item.name
                     }));
                     setCaseTypes(types);
                 }
@@ -66,31 +68,33 @@ export default function MyCasesPatientScreen() {
     useEffect(() => {
         const handler = setTimeout(() => {
             setSearch(searchInput);
-            setPage(1); // Reset page on search change
+            setPage(1);
         }, 500);
         return () => clearTimeout(handler);
     }, [searchInput, setSearch, setPage]);
 
     const casesColumns: Column<PatientCaseItem>[] = [
         {
-            header: "Diagnosis",
+            header: t.myCasesDiagnosis,
             accessor: "diagnosisdto",
             render: (_, row) => {
                 const sc = getCaseStatusConfig(row.processStatus || row.status);
                 const StatusIcon = sc.icon || Activity;
                 return (
                     <div className="flex flex-col gap-1.5 items-start">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnosisdto?.[0]?.caseTypeName || "Pending"}</span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            {row.diagnosisdto?.[0]?.caseTypeName || t.myCasesPending}
+                        </span>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
                             <StatusIcon size={10} className={sc.text} />
                             {row.processStatus || sc.label}
                         </span>
                     </div>
-                )
+                );
             }
         },
         {
-            header: "University Info",
+            header: t.myCasesUniversityInfo,
             accessor: "universityName",
             render: (val) => (
                 <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -100,7 +104,7 @@ export default function MyCasesPatientScreen() {
             )
         },
         {
-            header: "Registered On",
+            header: t.myCasesRegisteredOn,
             accessor: "createAt",
             render: (val) => (
                 <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -114,7 +118,7 @@ export default function MyCasesPatientScreen() {
             accessor: "id",
             render: (val) => (
                 <Link href={`/my-cases/${val}`} className="my-btn-outline px-3 py-1.5 text-xs float-right">
-                    View Details
+                    {t.myCasesViewDetails}
                 </Link>
             )
         }
@@ -124,9 +128,6 @@ export default function MyCasesPatientScreen() {
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
             {/* Header */}
             <div className="relative z-[1000] rounded-3xl bg-white dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 shadow-2xl shadow-slate-200/50 dark:shadow-none p-6 sm:p-8 mb-8 backdrop-blur-xl transition-all duration-300">
-                <div className="absolute top-0 right-0 -mt-24 -mr-24 w-96 h-96 rounded-full bg-indigo-50 dark:bg-indigo-500/5 blur-3xl opacity-60 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 -mb-24 -ml-24 w-96 h-96 rounded-full bg-emerald-50 dark:bg-emerald-500/5 blur-3xl opacity-60 pointer-events-none" />
-
                 <div className="relative flex flex-col xl:flex-row xl:items-center justify-between gap-6">
                     <div className="flex flex-1 items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-600 to-violet-700 flex items-center justify-center shadow-lg shadow-indigo-600/20 text-white shrink-0">
@@ -134,12 +135,12 @@ export default function MyCasesPatientScreen() {
                         </div>
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-                                My Cases
+                                {t.myCasesTitle}
                             </h1>
                             <p className="text-slate-500 dark:text-slate-400 text-sm sm:text-base font-medium flex items-center gap-2">
-                                Track and manage your cases
+                                {t.myCasesSubtitle}
                                 <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-600 dark:text-slate-300">
-                                    {totalCount} Total
+                                    {totalCount} {t.myCasesTotal}
                                 </span>
                             </p>
                         </div>
@@ -149,11 +150,11 @@ export default function MyCasesPatientScreen() {
                     <div className="flex flex-col sm:flex-row items-center gap-3">
                         <div className="w-full sm:w-72 relative z-[9999]">
                             <SearchableSelect
-                                options={[{ id: "", label: "All Case Types" }, ...caseTypes]}
+                                options={[{ id: "", label: t.myCasesAllTypes }, ...caseTypes]}
                                 value={searchInput}
                                 onChange={(val) => setSearchInput(val as string)}
-                                placeholder="Search case type..."
-                                searchPlaceholder="Search..."
+                                placeholder={t.myCasesSearchType}
+                                searchPlaceholder={t.myCasesSearch}
                                 accentColor="indigo"
                             />
                         </div>
@@ -162,17 +163,17 @@ export default function MyCasesPatientScreen() {
                             <div className="w-full sm:w-56 relative z-[9999]">
                                 <SearchableSelect
                                     options={[
-                                        { id: "", label: "All Statuses" },
-                                        { id: "Pending", label: "Pending" },
-                                        { id: "Approved", label: "Approved" },
-                                        { id: "Completed", label: "Completed" },
+                                        { id: "", label: t.myCasesAllStatuses },
+                                        { id: "Pending",   label: t.myCasesPending },
+                                        { id: "Approved",  label: t.myCasesApproved },
+                                        { id: "Completed", label: t.myCasesCompleted },
                                     ]}
                                     value={status}
                                     onChange={(val) => {
                                         setStatus(val as string);
                                         setPage(1);
                                     }}
-                                    placeholder="Filter by status..."
+                                    placeholder={t.myCasesFilterStatus}
                                     accentColor="indigo"
                                     showSearch={false}
                                 />
@@ -220,7 +221,7 @@ export default function MyCasesPatientScreen() {
                         </div>
                     )
                 ) : cases.length === 0 ? (
-                    <MyCasesEmptyState message="No cases found." />
+                    <MyCasesEmptyState message={t.myCasesEmpty} />
                 ) : (
                     viewMode === 'grid' ? (
                         <motion.div layout className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 place-items-center">

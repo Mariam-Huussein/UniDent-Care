@@ -4,22 +4,26 @@ import { PiTooth } from "react-icons/pi";
 import { Clock12, Mars, User, Venus } from "lucide-react";
 import { CaseCardProps } from "../../types/caseCardProps.types";
 import { timeAgo } from "../../utils/caseCard.utils";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface CaseContentProps {
     caseItem: CaseCardProps["caseItem"];
     additionalInfo?: React.ReactNode;
 }
 
-const getGenderLabel = (gender?: 0 | 1): string => {
-    if (gender === 0) return "Male";
-    if (gender === 1) return "Female";
-    return "Unknown";
-};
-
 export default function CaseContent({ caseItem, additionalInfo }: CaseContentProps) {
+    const { t } = useLanguage();
+
+    const getGenderLabel = (gender?: 0 | 1): string => {
+        if (gender === 0) return t.male;
+        if (gender === 1) return t.female;
+        return t.caseCardUnknown;
+    };
+
     const diagnosesArray = caseItem.diagnosisdto || [];
     const firstDiagnosis = diagnosesArray[0];
-    const displayName = firstDiagnosis?.caseTypeName || firstDiagnosis?.caseType || 'Uncategorized';
+    const displayName = firstDiagnosis?.caseTypeName || firstDiagnosis?.caseType || t.caseCardUncategorized;
+
     return (
         <div className="flex flex-col gap-2">
             {/* Title & Time */}
@@ -42,7 +46,7 @@ export default function CaseContent({ caseItem, additionalInfo }: CaseContentPro
 
             {/* Description */}
             <p className="text-xs text-gray-400 dark:text-slate-500 mb-1 line-clamp-2 transition-colors">
-                {caseItem.description || "No description provided."}
+                {caseItem.description || t.caseCardNoDescription}
             </p>
 
             {/* Detail chips */}
@@ -54,18 +58,16 @@ export default function CaseContent({ caseItem, additionalInfo }: CaseContentPro
 
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">
                     <User size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
-                    <span className="font-medium">{caseItem.patientAge} Yrs</span>
+                    <span className="font-medium">{caseItem.patientAge} {t.caseCardYrs}</span>
                 </div>
 
                 {caseItem.gender !== undefined && caseItem.gender !== null && (
                     <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">
-                        {
-                            caseItem.gender === 0 ? (
-                                <Mars size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
-                            ) : caseItem.gender === 1 ? (
-                                <Venus size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
-                            ) : null
-                        }
+                        {caseItem.gender === 0 ? (
+                            <Mars size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
+                        ) : caseItem.gender === 1 ? (
+                            <Venus size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
+                        ) : null}
                         <span className="font-medium">{getGenderLabel(caseItem.gender)}</span>
                     </div>
                 )}

@@ -5,7 +5,6 @@ import {
     User, Calendar, CheckCircle, Phone, MapPin,
     GraduationCap, Stethoscope, UserCircle,
     ClipboardList, BookUser, Clock,
-    Hash,
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
@@ -15,6 +14,7 @@ import DoctorActions from "./DoctorActions/DoctorActions";
 import { useCase } from "@/features/cases/context/CaseContext";
 import { useEffect } from "react";
 import ProgressTracker from "@/features/cases/components/CaseDetails/Layout/ProgressTracker";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface PatientInfoPanelProps {
     role: string | null;
@@ -22,9 +22,11 @@ interface PatientInfoPanelProps {
 }
 
 export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps) {
+    const { t } = useLanguage();
     const { caseData, creatorData, doctorOwnerData, studentOwnerData, refetchUserData, refetchSessions, refetchDoctorRequests, scheduledSession } = useCase();
     const patient = caseData as PatientCase;
-    const sc = getPatientStatusConfig(patient.status);
+    const sc = getPatientStatusConfig(patient.status, t);
+
     useEffect(() => {
         refetchUserData();
         refetchSessions();
@@ -37,7 +39,6 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
         .join("")
         .toUpperCase()
         .slice(0, 2);
-    console.log(patient)
     return (
         <motion.div
             initial={{ opacity: 0, x: 16 }}
@@ -54,7 +55,10 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                     <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white tracking-tight truncate">
                         {patient.patientName}
                     </h1>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{patient.caseType} Case{patient.diagnosisdto?.[0]?.stage == 0 ? ` · AI Exam` : ''}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {patient.caseType} {t.infoCaseWord}
+                        {patient.diagnosisdto?.[0]?.stage == 0 ? ` · ${t.infoAiExam}` : ''}
+                    </p>
                 </div>
             </div>
 
@@ -68,27 +72,24 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
 
             {/* Info Grid */}
             <div className="grid grid-cols-2 gap-3">
-                <InfoCard icon={User} label="Age" value={`${patient.patientAge} years`} color="text-blue-500" />
-                <InfoCard icon={Phone} label="Phone" value={patient.phone || "Not Provided"} color="text-emerald-500" />
-                <InfoCard icon={MapPin} label="City" value={patient.city || "Not Provided"} color="text-rose-500" />
-                {/* <InfoCard icon={Hash} label="National Id" value={patient.nationalId || "Not Provided"} color="text-rose-500" /> */}
-                <InfoCard icon={GraduationCap} label="University" value={patient.universityName || "Not Assigned"} color="text-indigo-500" />
-                <InfoCard icon={Calendar} label="Created At" value={new Date(patient.createdAt).toLocaleDateString()} color="text-violet-500" />
-                <InfoCard icon={ClipboardList} label="Total Sessions" value={`${patient.totalSessions}` || "0"} color="text-violet-500" />
-                {
-                    patient.createdByRole?.toLowerCase() !== "patient" && creatorData && (
-                        <InfoCard icon={UserCircle} label="Created By" value={creatorData?.data?.fullName || "Unknown"} color="text-teal-500" />
-                    )
-                }
+                <InfoCard icon={User}         label={t.infoAge}              value={`${patient.patientAge} ${t.yearsOld}`}              color="text-blue-500"   />
+                <InfoCard icon={Phone}        label={t.infoPhone}            value={patient.phone || t.infoNotProvided}                  color="text-emerald-500"/>
+                <InfoCard icon={MapPin}       label={t.infoCity}             value={patient.city || t.infoNotProvided}                   color="text-rose-500"   />
+                <InfoCard icon={GraduationCap}label={t.infoUniversity}       value={patient.universityName || t.infoNotAssigned}         color="text-indigo-500" />
+                <InfoCard icon={Calendar}     label={t.infoCreatedAt}        value={new Date(patient.createdAt).toLocaleDateString()}    color="text-violet-500" />
+                <InfoCard icon={ClipboardList}label={t.infoTotalSessions}    value={`${patient.totalSessions}` || "0"}                  color="text-violet-500" />
+                {patient.createdByRole?.toLowerCase() !== "patient" && creatorData && (
+                    <InfoCard icon={UserCircle} label={t.infoCreatedBy}      value={creatorData?.data?.fullName || t.infoUnknown}        color="text-teal-500"   />
+                )}
                 {patient.assignedStudentId && studentOwnerData && (
-                    <InfoCard icon={BookUser} label="Assigned Student" value={studentOwnerData?.data?.fullName || "Unknown"} color="text-cyan-500" />
+                    <InfoCard icon={BookUser}   label={t.infoAssignedStudent} value={studentOwnerData?.data?.fullName || t.infoUnknown}  color="text-cyan-500"   />
                 )}
                 {patient.assignedDoctorId && doctorOwnerData && (
-                    <InfoCard icon={Stethoscope} label="Supervising Doctor" value={doctorOwnerData?.data?.fullName || "Unknown"} color="text-cyan-500" />
+                    <InfoCard icon={Stethoscope}label={t.infoSupervisingDoctor} value={doctorOwnerData?.data?.fullName || t.infoUnknown} color="text-cyan-500"   />
                 )}
                 {scheduledSession && (() => {
-                    const status = scheduledSession.status?.toString().toLowerCase();
-                    const isExpired = status === "expired" || status === "3" || (() => {
+                    const sessionStatus = scheduledSession.status?.toString().toLowerCase();
+                    const isExpired = sessionStatus === "expired" || sessionStatus === "3" || (() => {
                         const sd = new Date(scheduledSession.scheduledAt);
                         sd.setHours(0, 0, 0, 0);
                         const td = new Date();
@@ -101,7 +102,7 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                     return (
                         <InfoCard
                             icon={Clock}
-                            label="Next Session"
+                            label={t.infoNextSession}
                             value={new Date(scheduledSession.scheduledAt).toLocaleString("en-US", {
                                 month: "short",
                                 day: "numeric",
@@ -116,9 +117,9 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
 
             {/* Treatment Progress */}
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80">
-            {/* status, createdByRole, diagnoses  */}
                 <ProgressTracker status={patient.status} createdByRole={patient.createdByRole} diagnosisdto={patient.diagnosisdto} />
             </div>
+
             {/* Divider */}
             <div className="h-px bg-slate-100 dark:bg-slate-800/80 my-6" />
 
@@ -131,14 +132,13 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                 <DoctorActions patient={patient} onRefetch={onRefetch} />
             )}
 
-
             {/* Completed */}
             {patient.status.toLowerCase() === "completed" && (
                 <div className="space-y-4">
                     <div className="rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200/60 dark:border-emerald-800/50 p-4 space-y-2">
                         <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
                             <CheckCircle size={16} className="text-emerald-600 dark:text-emerald-500" />
-                            Treatment Completed
+                            {t.infoTreatmentCompleted}
                         </p>
                         {patient.completedAt && (
                             <p className="text-xs text-emerald-600 dark:text-emerald-500">

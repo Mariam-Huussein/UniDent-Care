@@ -6,6 +6,7 @@ import { ToothPanelData } from "./ToothInfoPanel";
 import { ToothData } from "@/features/cases/types/CaseDetails.types";
 import { getToothStatusColor } from "@/features/cases/utils/CaseDetails.utils";
 import { Lock } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 const ReactOdontogram = dynamic(() => import("react-odontogram"), { ssr: false });
 
@@ -33,6 +34,8 @@ export default function OdontogramChart({
     onToothClick,
     onAfterViewClick,
 }: OdontogramChartProps) {
+    const { t } = useLanguage();
+
     return (
         <div className="relative">
             {/* Overlay when locked */}
@@ -42,7 +45,7 @@ export default function OdontogramChart({
                         <Lock size={18} className="text-slate-400 dark:text-slate-500" />
                     </div>
                     <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        Chart locked — case not yet assigned
+                        {t.odontogramLocked}
                     </p>
                 </div>
             )}
@@ -70,14 +73,14 @@ export default function OdontogramChart({
                 {teethMap.size > 0 && (
                     <style>{
                         Array.from(teethMap.values())
-                            .filter((t) => t.status !== "healthy")
-                            .map((t) => {
-                                const c = getToothStatusColor(t.status);
+                            .filter((tooth) => tooth.status !== "healthy")
+                            .map((tooth) => {
+                                const c = getToothStatusColor(tooth.status);
                                 return `
-                                    g[id="${t.number}"] path,
-                                    g[id="${t.number}"] polygon,
-                                    g[id="tooth-${t.number}"] path,
-                                    g[id="tooth-${t.number}"] polygon {
+                                    g[id="${tooth.number}"] path,
+                                    g[id="${tooth.number}"] polygon,
+                                    g[id="tooth-${tooth.number}"] path,
+                                    g[id="tooth-${tooth.number}"] polygon {
                                         fill: ${c.fill} !important;
                                         stroke: ${c.stroke} !important;
                                         stroke-width: 1.5px !important;
@@ -124,38 +127,38 @@ export default function OdontogramChart({
                                 if (diagnosed) {
                                     return (
                                         <div className="text-center px-1.5 space-y-1">
-                                            <div className="font-bold text-sm">Tooth #{toothNum}</div>
+                                            <div className="font-bold text-sm">{t.odontogramToothNum}{toothNum}</div>
                                             <div className="text-xs opacity-80 font-medium">{diagnosed.caseType}</div>
                                             <div className="text-[10px] opacity-60 italic">{diagnosed.diagnosisStage}</div>
                                             <div className="text-[10px] opacity-50 pt-1 border-t border-white/20">
-                                                Click to view details
+                                                {t.odontogramClickDetails}
                                             </div>
                                         </div>
                                     );
                                 }
                                 return (
                                     <div className="text-center px-1">
-                                        <div className="font-bold text-sm">Tooth #{toothNum}</div>
-                                        <div className="text-[10px] opacity-60 mt-0.5">No diagnosis recorded</div>
+                                        <div className="font-bold text-sm">{t.odontogramToothNum}{toothNum}</div>
+                                        <div className="text-[10px] opacity-60 mt-0.5">{t.odontogramNoDiagnosis}</div>
                                     </div>
                                 );
                             }
 
-                            const t = teethMap.get(toothNum);
-                            const statusLabel = t ? getToothStatusColor(t.status).label : "Healthy";
+                            const tooth = teethMap.get(toothNum);
+                            const statusLabel = tooth ? getToothStatusColor(tooth.status).label : "Healthy";
                             return (
                                 <div className="text-center px-1">
-                                    <div className="font-bold text-sm mb-1">Tooth #{toothNum}</div>
+                                    <div className="font-bold text-sm mb-1">{t.odontogramToothNum}{toothNum}</div>
                                     <div className="flex items-center justify-center gap-1.5 opacity-90">
                                         <div
                                             className="w-2 h-2 rounded-full"
-                                            style={{ backgroundColor: t ? getToothStatusColor(t.status).stroke : "#cbd5e1" }}
+                                            style={{ backgroundColor: tooth ? getToothStatusColor(tooth.status).stroke : "#cbd5e1" }}
                                         />
                                         <span className="text-xs">{statusLabel}</span>
                                     </div>
-                                    {t?.treatmentType && (
+                                    {tooth?.treatmentType && (
                                         <div className="mt-1.5 pt-1.5 border-t border-white/20 text-[10px] opacity-80">
-                                            {t.treatmentType}
+                                            {tooth.treatmentType}
                                         </div>
                                     )}
                                 </div>

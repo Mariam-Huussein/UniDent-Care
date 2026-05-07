@@ -7,6 +7,7 @@ import DoctorSelect from "@/features/cases/components/Request/SelectDoctorByUser
 import { useSearchDoctor } from "@/features/cases/hooks/useSearchDoctor";
 import { useEffect, useState } from "react";
 import { DoctorSearchResult } from "@/features/cases/types/caseCardProps.types";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface SendRequestModalProps {
     caseId: string;
@@ -16,6 +17,7 @@ interface SendRequestModalProps {
 }
 
 export default function SendRequestModal({ caseId, patientName, caseType, onClose }: SendRequestModalProps) {
+    const { t } = useLanguage();
     const { register, handleSubmit, errors, isValid, loading, setValue } = useSendRequest(caseId, onClose);
     const { results: doctors, loading: isLoadingDoctors, search: handleSearchDoctors } = useSearchDoctor();
     const [selectedDoctor, setSelectedDoctor] = useState<DoctorSearchResult | null>(null);
@@ -35,7 +37,6 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
-        
         return () => {
             document.body.style.overflow = "unset";
         };
@@ -50,8 +51,8 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-800">
                     <div>
-                        <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">Send Request</h2>
-                        <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">Fill in the details to send a case request</p>
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-slate-100">{t.sendRequestTitle}</h2>
+                        <p className="text-xs text-gray-400 dark:text-slate-400 mt-0.5">{t.sendRequestSubtitle}</p>
                     </div>
                     <button
                         onClick={onClose}
@@ -82,7 +83,7 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
                     {/* Doctor Selection */}
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-gray-700 dark:text-slate-200">
-                            Doctor <span className="text-red-400 dark:text-red-500">*</span>
+                            {t.sendRequestDoctorLabel} <span className="text-red-400 dark:text-red-500">*</span>
                         </label>
                         <DoctorSelect
                             value={selectedDoctor}
@@ -90,23 +91,25 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
                             onSearch={handleSearchDoctors}
                             options={doctors}
                             loading={isLoadingDoctors}
-                            placeholder="Search doctor by username..."
+                            placeholder={t.sendRequestDoctorPlaceholder}
                         />
                         <input type="hidden" {...register("doctorUsername")} />
                         {errors.doctorUsername && (
                             <p className="text-xs text-red-500 dark:text-red-400">{errors.doctorUsername.message}</p>
                         )}
-                        {!selectedDoctor && <p className="text-xs text-gray-400 dark:text-slate-500">Please select a doctor</p>}
+                        {!selectedDoctor && (
+                            <p className="text-xs text-gray-400 dark:text-slate-500">{t.sendRequestDoctorHint}</p>
+                        )}
                     </div>
 
                     {/* Description */}
                     <div className="space-y-1.5">
                         <label className="text-sm font-medium text-gray-700 dark:text-slate-200">
-                            Description <span className="text-red-400 dark:text-red-500">*</span>
+                            {t.sendRequestDescLabel} <span className="text-red-400 dark:text-red-500">*</span>
                         </label>
                         <textarea
                             {...register("description")}
-                            placeholder="Describe your request (min 10 characters)"
+                            placeholder={t.sendRequestDescPlaceholder}
                             rows={4}
                             className="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm text-gray-700 dark:text-slate-100 placeholder:text-gray-300 dark:placeholder:text-slate-500 
                                        bg-white dark:bg-slate-900/50
@@ -125,7 +128,7 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
                             disabled={loading}
                             className="my-btn-outline"
                         >
-                            Cancel
+                            {t.sendRequestCancel}
                         </button>
                         <button
                             type="submit"
@@ -135,12 +138,12 @@ export default function SendRequestModal({ caseId, patientName, caseType, onClos
                             {loading ? (
                                 <>
                                     <Loader2 size={15} className="animate-spin" />
-                                    Sending...
+                                    {t.sendRequestSending}
                                 </>
                             ) : (
                                 <>
                                     <Send size={15} />
-                                    Send Request
+                                    {t.sendRequestSend}
                                 </>
                             )}
                         </button>

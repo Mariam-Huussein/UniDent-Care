@@ -3,6 +3,7 @@
 import { ToothStatus } from "@/features/cases/types/CaseDetails.types";
 import { getToothStatusColor } from "@/features/cases/utils/CaseDetails.utils";
 import { Eye, Pencil } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface OdontogramHeaderProps {
     readonly: boolean;
@@ -11,6 +12,7 @@ interface OdontogramHeaderProps {
 const TOOTH_STATUSES: ToothStatus[] = ["healthy", "needs-treatment", "in-progress", "treated"];
 
 export default function OdontogramHeader({ readonly }: OdontogramHeaderProps) {
+    const { t } = useLanguage();
     return (
         <div className="flex items-center justify-between flex-wrap gap-3">
             {/* Title */}
@@ -23,12 +25,12 @@ export default function OdontogramHeader({ readonly }: OdontogramHeaderProps) {
                 </div>
                 <div>
                     <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
-                        {readonly ? "Dental Chart" : "Interactive Odontogram"}
+                        {readonly ? t.odontoDentalChart : t.odonoInteractive}
                     </h3>
                     <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
                         {readonly
-                            ? "Click any tooth to view diagnosis info"
-                            : "Select teeth to build a diagnosis plan"}
+                            ? t.odontogramClickView
+                            : t.odontogramSelectBuild}
                     </p>
                 </div>
             </div>

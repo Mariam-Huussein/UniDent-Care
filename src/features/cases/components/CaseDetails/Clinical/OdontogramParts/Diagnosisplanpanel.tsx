@@ -10,6 +10,7 @@ import { useCase } from "@/features/cases/context/CaseContext";
 import { submitDiagnoses, updateDiagnosis, deleteDiagnosis } from "@/features/cases/server/diagnoses.action";
 import toast from "react-hot-toast";
 import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export interface DiagnosisPlanPanelProps {
     selected: ToothDetail[];
@@ -29,6 +30,7 @@ export default function DiagnosisPlanPanel({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const { caseData } = useCase();
+    const { t } = useLanguage();
 
     const handleSubmit = async () => {
         if (selected.length === 0) return;
@@ -38,18 +40,14 @@ export default function DiagnosisPlanPanel({
             const selTooth = selected[0];
             const fdiNum = Number(selTooth.notations.fdi);
             const toothData = teethMap.get(fdiNum);
-            console.log("Current Tooth Data:", toothData);
             if (!toothData) {
                 throw new Error("Tooth data not found");
             }
 
             if (toothData.status === "healthy" && toothData.id) {
-                console.log("this is delete ")
                 const res = await deleteDiagnosis(toothData.id);
-                console.log("this is delete res ", res)
                 if (!res.success) throw new Error(res.message);
             } else if (toothData.status !== "healthy" && toothData.id && toothData.caseTypeId) {
-                console.log("this is update ")
                 const payload = {
                     id: toothData.id,
                     stage: 1,
@@ -57,12 +55,9 @@ export default function DiagnosisPlanPanel({
                     notes: toothData.notes || "",
                     teethNumbers: [fdiNum]
                 };
-                console.log("this is update payload ", payload)
                 const res = await updateDiagnosis(payload);
-                console.log("this is update res ", res)
                 if (!res.success) throw new Error(res.message);
             } else if (toothData.status !== "healthy" && !toothData.id && toothData.caseTypeId) {
-                console.log("this is submit ")
                 const payload = {
                     patientCaseId: caseData?.id || "",
                     stage: 1,
@@ -72,19 +67,17 @@ export default function DiagnosisPlanPanel({
                     role: userRole || "",
                     teethNumbers: [fdiNum]
                 };
-                console.log("this is submit payload ", payload)
                 const res = await submitDiagnoses(payload);
-                console.log("this is submit res ", res)
                 if (!res.success) throw new Error(res.message);
             }
 
-            toast.success("Diagnosis saved successfully!");
+            toast.success(t.diagnosisSaved);
             setSubmitted(true);
             await onSubmitSuccess();
 
             setTimeout(() => { setSubmitted(false); }, 1800);
         } catch (error: any) {
-            toast.error("Failed to submit: " + error.message);
+            toast.error(t.diagnosisFailed + error.message);
         } finally {
             setIsSubmitting(false);
         }
@@ -100,10 +93,10 @@ export default function DiagnosisPlanPanel({
                     </div>
                     <div>
                         <h3 className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
-                            Diagnosis Plan
+                            {t.diagnosisPlanTitle}
                         </h3>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                            {selected.length === 1 ? "1 tooth selected" : "No tooth selected"}
+                            {selected.length === 1 ? t.diagnosisOneTooth : t.diagnosisNoTooth}
                         </p>
                     </div>
                 </div>
@@ -124,10 +117,10 @@ export default function DiagnosisPlanPanel({
                                 <ChevronDown size={22} className="text-indigo-400 dark:text-indigo-500" />
                             </div>
                             <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                                No teeth selected
+                                {t.diagnosisNoTeethTitle}
                             </h4>
                             <p className="text-xs text-slate-400 dark:text-slate-500 mt-1.5 leading-relaxed max-w-[180px]">
-                                Click any tooth on the chart to start building a plan
+                                {t.diagnosisNoTeethDesc}
                             </p>
                         </motion.div>
                     ) : (
@@ -172,15 +165,15 @@ export default function DiagnosisPlanPanel({
                         {submitted ? (
                             <>
                                 <CheckCircle2 size={16} />
-                                Submitted!
+                                {t.diagnosisSubmitted}
                             </>
                         ) : isSubmitting ? (
                             <>
                                 <Loader2 size={16} className="animate-spin" />
-                                Submitting…
+                                {t.diagnosisSubmitting}
                             </>
                         ) : (
-                            "Submit Diagnosis"
+                            t.diagnosisSubmitBtn
                         )}
                     </button>
                 </div>

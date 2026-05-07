@@ -11,6 +11,10 @@ import CaseCard from "../CaseCard";
 import { MyCasesSkeleton } from "./MyCasesSkeleton";
 import { MyCasesEmptyState } from "./MyCasesEmptyState";
 import { getCaseStatusConfig } from "./getCaseStatusConfig";
+import { useState, useMemo } from "react";
+import GridControlsToolbar from "../AvailableCases/GridControlsToolbar";
+import { SortConfig } from "../../hooks/useFilterCases";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface CasesTabContentProps {
     cases: StudentDashboardCaseItem[];
@@ -35,7 +39,7 @@ const mapStudentCaseToCaseItem = (item: StudentDashboardCaseItem): CaseItem => {
             publicId: firstDiagnosis.caseTypeId || "",
             name: firstDiagnosis.caseTypeName || firstDiagnosis.caseType || "",
             description: ""
-        } : null, 
+        } : null,
         diagnosisdto: item.diagnosisdto,
         status: item.status,
         createAt: item.createAt,
@@ -43,17 +47,13 @@ const mapStudentCaseToCaseItem = (item: StudentDashboardCaseItem): CaseItem => {
         pendingRequests: item.pendingRequests,
         imageUrls: item.imageUrls,
         gender: undefined,
-        // The user manually modified CaseItem's diagnosisdto to be an array of DiagnosisStage
     };
 };
-
-import { useState, useMemo } from "react";
-import GridControlsToolbar from "../AvailableCases/GridControlsToolbar";
-import { SortConfig } from "../../hooks/useFilterCases";
 
 export function CasesTabContent({
     cases, casesLoading, caseType, setCaseType, casesPage, setCasesPage, casesTotalPages, casesViewMode, setCasesViewMode
 }: CasesTabContentProps) {
+    const { t } = useLanguage();
 
     // --- Filter & Sort State ---
     const [filters, setFilters] = useState<Record<string, string>>({ caseType: caseType });
@@ -92,7 +92,7 @@ export function CasesTabContent({
 
             if (nameFilter && !c.patientName.toLowerCase().includes(nameFilter.toLowerCase())) return false;
             if (typeFilter && !(c.diagnosisdto?.[0]?.caseTypeName || "").toLowerCase().includes(typeFilter.toLowerCase())) return false;
-            
+
             if (statusFilter) {
                 const currentStatus = c.processStatus || c.status;
                 if (!currentStatus || currentStatus.toLowerCase() !== statusFilter.toLowerCase()) return false;
@@ -131,7 +131,7 @@ export function CasesTabContent({
 
     const casesColumns: Column<StudentDashboardCaseItem>[] = [
         {
-            header: "Patient",
+            header: t.casesTablePatient,
             accessor: "patientName",
             render: (val, row) => (
                 <div className="flex items-center gap-3">
@@ -140,30 +140,34 @@ export function CasesTabContent({
                     </div>
                     <div className="flex flex-col">
                         <span className="font-bold text-slate-800 dark:text-slate-100 text-sm">{val}</span>
-                        <span className="text-xs text-slate-500 flex items-center gap-1"><User size={10} /> {row.patientAge} years</span>
+                        <span className="text-xs text-slate-500 flex items-center gap-1">
+                            <User size={10} /> {row.patientAge} {t.casesTableYears}
+                        </span>
                     </div>
                 </div>
             )
         },
         {
-            header: "Diagnosis",
+            header: t.myCasesDiagnosis,
             accessor: "diagnosisdto",
             render: (_, row) => {
-                const sc = getCaseStatusConfig(row.status);
+                const sc = getCaseStatusConfig(row.status, t);
                 const StatusIcon = sc.icon || Activity;
                 return (
                     <div className="flex flex-col gap-1.5 items-start">
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{row.diagnosisdto?.[0]?.caseTypeName || "Pending"}</span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            {row.diagnosisdto?.[0]?.caseTypeName || t.myCasesPending}
+                        </span>
                         <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${sc.bg} ${sc.text} uppercase tracking-wider`}>
                             <StatusIcon size={10} className={sc.text} />
                             {sc.label}
                         </span>
                     </div>
-                )
+                );
             }
         },
         {
-            header: "University Info",
+            header: t.myCasesUniversityInfo,
             accessor: "universityName",
             render: (val) => (
                 <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -173,7 +177,7 @@ export function CasesTabContent({
             )
         },
         {
-            header: "Registered On",
+            header: t.myCasesRegisteredOn,
             accessor: "createAt",
             render: (val) => (
                 <div className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400">
@@ -187,7 +191,7 @@ export function CasesTabContent({
             accessor: "id",
             render: (val) => (
                 <Link href={`/my-cases/${val}`} className="my-btn-outline px-3 py-1.5 text-xs float-right">
-                    View Details
+                    {t.myCasesViewDetails}
                 </Link>
             )
         }
@@ -202,7 +206,7 @@ export function CasesTabContent({
             transition={{ duration: 0.3 }}
             className="flex flex-col gap-6"
         >
-            <GridControlsToolbar 
+            <GridControlsToolbar
                 filters={filters}
                 onFilterChange={handleFilterChange}
                 clearFilters={clearFilters}
@@ -211,11 +215,11 @@ export function CasesTabContent({
                 onSort={handleSort}
                 hideGender={true}
                 statusOptions={[
-                    { label: "All Statuses", value: "" },
-                    { label: "In Progress", value: "InProgress" },
-                    { label: "Completed", value: "Completed" }
+                    { label: t.toolbarAllStatuses, value: "" },
+                    { label: t.toolbarInProgress,  value: "InProgress" },
+                    { label: t.myCasesCompleted,   value: "Completed" },
                 ]}
-                defaultStatusLabel="All Statuses"
+                defaultStatusLabel={t.toolbarAllStatuses}
             />
 
             {/* Content Area */}
@@ -225,16 +229,19 @@ export function CasesTabContent({
                         {Array.from({ length: 6 }).map((_, i) => <MyCasesSkeleton key={i} />)}
                     </div>
                 ) : (
-                    <div className="space-y-4 pt-4"><div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" /><div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" /></div>
+                    <div className="space-y-4 pt-4">
+                        <div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" />
+                        <div className="w-full h-12 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl animate-pulse" />
+                    </div>
                 )
             ) : filteredAndSortedCases.length === 0 ? (
-                <MyCasesEmptyState message="No cases found in this category." />
+                <MyCasesEmptyState message={t.casesTableEmptyCategory} />
             ) : (
                 casesViewMode === 'grid' ? (
                     <motion.div layout className="grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-6 place-items-center">
                         <AnimatePresence>
                             {filteredAndSortedCases.map((item, i) => {
-                                const sc = getCaseStatusConfig(item.processStatus || item.status);
+                                const sc = getCaseStatusConfig(item.processStatus || item.status, t);
                                 const StatusIcon = sc.icon || Activity;
                                 return (
                                     <motion.div

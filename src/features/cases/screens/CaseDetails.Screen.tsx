@@ -8,9 +8,11 @@ import PatientDetailsSkeleton from "../components/CaseDetails/Layout/CaseDetails
 import CaseDetailsTopBar from "../components/CaseDetails/Layout/CaseDetailsTopBar";
 import { useCaseDetails } from "../hooks/useCaseDetails";
 import { CaseProvider } from "../context/CaseContext";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
     const { patient, isLoading, status, role, studentId, refetch } = useCaseDetails(caseId);
+    const { t } = useLanguage();
     return (
         <CaseProvider caseData={patient} caseId={caseId} isLoading={isLoading} refetch={refetch}>
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
@@ -23,7 +25,7 @@ export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
                 {isLoading ? (
                     <PatientDetailsSkeleton />
                 ) : !patient ? (
-                    <div className="flex items-center justify-center p-20 text-gray-500">Case not found.</div>
+                    <div className="flex items-center justify-center p-20 text-gray-500">{t.caseNotFound}</div>
                 ) : (
                     <AnimatePresence mode="wait">
                         <motion.div

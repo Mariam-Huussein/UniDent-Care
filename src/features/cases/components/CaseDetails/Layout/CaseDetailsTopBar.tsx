@@ -1,28 +1,28 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { CaseStatus } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
 import { useCase } from "@/features/cases/context/CaseContext";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 import toast from "react-hot-toast";
-import { Share2 } from "lucide-react";
 
 interface CaseDetailsTopBarProps {
     currentStatus: CaseStatus;
     patientName: string;
 }
 
-
 export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDetailsTopBarProps) {
     const router = useRouter();
-    const { caseData, caseId } = useCase()
-    const cfg = getPatientStatusConfig(currentStatus);
+    const { t } = useLanguage();
+    const { caseData, caseId } = useCase();
+    const cfg = getPatientStatusConfig(currentStatus, t);
+
     const handleShare = async () => {
         const shareUrl = `${window.location.origin}/cases/${caseId}`;
 
-        // 1. تجربة الـ Native Share (للموبايلات)
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -30,24 +30,23 @@ export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDe
                     text: `Check out this dental case for ${caseData?.patientName}`,
                     url: shareUrl,
                 });
-                return; // لو نجح الشير نخرج من الدالة
+                return;
             } catch (err) {
                 console.error("Error sharing:", err);
-                // لو اليوزر كنسل الشير مش عايزين نكمل للـ clipboard
                 if ((err as Error).name === 'AbortError') return;
             }
         }
 
-        // 2. تجربة الـ Clipboard API (للمتصفحات الحديثة و HTTPS)
         if (navigator.clipboard && navigator.clipboard.writeText) {
             try {
                 await navigator.clipboard.writeText(shareUrl);
-                toast.success("Link copied to clipboard!");
+                toast.success(t.caseDetailsLinkCopied);
                 return;
             } catch (err) {
                 console.error("Failed to copy using clipboard API:", err);
             }
         }
+
         try {
             const textArea = document.createElement("textarea");
             textArea.value = shareUrl;
@@ -55,12 +54,13 @@ export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDe
             textArea.select();
             document.execCommand("copy");
             document.body.removeChild(textArea);
-            toast.success("Link copied!");
+            toast.success(t.caseDetailsLinkCopiedShort);
         } catch (err) {
             console.error("Fallback copy failed:", err);
-            toast.error("Could not copy link automatically.");
+            toast.error(t.caseDetailsCopyFailed);
         }
     };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: -12 }}
@@ -74,13 +74,15 @@ export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDe
                     whileTap={{ scale: 0.95 }}
                     onClick={() => router.back()}
                     className="w-10 h-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:shadow-md transition-all cursor-pointer"
-                    aria-label="Go back"
+                    aria-label={t.caseDetailsGoBack}
                 >
                     <ArrowLeft size={17} />
                 </motion.button>
                 <div>
-                    <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white tracking-tight">{patientName}'s Case Details</h1>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Case lifecycle view</p>
+                    <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-white tracking-tight">
+                        {patientName}&apos;s {t.caseDetailsTitle}
+                    </h1>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{t.caseDetailsSubtitle}</p>
                 </div>
             </div>
 
@@ -93,7 +95,7 @@ export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDe
                     className="flex cursor-pointer items-center gap-2 text-[11px] font-bold px-4 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors uppercase tracking-wide"
                 >
                     <Share2 size={14} className="text-blue-500" />
-                    Share
+                    {t.caseDetailsShare}
                 </motion.button>
 
                 {/* Status Badge */}

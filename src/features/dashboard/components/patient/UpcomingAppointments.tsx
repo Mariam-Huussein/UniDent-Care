@@ -88,7 +88,7 @@ export function UpcomingAppointments({ upcomingSessions }: UpcomingAppointmentsP
                         {s.doctorName}
                       </h4>
                       <p className="text-xs font-bold text-slate-400 mt-1 flex items-center gap-2">
-                        <Clock size={12} className="text-blue-400" /> {day} at {time}
+                        <Clock size={12} className="text-blue-400" /> {day} {t.dashApptAt} {time}
                       </p>
                     </div>
 

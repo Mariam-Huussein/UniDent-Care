@@ -8,6 +8,7 @@ import {
 import PersonRow from "./PersonRow";
 import InfoRow from "./InfoRow";
 import { DiagnosisStage } from "@/features/cases/types/CaseDetails.types";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 export interface ToothPanelData {
     toothNumber: number;
@@ -23,17 +24,16 @@ interface ToothInfoPanelProps {
     onClose: () => void;
 }
 
-const getStageLabel = (data : ToothPanelData | null) => {
-    const stage = data?.diagnosisStage;
-    
-    if (stage === 0 || stage === "AI") return "AI";
-    
-    if (stage === 1 || stage === "BasicClinic") return "Basic Clinic";
-    
-    return "Unknown";
-};
-
 export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
+    const { t } = useLanguage();
+
+    const getStageLabel = (panelData: ToothPanelData | null) => {
+        const stage = panelData?.diagnosisStage;
+        if (stage === 0 || stage === "AI")           return t.toothInfoStageAI;
+        if (stage === 1 || stage === "BasicClinic")  return t.toothInfoStageClinic;
+        return t.toothInfoStageUnknown;
+    };
+
     return (
         <AnimatePresence mode="wait">
             {data ? (
@@ -55,10 +55,10 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                             </div>
                             <div>
                                 <p className="text-sm font-bold text-slate-800 dark:text-white leading-tight">
-                                    Tooth {data.toothNumber}
+                                    {t.odontogramToothNum}{data.toothNumber}
                                 </p>
                                 <p className="text-[10px] text-indigo-500 dark:text-indigo-400 uppercase tracking-wider font-bold mt-0.5">
-                                    Diagnosis Info
+                                    {t.toothInfoTitle}
                                 </p>
                             </div>
                         </div>
@@ -76,14 +76,14 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                         {/* Case Type */}
                         <InfoRow
                             icon={<Tag size={13} className="text-indigo-500 dark:text-indigo-400" />}
-                            label="Case Type"
-                            value={data.caseType || "Unkown"}
+                            label={t.toothInfoCaseType}
+                            value={data.caseType || t.toothInfoUnknown}
                         />
 
                         {/* Diagnosis Stage */}
                         <InfoRow
                             icon={<AlertCircle size={13} className="text-amber-500" />}
-                            label="Stage"
+                            label={t.toothInfoStage}
                             value={getStageLabel(data)}
                         />
 
@@ -96,7 +96,7 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                                 <div className="flex items-center gap-1.5 mb-2">
                                     <FileText size={12} className="text-indigo-400 dark:text-indigo-500" />
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
-                                        Clinical Notes
+                                        {t.toothInfoNotes}
                                     </span>
                                 </div>
                                 <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
@@ -105,7 +105,7 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                             </div>
                         ) : (
                             <p className="text-xs text-slate-400 dark:text-slate-500 italic px-1">
-                                No clinical notes recorded.
+                                {t.toothInfoNoNotes}
                             </p>
                         )}
 
@@ -115,18 +115,18 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                         {/* Assigned Student */}
                         <PersonRow
                             icon={<GraduationCap size={14} className="text-emerald-500" />}
-                            role="Assigned Student"
+                            role={t.toothInfoAssignedStudent}
                             name={data.assignedStudentName}
-                            emptyLabel="Not yet assigned"
+                            emptyLabel={t.toothInfoNotAssigned}
                         />
 
                         {/* Supervising Doctor */}
                         <PersonRow
                             icon={<Stethoscope size={14} className="text-blue-500" />}
-                            role="Supervising Doctor"
+                            role={t.toothInfoSupervisingDoctor}
                             name={data.assignedDoctorName}
-                            prefix="Dr."
-                            emptyLabel="Not yet assigned"
+                            prefix={t.toothInfoDrPrefix}
+                            emptyLabel={t.toothInfoNotAssigned}
                         />
 
                         {/* Status pill */}
@@ -134,7 +134,7 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                             <div className="flex items-center gap-2 bg-linear-to-r from-indigo-50 to-violet-50 dark:from-indigo-900/10 dark:to-violet-900/10 border border-indigo-100 dark:border-indigo-800/40 rounded-xl px-3.5 py-2.5">
                                 <Activity size={14} className="text-indigo-500 shrink-0" />
                                 <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400">
-                                    Case is under active treatment
+                                    {t.toothInfoActiveCase}
                                 </p>
                             </div>
                         </div>
@@ -154,10 +154,10 @@ export default function ToothInfoPanel({ data, onClose }: ToothInfoPanelProps) {
                     </div>
                     <div>
                         <p className="text-sm font-bold text-slate-600 dark:text-slate-400">
-                            No tooth selected
+                            {t.toothInfoNoSelection}
                         </p>
                         <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed max-w-[160px] mx-auto">
-                            Click any tooth on the chart to view its diagnosis details
+                            {t.toothInfoNoSelectionDesc}
                         </p>
                     </div>
                 </motion.div>

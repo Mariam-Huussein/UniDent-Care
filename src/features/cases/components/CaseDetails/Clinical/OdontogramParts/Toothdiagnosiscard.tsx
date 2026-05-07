@@ -7,6 +7,7 @@ import type { ToothDetail } from "react-odontogram";
 import SelectItems from "@/components/common/SelectItems";
 import CaseTypeDropdown from "@/features/cases/components/AvailableCases/CaseTypeDropdown";
 import { X } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 type ToothStatus = ToothData["status"];
 
@@ -17,26 +18,21 @@ interface ToothDiagnosisCardProps {
     onUpdate: (num: number, updates: Partial<ToothData>) => void;
 }
 
-const STATUS_OPTIONS = ["Healthy", "Needs Treatment"];
-
-const statusToDisplay = (status: string) => {
+const statusToDisplay = (status: string, healthy: string, needsTreatment: string) => {
     switch (status) {
-        case "healthy":         return "Healthy";
-        case "needs-treatment": return "Needs Treatment";
+        case "healthy":         return healthy;
+        case "needs-treatment": return needsTreatment;
         // case "in-progress":     return "In Progress";
         // case "treated":         return "Treated";
-        default:                return "Healthy";
+        default:                return healthy;
     }
 };
 
-const displayToStatus = (display: string): ToothStatus => {
-    switch (display) {
-        case "Healthy":          return "healthy";
-        case "Needs Treatment":  return "needs-treatment";
-        // case "In Progress":      return "in-progress";
-        // case "Treated":          return "treated";
-        default:                 return "healthy";
-    }
+const displayToStatus = (display: string, healthy: string, needsTreatment: string): ToothStatus => {
+    if (display === needsTreatment) return "needs-treatment";
+    // if (display === "In Progress") return "in-progress";
+    // if (display === "Treated")     return "treated";
+    return "healthy";
 };
 
 export default function ToothDiagnosisCard({
@@ -45,9 +41,12 @@ export default function ToothDiagnosisCard({
     onRemove,
     onUpdate,
 }: ToothDiagnosisCardProps) {
+    const { t: dict } = useLanguage();
     const fdiNum = Number(selTooth.notations.fdi);
     const t = toothData;
     const colors = getToothStatusColor(t.status);
+
+    const STATUS_OPTIONS = [dict.toothStatusHealthy, dict.toothStatusNeedsTreatment];
 
     return (
         <div className="relative z-10 bg-white dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 rounded-xl shadow-sm hover:border-indigo-200 dark:hover:border-indigo-700/50 hover:shadow-md transition-all duration-200 overflow-visible">
@@ -70,7 +69,7 @@ export default function ToothDiagnosisCard({
                         </div>
                         <div>
                             <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                                Tooth #{fdiNum}
+                                {dict.odontogramToothNum}{fdiNum}
                             </span>
                             <p
                                 className="text-[10px] font-semibold mt-0.5"
@@ -92,13 +91,13 @@ export default function ToothDiagnosisCard({
                 <div className="space-y-3 overflow-visible">
                     <div className="relative z-30">
                         <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
-                            Status
+                            {dict.toothStatusLabel}
                         </label>
                         <SelectItems
-                            value={statusToDisplay(t.status)}
-                            onChange={(val) => onUpdate(fdiNum, { status: displayToStatus(val) })}
+                            value={statusToDisplay(t.status, dict.toothStatusHealthy, dict.toothStatusNeedsTreatment)}
+                            onChange={(val) => onUpdate(fdiNum, { status: displayToStatus(val, dict.toothStatusHealthy, dict.toothStatusNeedsTreatment) })}
                             options={STATUS_OPTIONS}
-                            placeholder="Select Status"
+                            placeholder={dict.toothSelectStatus}
                         />
                     </div>
 
@@ -112,21 +111,21 @@ export default function ToothDiagnosisCard({
                         >
                             <div className="relative z-20">
                                 <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
-                                    Treatment Type
+                                    {dict.toothTreatmentType}
                                 </label>
                                 <CaseTypeDropdown
                                     selectedCaseType={t.treatmentType || ""}
                                     setSelectedCaseType={(val) => onUpdate(fdiNum, { treatmentType: val })}
                                     onCaseTypeSelect={(name, id) => onUpdate(fdiNum, { treatmentType: name, caseTypeId: id })}
-                                    placeholder="Select Treatment Type"
+                                    placeholder={dict.toothSelectTreatment}
                                 />
                             </div>
                             <div>
                                 <label className="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">
-                                    Clinical Notes
+                                    {dict.toothClinicalNotes}
                                 </label>
                                 <textarea
-                                    placeholder="Surfaces, observations, e.g. MOD caries on buccal…"
+                                    placeholder={dict.toothNotesPlaceholder}
                                     rows={2}
                                     className="w-full text-xs text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 bg-white dark:bg-slate-900/60 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/40 focus:border-indigo-400 dark:focus:border-indigo-600 transition-all resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
                                     value={t.notes || ""}

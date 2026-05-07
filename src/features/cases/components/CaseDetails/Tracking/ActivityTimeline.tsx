@@ -8,6 +8,7 @@ import { RootState } from "@/store";
 import { getSessionsByCase } from "@/features/cases/server/sessions.action";
 import { TimelineSessionItem } from "@/features/session/types/Sessions.types";
 import SessionCard from "../../../../session/components/SessionTimeLine/SessionCard";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 /* ─────────────────────────────────────────────────────────── */
 /*  Skeleton                                                   */
@@ -57,14 +58,15 @@ function TimelineSkeleton() {
 /*  Empty state                                               */
 /* ─────────────────────────────────────────────────────────── */
 function EmptyState() {
+    const { t } = useLanguage();
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 rounded-3xl bg-slate-50 dark:bg-slate-800/50 flex items-center justify-center mb-4 ring-1 ring-slate-200 dark:ring-slate-700/50 shadow-inner">
                 <MessageSquareText size={24} className="text-slate-300 dark:text-slate-600" />
             </div>
-            <p className="text-base font-bold text-slate-600 dark:text-slate-300">No completed sessions yet</p>
+            <p className="text-base font-bold text-slate-600 dark:text-slate-300">{t.timelineNoSessionsTitle}</p>
             <p className="text-sm text-slate-400 dark:text-slate-500 mt-1.5 max-w-xs leading-relaxed">
-                Sessions will appear here once completed. Track your clinical progress over time.
+                {t.timelineNoSessionsDesc}
             </p>
         </div>
     );
@@ -75,6 +77,7 @@ function EmptyState() {
 /* ─────────────────────────────────────────────────────────── */
 export default function ActivityTimeline({ caseId }: { caseId: string }) {
     const role = useSelector((state: RootState) => state.auth.role);
+    const { t } = useLanguage();
     const [sessions, setSessions] = useState<TimelineSessionItem[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -89,7 +92,7 @@ export default function ActivityTimeline({ caseId }: { caseId: string }) {
                 setSessions(done);
             }
         } catch (e: any) {
-            toast.error(e.message || "Failed to load sessions");
+            toast.error(e.message || t.timelineLoadError);
         } finally {
             setLoading(false);
         }
@@ -116,10 +119,10 @@ export default function ActivityTimeline({ caseId }: { caseId: string }) {
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <div>
                     <h3 className="text-sm font-bold text-slate-800 dark:text-white tracking-tight">
-                        Clinical Sessions Timeline
+                        {t.timelineTitle}
                     </h3>
                     <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                        {sessions.length} completed &middot; {evaluated} evaluated
+                        {sessions.length} {t.timelineCompleted} &middot; {evaluated} {t.timelineEvaluated}
                     </p>
                 </div>
 
@@ -127,7 +130,7 @@ export default function ActivityTimeline({ caseId }: { caseId: string }) {
                 {sessions.length > 0 && (
                     <div className="flex items-center gap-2">
                         <span className="text-[11px] text-slate-400 dark:text-slate-500">
-                            {Math.round((evaluated / sessions.length) * 100)}% reviewed
+                            {Math.round((evaluated / sessions.length) * 100)}{t.timelineReviewed}
                         </span>
                         <div className="w-20 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                             <div

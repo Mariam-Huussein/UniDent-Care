@@ -88,13 +88,13 @@ export function StatsCards({ kpis, progress }: StatsCardsProps) {
         <div className="relative z-10 flex justify-between items-center h-full">
            <div>
              <p className="text-sm font-bold text-slate-300 mb-1 flex items-center gap-2">
-                <TrendingUp size={16} /> Treatment Progress
+                <TrendingUp size={16} /> {t.dashProgressTitle}
              </p>
              <h4 className="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
                {progress.progressPercentage}%
              </h4>
              <p className="text-xs text-slate-400 mt-2 font-medium">
-               {progress.completedSessions} of {progress.totalSessions} Sessions Done
+               {progress.completedSessions} {t.dashProgressOf} {progress.totalSessions} {t.dashProgressSessionsDone}
              </p>
            </div>
            

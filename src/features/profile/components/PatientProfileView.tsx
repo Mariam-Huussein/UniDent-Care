@@ -3,32 +3,34 @@
 import { motion } from "framer-motion";
 import { HeartPulse, Phone, CreditCard, Calendar, MapPin, Mail } from "lucide-react";
 import { cityMap } from "@/constants/enums";
+import { Dictionary } from "@/utils/i18n/dictionaries";
 
 interface PatientProfileViewProps {
   patient: any;
-  t: any;
+  t: Dictionary;
 }
 
 export function PatientProfileView({ patient, t }: PatientProfileViewProps) {
   const getGenderText = (gender?: number) => {
-    if (gender === 0) return t?.profile?.male   || "Male";
-    if (gender === 1) return t?.profile?.female || "Female";
+    if (gender === 0) return t.male;
+    if (gender === 1) return t.female;
     return "N/A";
   };
 
   const getCityName = (cityValue?: number) => {
     if (cityValue === undefined || cityValue === null) return "—";
     const entry = Object.entries(cityMap).find(([, v]) => v === cityValue);
-    return entry ? entry[0] : "—";
+    if (!entry) return "—";
+    const key = entry[0] as keyof typeof t.cities;
+    return t.cities[key] ?? entry[0];
   };
 
   const fields = [
-    { icon: Phone,     color: "blue",   label: t?.profile?.phoneNumber || "Phone",      value: patient?.phone      || "—" },
-    { icon: Mail,      color: "violet", label: t?.profile?.email       || "Email",      value: patient?.email      || "—" },
-    { icon: CreditCard,color: "indigo", label: t?.profile?.nationalId  || "National ID",value: patient?.nationalId || "—" },
-    { icon: Calendar,  color: "amber",  label: t?.profile?.age         || "Age",        value: patient?.age ? `${patient.age} ${t?.profile?.yearsOld || "years old"}` : "—" },
-    { icon: HeartPulse,color: "rose",   label: t?.profile?.gender      || "Gender",     value: getGenderText(patient?.gender) },
-    { icon: MapPin,    color: "teal",   label: t?.profile?.city        || "City",       value: getCityName(patient?.city) },
+    { icon: Phone,      color: "blue",   label: t.phone,      value: patient?.phone      || "—" },
+    { icon: CreditCard, color: "indigo", label: t.nationalId, value: patient?.nationalId || "—" },
+    { icon: Calendar,   color: "amber",  label: t.age,        value: patient?.age ? `${patient.age} ${t.yearsOld}` : "—" },
+    { icon: HeartPulse, color: "rose",   label: genderLabel(t), value: getGenderText(patient?.gender) },
+    { icon: MapPin,     color: "teal",   label: t.city,       value: getCityName(patient?.city) },
   ];
 
   const colorMap: Record<string, string> = {
@@ -48,7 +50,7 @@ export function PatientProfileView({ patient, t }: PatientProfileViewProps) {
     >
       <div className="p-4 sm:p-6">
         <h3 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4">
-          {t?.profile?.personalInfo || "Personal Information"}
+          {t.personalInfo}
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
           {fields.map(({ icon: Icon, color, label, value }) => (
@@ -66,4 +68,9 @@ export function PatientProfileView({ patient, t }: PatientProfileViewProps) {
       </div>
     </motion.div>
   );
+}
+
+// helper to keep the fields array clean
+function genderLabel(t: Dictionary) {
+  return t.genderLabel;
 }

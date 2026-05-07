@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 
 import { authService } from "@/features/auth/services/authService";
 import { logout as logoutAction } from "@/features/auth/store/authSlice";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 interface LogoutButtonProps {
   variant?: "minimal" | "full";
@@ -19,6 +20,7 @@ interface LogoutButtonProps {
 export default function LogoutButton({ variant = "full", className = "" }: LogoutButtonProps) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { t } = useLanguage();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const performCleanup = () => {
@@ -40,7 +42,7 @@ export default function LogoutButton({ variant = "full", className = "" }: Logou
     if (isLoggingOut) return;
     
     setIsLoggingOut(true);
-    const toastId = toast.loading("Securely signing out...");
+    const toastId = toast.loading(t.signingOut);
 
     try {
       await authService.logout(); 
@@ -49,7 +51,7 @@ export default function LogoutButton({ variant = "full", className = "" }: Logou
     } finally {
       performCleanup();
       
-      toast.success("See you soon!", { id: toastId });
+      toast.success(t.logoutSuccess, { id: toastId });
       
       router.replace("/login");
       router.refresh(); 
@@ -62,7 +64,7 @@ export default function LogoutButton({ variant = "full", className = "" }: Logou
         onClick={handleLogout}
         disabled={isLoggingOut}
         className={`p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ${className}`}
-        title="Sign Out"
+        title={t.logout}
       >
         {isLoggingOut ? <Loader2 className="animate-spin" size={20} /> : <LogOut size={20} />}
       </button>
@@ -75,15 +77,15 @@ export default function LogoutButton({ variant = "full", className = "" }: Logou
       whileTap={{ scale: 0.98 }}
       onClick={handleLogout}
       disabled={isLoggingOut}
-      className={`group w-full flex items-center justify-between px-4 py-3 rounded-xl border border-red-100 bg-red-50/50 hover:bg-red-100 hover:border-red-200 text-red-700 transition-all duration-200 ${className}`}
+      className={`group cursor-pointer w-full flex items-center justify-between px-4 py-3 rounded-xl border border-red-100 bg-red-50/50 hover:bg-red-100 hover:border-red-200 text-red-700 transition-all duration-200 ${className}`}
     >
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-lg bg-red-100 group-hover:bg-white group-hover:shadow-sm transition-all ${isLoggingOut ? "text-red-400" : "text-red-600"}`}>
           {isLoggingOut ? <Loader2 className="animate-spin" size={18} /> : <LogOut size={18} />}
         </div>
         <div className="text-left">
-          <p className="text-sm font-bold">Sign Out</p>
-          <p className="text-xs text-red-500/80">End your current session</p>
+          <p className="text-sm font-bold">{t.logout}</p>
+          <p className="text-xs text-red-500/80">{t.logoutSubtitle}</p>
         </div>
       </div>
       
