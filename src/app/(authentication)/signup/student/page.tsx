@@ -80,20 +80,17 @@ export default function StudentSignup() {
       }
     },
     onError: (err: any) => {
-      const serverErrors = err?.response?.data?.errors || err?.response?.data?.error?.errors;
+      const errorData = err?.response?.data;
+      let msg = isRtl ? "فشل التسجيل. يرجى التحقق من المدخلات." : "Registration failed. Please check your inputs.";
       
-      if (serverErrors && typeof serverErrors === 'object') {
-        Object.keys(serverErrors).forEach((key) => {
-          const messages = serverErrors[key];
-          if (Array.isArray(messages)) {
-            messages.forEach((msg: string) => toast.error(`${key}: ${msg}`));
-          } else {
-            toast.error(messages);
-          }
-        });
-      } else {
-        toast.error(isRtl ? "فشل التسجيل. يرجى التحقق من المدخلات." : "Registration failed. Please check your inputs.");
+      if (errorData) {
+        if (errorData.error?.errors?.[0]) {
+          msg = errorData.error.errors[0];
+        } else if (errorData.message && errorData.message !== "Error") {
+          msg = errorData.message;
+        }
       }
+      toast.error(msg);
     },
   });
 

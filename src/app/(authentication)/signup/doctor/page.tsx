@@ -75,17 +75,17 @@ export default function DoctorSignup() {
       }
     },
     onError: (err: any) => {
-      const serverErrors = err?.response?.data?.error?.errors;
-      if (serverErrors) {
-        Object.keys(serverErrors).forEach((key) => {
-          const messages = serverErrors[key];
-          messages.forEach((msg: string) => {
-            toast.error(`${key}: ${msg}`);
-          });
-        });
-      } else {
-        toast.error(isRtl ? "فشل التسجيل. يرجى التحقق من بياناتك." : "Registration failed. Please check your data.");
+      const errorData = err?.response?.data;
+      let msg = isRtl ? "فشل التسجيل. يرجى التحقق من بياناتك." : "Registration failed. Please check your data.";
+      
+      if (errorData) {
+        if (errorData.error?.errors?.[0]) {
+          msg = errorData.error.errors[0];
+        } else if (errorData.message && errorData.message !== "Error") {
+          msg = errorData.message;
+        }
       }
+      toast.error(msg);
     },
   });
 

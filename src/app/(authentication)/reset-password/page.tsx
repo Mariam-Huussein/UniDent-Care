@@ -43,7 +43,21 @@ function ResetPasswordContent() {
       }
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Failed to reset password");
+      // Extract error message from the response structure
+      const errorData = error?.response?.data;
+      let msg = "Failed to reset password";
+      
+      if (errorData) {
+        // Check if error message is in error.errors array
+        if (errorData.error?.errors?.[0]) {
+          msg = errorData.error.errors[0];
+        } 
+        // Fallback to root message field
+        else if (errorData.message && errorData.message !== "Error") {
+          msg = errorData.message;
+        }
+      }
+      toast.error(msg);
     },
   });
 

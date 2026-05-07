@@ -65,7 +65,8 @@ export default function Login() {
       }
     },
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || (isRtl ? "بيانات غير صحيحة" : "Invalid credentials");
+      const errorData = error?.response?.data;
+      const msg = errorData?.error?.errors?.[0] || errorData?.message || (isRtl ? "بيانات غير صحيحة" : "Invalid credentials");
       toast.error(msg);
     },
   });

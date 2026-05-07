@@ -74,7 +74,16 @@ export default function PatientSignup() {
       }
     },
     onError: (err: any) => {
-      const msg = err?.response?.data?.message || (isRtl ? "حدث خطأ ما" : "Something went wrong");
+      const errorData = err?.response?.data;
+      let msg = isRtl ? "حدث خطأ ما" : "Something went wrong";
+      
+      if (errorData) {
+        if (errorData.error?.errors?.[0]) {
+          msg = errorData.error.errors[0];
+        } else if (errorData.message && errorData.message !== "Error") {
+          msg = errorData.message;
+        }
+      }
       toast.error(msg);
     },
   });

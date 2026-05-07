@@ -31,7 +31,20 @@ export default function ForgetPassword() {
       }
     },
     onError: (error: any) => {
-      const msg = error?.response?.data?.message || "Error sending email";
+      // Extract error message from the response structure
+      const errorData = error?.response?.data;
+      let msg = "Error sending email";
+      
+      if (errorData) {
+        // Check if error message is in error.errors array
+        if (errorData.error?.errors?.[0]) {
+          msg = errorData.error.errors[0];
+        } 
+        // Fallback to root message field
+        else if (errorData.message && errorData.message !== "Error") {
+          msg = errorData.message;
+        }
+      }
       toast.error(msg);
     },
   });
