@@ -6,15 +6,61 @@ import { useRouter } from "next/navigation";
 import { CaseStatus } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
 import { useCase } from "@/features/cases/context/CaseContext";
+import toast from "react-hot-toast";
+import { Share2 } from "lucide-react";
 
 interface CaseDetailsTopBarProps {
     currentStatus: CaseStatus;
     patientName: string;
 }
 
+
 export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDetailsTopBarProps) {
     const router = useRouter();
+    const { caseData, caseId } = useCase()
     const cfg = getPatientStatusConfig(currentStatus);
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/cases/${caseId}`;
+
+        // 1. تجربة الـ Native Share (للموبايلات)
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Case: ${caseData?.patientName}`,
+                    text: `Check out this dental case for ${caseData?.patientName}`,
+                    url: shareUrl,
+                });
+                return; // لو نجح الشير نخرج من الدالة
+            } catch (err) {
+                console.error("Error sharing:", err);
+                // لو اليوزر كنسل الشير مش عايزين نكمل للـ clipboard
+                if ((err as Error).name === 'AbortError') return;
+            }
+        }
+
+        // 2. تجربة الـ Clipboard API (للمتصفحات الحديثة و HTTPS)
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                toast.success("Link copied to clipboard!");
+                return;
+            } catch (err) {
+                console.error("Failed to copy using clipboard API:", err);
+            }
+        }
+        try {
+            const textArea = document.createElement("textarea");
+            textArea.value = shareUrl;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textArea);
+            toast.success("Link copied!");
+        } catch (err) {
+            console.error("Fallback copy failed:", err);
+            toast.error("Could not copy link automatically.");
+        }
+    };
     return (
         <motion.div
             initial={{ opacity: 0, y: -12 }}
@@ -38,11 +84,24 @@ export default function CaseDetailsTopBar({ currentStatus, patientName }: CaseDe
                 </div>
             </div>
 
-            {/* Status Badge */}
-            <span className={`inline-flex items-center gap-2 text-[11px] font-bold px-4 py-2 rounded-xl ${cfg.bg} ${cfg.text} tracking-wide uppercase shadow-sm border ${cfg.border}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} animate-pulse`} />
-                {cfg.label}
-            </span>
+            <div className="flex items-center gap-2 sm:gap-3">
+                {/* Share Button */}
+                <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleShare}
+                    className="flex cursor-pointer items-center gap-2 text-[11px] font-bold px-4 py-2 rounded-xl bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors uppercase tracking-wide"
+                >
+                    <Share2 size={14} className="text-blue-500" />
+                    Share
+                </motion.button>
+
+                {/* Status Badge */}
+                <span className={`inline-flex items-center gap-2 text-[11px] font-bold px-4 py-2 rounded-xl ${cfg.bg} ${cfg.text} tracking-wide uppercase shadow-sm border ${cfg.border}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} animate-pulse`} />
+                    {cfg.label}
+                </span>
+            </div>
         </motion.div>
     );
 }

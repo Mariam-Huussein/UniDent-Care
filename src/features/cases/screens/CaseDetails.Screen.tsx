@@ -11,11 +11,10 @@ import { CaseProvider } from "../context/CaseContext";
 
 export default function CaseDetailsScreen({ caseId }: { caseId: string }) {
     const { patient, isLoading, status, role, studentId, refetch } = useCaseDetails(caseId);
-
     return (
         <CaseProvider caseData={patient} caseId={caseId} isLoading={isLoading} refetch={refetch}>
         <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 -m-6 lg:-m-10 px-4 py-5 sm:px-6 sm:py-6 lg:px-10 lg:py-8 transition-colors duration-300">
-            <div className="max-w-[1200px] mx-auto space-y-6">
+            <div className="max-w-300 mx-auto space-y-6">
 
                 {/* ═══ Top Bar ═══ */}
                 <CaseDetailsTopBar currentStatus={status} patientName={patient?.patientName || ""} />

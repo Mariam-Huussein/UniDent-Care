@@ -67,7 +67,7 @@ export default function GridControlsToolbar({
           <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 flex-1 min-w-0">
 
             {/* Search */}
-            <div className="relative flex-1 min-w-full sm:min-w-[160px] group">
+            <div className="relative flex-1 min-w-full sm:min-w-40 group">
               <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
                 <Search className="h-3.5 w-3.5 text-gray-400 dark:text-slate-500 group-focus-within:text-indigo-500 transition-colors" />
               </div>

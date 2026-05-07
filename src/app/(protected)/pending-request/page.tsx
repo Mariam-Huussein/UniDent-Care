@@ -151,17 +151,18 @@ export default function PendingRequestsPage() {
         {
             header: isRtl ? "الحالة" : "Case",
             accessor: "diagnosisdto",
-            render: (_, row) => (
-                <div className="flex flex-col gap-1">
-                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                        {row.diagnosisdto?.[0]?.caseTypeName || 'Uncategorized'}
-                    </span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                        <Calendar size={10} />
-                        {new Date(row.createAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US")}
-                    </span>
-                </div>
-            )
+            render: (val, row) => {
+                const caseTitle = val?.[0]?.caseTypeName || row.description || 'Uncategorized';
+                return (
+                    <div className="flex flex-col gap-1">
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">{caseTitle}</span>
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                            <Calendar size={10} />
+                            {new Date(row.createAt).toLocaleDateString(isRtl ? "ar-EG" : "en-US")}
+                        </span>
+                    </div>
+                );
+            }
         },
         {
             header: isRtl ? "المريض" : "Patient",

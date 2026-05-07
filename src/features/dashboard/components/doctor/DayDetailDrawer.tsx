@@ -146,7 +146,7 @@ export function DayDetailDrawer({
                                                         <div className="flex items-start justify-between gap-3">
                                                             <div className="flex-1 min-w-0">
                                                                 <p className="font-bold text-slate-800 dark:text-white text-sm truncate">
-                                                                    {req.caseName || (isRtl ? "حالة" : "Case")}
+                                                                    {req.diagnosisdto?.[0]?.caseTypeName || req.description || (isRtl ? "حالة" : "Case")}
                                                                 </p>
                                                                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                                                     {req.studentName} · {req.patientName}
