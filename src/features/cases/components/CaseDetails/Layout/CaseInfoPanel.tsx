@@ -5,6 +5,7 @@ import {
     User, Calendar, CheckCircle, Phone, MapPin,
     GraduationCap, Stethoscope, UserCircle,
     ClipboardList, BookUser, Clock,
+    Sparkles,
 } from "lucide-react";
 import { PatientCase } from "../../../types/CaseDetails.types";
 import { getPatientStatusConfig } from "../../../utils/CaseDetails.utils";
@@ -57,7 +58,14 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
                     </h1>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                         {patient.caseType} {t.infoCaseWord}
-                        {patient.diagnosisdto?.[0]?.stage == 0 ? ` · ${t.infoAiExam}` : ''}
+                        {patient.diagnosisdto?.[0]?.stage == 0 ? 
+                        <>
+                        <span className="inline-flex items-center gap-0.5 ml-1 text-[10px] font-bold text-violet-500 dark:text-violet-400">
+                            <Sparkles size={11} className="text-violet-500 dark:text-violet-400" />
+                            AI Exam
+                        </span>
+                        </>
+                        : ''}
                     </p>
                 </div>
             </div>

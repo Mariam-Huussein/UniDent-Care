@@ -1,5 +1,5 @@
 
-import { cityList } from "@/constants/enums";
+import { cityMap } from "@/constants/enums";
 import { PatientData } from "../types/AddCase.types";
 import { motion } from "framer-motion";
 import { BadgePlus, CheckCircle2, ChevronRight, Phone, MapPin, User, Baby } from "lucide-react";
@@ -9,7 +9,8 @@ import { ShieldCheck } from "lucide-react";
 export default function PatientInfoCard({ patient, onContinue }: { patient: PatientData; onContinue: () => void }) {
   const initials = (patient?.fullName || "").split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   const gender = patient.gender === 0 ? "Male" : "Female";
-  const city = cityList;
+  const cityEntry = Object.entries(cityMap).find(([, v]) => v === patient.city);
+  const city = cityEntry ? cityEntry[0] : "—";
   const age = patient.age ?? null;
 
   return (
