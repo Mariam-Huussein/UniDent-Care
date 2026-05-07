@@ -21,7 +21,7 @@ export default function Logo({
   const isRtl = language === "ar";
 
   return (
-    <div dir={isRtl ? "rtl" : "ltr"}
+    <div
     className={`flex items-center align-center gap-0.5 justify-center transition-all duration-300 ${className}`}>
       <div className={`flex items-center justify-center shrink-0 hover:animate-pulse transition-transform duration-500 ${iconClassName}`}>
         <Image

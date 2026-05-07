@@ -1,7 +1,7 @@
 "use client";
 
 import { PiTooth } from "react-icons/pi";
-import { Clock12, Mars, User, Venus } from "lucide-react";
+import { Clock12, Mars, User, Venus, Sparkles } from "lucide-react";
 import { CaseCardProps } from "../../types/caseCardProps.types";
 import { timeAgo } from "../../utils/caseCard.utils";
 import { useLanguage } from "@/components/providers/LanguageProvider";
@@ -23,6 +23,7 @@ export default function CaseContent({ caseItem, additionalInfo }: CaseContentPro
     const diagnosesArray = caseItem.diagnosisdto || [];
     const firstDiagnosis = diagnosesArray[0];
     const displayName = firstDiagnosis?.caseTypeName || firstDiagnosis?.caseType || t.caseCardUncategorized;
+    const isAiDiagnosis = firstDiagnosis?.stage === 0 || firstDiagnosis?.stage === "AI";
 
     return (
         <div className="flex flex-col gap-2">
@@ -54,6 +55,12 @@ export default function CaseContent({ caseItem, additionalInfo }: CaseContentPro
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">
                     <PiTooth size={14} className="text-indigo-500 dark:text-indigo-400 transition-colors" />
                     <span className="font-medium">{displayName}</span>
+                    {isAiDiagnosis && (
+                        <span className="inline-flex items-center gap-0.5 ml-1 text-[10px] font-bold text-violet-500 dark:text-violet-400">
+                            <Sparkles size={11} className="text-violet-500 dark:text-violet-400" />
+                            AI
+                        </span>
+                    )}
                 </div>
 
                 <div className="inline-flex items-center gap-1 text-[14px] sm:text-xs text-gray-500 dark:text-slate-300 bg-gray-50 dark:bg-slate-700/50 px-2 py-1 rounded-md transition-colors">

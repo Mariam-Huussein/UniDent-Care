@@ -13,43 +13,32 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  // دالة للحصول على اللغة من المتصفح
-  const getBrowserLanguage = (): Language => {
-    if (typeof window === "undefined") return "en";
-    
-    // الحصول على لغة المتصفح
-    const browserLang = navigator.language || (navigator as any).userLanguage;
-    
-    // التحقق إذا كانت اللغة عربية
-    if (browserLang.startsWith("ar")) {
-      return "ar";
-    }
-    
-    // افتراضياً الإنجليزية
-    return "en";
-  };
-
-  const [language, setLanguageState] = useState<Language>(() => {
-    // محاولة الحصول على اللغة من Cookies أولاً
-    const storedLang = Cookies.get("language") as Language | undefined;
-    if (storedLang && (storedLang === "en" || storedLang === "ar")) {
-      return storedLang;
-    }
-    // إذا لم توجد في Cookies، استخدم لغة المتصفح
-    return getBrowserLanguage();
-  });
+  // Always start with "en" so the server and first client render match.
+  // The real language is applied in useEffect (client-only) to avoid hydration mismatch.
+  const [language, setLanguageState] = useState<Language>("en");
 
   useEffect(() => {
-    // تطبيق اللغة على المستند
-    document.documentElement.lang = language;
-    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
-    
-    // حفظ اللغة في Cookies إذا لم تكن محفوظة
-    const storedLang = Cookies.get("language");
-    if (!storedLang) {
-      Cookies.set("language", language, { expires: 365 });
+    // Resolve the actual language from cookie or browser preference
+    const storedLang = Cookies.get("language") as Language | undefined;
+
+    let resolved: Language = "en";
+    if (storedLang === "en" || storedLang === "ar") {
+      resolved = storedLang;
+    } else {
+      // Fall back to browser language
+      const browserLang = navigator.language || (navigator as any).userLanguage || "";
+      if (browserLang.startsWith("ar")) resolved = "ar";
     }
-  }, [language]);
+
+    setLanguageState(resolved);
+    document.documentElement.lang = resolved;
+    document.documentElement.dir = resolved === "ar" ? "rtl" : "ltr";
+
+    // Persist if not already saved
+    if (!storedLang) {
+      Cookies.set("language", resolved, { expires: 365 });
+    }
+  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

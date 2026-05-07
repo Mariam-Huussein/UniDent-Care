@@ -34,7 +34,7 @@ export default function Pagination({ currentPage, totalPages, hasPreviousPage, h
                 aria-label="Previous page"
                 disabled={!hasPreviousPage}
                 onClick={() => onPageChange(currentPage - 1)}
-                className= {`${!hasPreviousPage &&`hidden`} h-10 w-10 flex items-center justify-center rounded-full bg-slate-200/50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-200 transition-colors`}
+                className= {`h-10 w-10 flex items-center justify-center rounded-full bg-slate-200/50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-200 transition-colors`}
             >
                 <ChevronLeft className="w-5 h-5 text-slate-600" />
             </button>
@@ -62,7 +62,7 @@ export default function Pagination({ currentPage, totalPages, hasPreviousPage, h
                 aria-label="Next page"
                 disabled={!hasNextPage}
                 onClick={() => onPageChange(currentPage + 1)}
-                className= {`${!hasNextPage &&`hidden`} h-10 w-10 flex items-center justify-center rounded-full bg-slate-200/50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-200 transition-colors`}
+                className= {`h-10 w-10 flex items-center justify-center rounded-full bg-slate-200/50 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-200 transition-colors`}
             >
                 <ChevronRight className="w-5 h-5 text-slate-600" />
             </button>
