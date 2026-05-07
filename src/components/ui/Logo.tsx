@@ -21,7 +21,8 @@ export default function Logo({
   const isRtl = language === "ar";
 
   return (
-    <div className={`flex items-center align-center gap-0.5 justify-center transition-all duration-300  ${className}`}>
+    <div dir={isRtl ? "rtl" : "ltr"}
+    className={`flex items-center align-center gap-0.5 justify-center transition-all duration-300 ${className}`}>
       <div className={`flex items-center justify-center shrink-0 hover:animate-pulse transition-transform duration-500 ${iconClassName}`}>
         <Image
           src={logoLight}
@@ -33,6 +34,19 @@ export default function Logo({
 
       {showText && (
         <h1 className={`${textClassName} font-extrabold tracking-tight whitespace-nowrap flex items-end gap-0.2 ${isRtl ? 'font-arabic' : ''}`}>
+          {isRtl ? (
+            <>
+              <span>
+                <span className="ps-0.5 bg-clip-text text-transparent bg-gradient-to-l from-slate-900 via-indigo-700 to-blue-600 dark:from-white dark:via-indigo-300 dark:to-blue-400">
+                  يوني دينت
+                </span>
+              </span>
+              <span className="text-[0.55em] font-bold text-slate-500 dark:text-slate-400 relative bottom-[2px]">
+                كير
+              </span>
+            </>
+            ):(
+              <>
           <span>
             <span className="bg-clip-text text-transparent bg-linear-to-r from-slate-800 to-indigo-600 dark:from-slate-100 dark:to-indigo-300">
               Uni
@@ -44,7 +58,8 @@ export default function Logo({
           <span className="text-[0.55em] font-semibold text-italic text-slate-500 dark:text-slate-400 uppercase tracking-tight relative top-[2px]">
             Care
           </span>
-
+              </>
+            )}
         </h1>
       )}
     </div>

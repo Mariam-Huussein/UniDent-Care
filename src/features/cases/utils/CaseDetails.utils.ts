@@ -1,3 +1,4 @@
+import { getUserDetailsFromCookies } from "@/utils/sharedHelper";
 import { CaseStatus, PatientCase, ToothStatus } from "../types/CaseDetails.types";
 import { Dictionary } from "@/utils/i18n/dictionaries";
 
@@ -11,6 +12,7 @@ export function formatTimestamp(ts: string) {
 
 type TabDef = { key: string; label: string };
 export function getTabsForStatus(status: CaseStatus, patient: PatientCase, t?: Dictionary): TabDef[] {
+    const {userRole} = getUserDetailsFromCookies();
     const odontogram  = { key: "odontogram",  label: t?.tabOdontogram  ?? "Odontogram"    };
     const timeline    = { key: "timeline",    label: t?.tabTimeline    ?? "Timeline"       };
     const beforeAfter = { key: "beforeAfter", label: t?.tabBeforeAfter ?? "Before & After" };
@@ -20,12 +22,16 @@ export function getTabsForStatus(status: CaseStatus, patient: PatientCase, t?: D
         case "underReview":
             return [odontogram];
         case "inprogress":
-            if (patient.userFlags.isAssignedDoctor || patient.hasEvaluatedSession) {
+            if ((patient.userFlags.isAssignedDoctor || patient.hasEvaluatedSession )&& userRole==="Doctor") {
                 return [timeline, odontogram];
             }
-            return [odontogram, timeline];
-        case "completed":
-            return [odontogram, timeline, beforeAfter];
+            if(userRole != "Patient"){
+                return [odontogram, timeline];
+            }
+        case "completed":        
+            if(userRole != "Patient"){
+                return [odontogram, timeline];
+            }    
         default:
             return [odontogram];
     }
