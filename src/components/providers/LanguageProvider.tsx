@@ -13,16 +13,43 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("en");
+  // دالة للحصول على اللغة من المتصفح
+  const getBrowserLanguage = (): Language => {
+    if (typeof window === "undefined") return "en";
+    
+    // الحصول على لغة المتصفح
+    const browserLang = navigator.language || (navigator as any).userLanguage;
+    
+    // التحقق إذا كانت اللغة عربية
+    if (browserLang.startsWith("ar")) {
+      return "ar";
+    }
+    
+    // افتراضياً الإنجليزية
+    return "en";
+  };
 
-  useEffect(() => {
+  const [language, setLanguageState] = useState<Language>(() => {
+    // محاولة الحصول على اللغة من Cookies أولاً
     const storedLang = Cookies.get("language") as Language | undefined;
     if (storedLang && (storedLang === "en" || storedLang === "ar")) {
-      setLanguageState(storedLang);
-      document.documentElement.lang = storedLang;
-      document.documentElement.dir = storedLang === "ar" ? "rtl" : "ltr";
+      return storedLang;
     }
-  }, []);
+    // إذا لم توجد في Cookies، استخدم لغة المتصفح
+    return getBrowserLanguage();
+  });
+
+  useEffect(() => {
+    // تطبيق اللغة على المستند
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+    
+    // حفظ اللغة في Cookies إذا لم تكن محفوظة
+    const storedLang = Cookies.get("language");
+    if (!storedLang) {
+      Cookies.set("language", language, { expires: 365 });
+    }
+  }, [language]);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
