@@ -10,7 +10,7 @@ export const patientSignupSchema = z.object({
     nationalId: z.string().length(14, "National ID must be 14 digits"),
     birthDate: z.string().min(1, "Birth date is required"),
     gender: z.number(),
-    city: z.number().min(1, "Please select a city"),
+    city: z.number().min(0, "Please select a city"),
 });
 
 export type PatientSignupValues = z.infer<typeof patientSignupSchema>;

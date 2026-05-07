@@ -44,17 +44,13 @@ export const authService = {
         return response.data;
     },
     getCitiesLookup: async (): Promise<{ id: number; name_ar: string; name_en: string }[]> => {
-        const url = "https://raw.githubusercontent.com/Tech-Labs/egypt-governorates-and-cities-db/master/cities.json";
-        const response = await fetch(url);
-        const json = await response.json();
-        
-        const citiesTable = json.find((item: any) => item.type === "table" && item.name === "cities");
-        if (!citiesTable || !citiesTable.data) return [];
-        
-        return citiesTable.data.map((city: any) => ({
-            id: parseInt(city.id),
-            name_ar: city.city_name_ar,
-            name_en: city.city_name_en
+        const response = await api.get<{ value: number; name: string }[]>("/Enum/cities");
+        console.log("Cities API Response:", response.data);
+        // Transform the API response to match the expected format
+        return response.data.map(city => ({
+            id: city.value,
+            name_ar: city.name,
+            name_en: city.name
         }));
     }
 };
