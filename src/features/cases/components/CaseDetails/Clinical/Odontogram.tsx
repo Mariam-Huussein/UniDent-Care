@@ -100,7 +100,14 @@ export default function Odontogram() {
     const handleToothClick = (toothNum: number) => {
         const data = diagnosedTeethMap.get(toothNum) ?? null;
         // Only open panel for diagnosed teeth; ignore clicks on undiagnosed teeth
-        if (data) setPanelData(data);
+        if (data) {
+            setPanelData(data);
+            if (window.innerWidth < 1024) {
+                setTimeout(() => {
+                    document.getElementById("odontogram-side-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }, 100);
+            }
+        }
     };
 
     /** Called by the chart after every view-mode click to reset visual selection */
@@ -133,6 +140,11 @@ export default function Odontogram() {
                             const lastToothClicked = newSelection[newSelection.length - 1];
                             setSelected([lastToothClicked]);
                             setChartKey((prev) => prev + 1);
+                            if (window.innerWidth < 1024) {
+                                setTimeout(() => {
+                                    document.getElementById("odontogram-side-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }, 100);
+                            }
                         } else {
                             setSelected([]);
                             setChartKey((prev) => prev + 1);
@@ -157,7 +169,7 @@ export default function Odontogram() {
 
             {/* ── Right: edit plan OR view info ── */}
             {showRightPanel && (
-                <div className="lg:sticky lg:top-4 self-start">
+                <div id="odontogram-side-panel" className="lg:sticky lg:top-4 self-start scroll-mt-24">
                     {isDiagnosisActive ? (
                         <DiagnosisPlanPanel
                             selected={selected}

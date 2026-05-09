@@ -35,6 +35,7 @@ import { StudentSignupPayload } from "@/features/auth/types/studentPayload.Types
 import Logo from "@/components/ui/Logo";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import SearchableSelect from "@/components/common/SearchableSelect";
+import Link from "next/link";
 
 export default function StudentSignup() {
   const router = useRouter();
@@ -287,7 +288,7 @@ export default function StudentSignup() {
           <div className="mt-8 text-center">
             <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
               {isRtl ? 'لديك حساب بالفعل؟' : 'Already a member?'}{" "}
-              <a href="/login" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline decoration-2 underline-offset-4">{isRtl ? 'سجل دخولك' : 'Log in here'}</a>
+              <Link href="/login" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline decoration-2 underline-offset-4">{isRtl ? 'سجل دخولك' : 'Log in here'}</Link>
             </p>
           </div>
         </div>

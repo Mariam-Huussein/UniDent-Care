@@ -15,7 +15,7 @@ export default function Footer() {
           <p className="text-slate-400 text-sm font-medium">
             © {new Date().getFullYear()} UniDent Care. {t.footerRights}
           </p>
-          <div className="flex gap-6 text-slate-400 text-sm font-medium">
+          {/* <div className="flex gap-6 text-slate-400 text-sm font-medium">
             <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">
               {t.footerPrivacy}
             </Link>
@@ -25,7 +25,7 @@ export default function Footer() {
             <Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">
               {t.footerContact}
             </Link>
-          </div>
+          </div> */}
         </div>
       </footer>
   )

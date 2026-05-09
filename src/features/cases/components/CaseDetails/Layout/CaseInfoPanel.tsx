@@ -16,6 +16,7 @@ import { useCase } from "@/features/cases/context/CaseContext";
 import { useEffect } from "react";
 import ProgressTracker from "@/features/cases/components/CaseDetails/Layout/ProgressTracker";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import Link from "next/link";
 
 interface PatientInfoPanelProps {
     role: string | null;
@@ -79,11 +80,11 @@ export default function CaseInfoPanel({ role, onRefetch }: PatientInfoPanelProps
             )}
 
             {/* Info Grid */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <InfoCard icon={User}         label={t.infoAge}              value={`${patient.patientAge} ${t.yearsOld}`}              color="text-blue-500"   />
-                <InfoCard icon={Phone}        label={t.infoPhone}            value={patient.phone || t.infoNotProvided}                  color="text-emerald-500"/>
+                <InfoCard icon={Phone}        label={t.infoPhone}            value={patient.phone ? <Link href={`tel:${patient.phone}`} className="hover:underline">{patient.phone}</Link> : t.infoNotProvided}                  color="text-emerald-500"/>
                 <InfoCard icon={MapPin}       label={t.infoCity}             value={patient.city || t.infoNotProvided}                   color="text-rose-500"   />
-                <InfoCard icon={GraduationCap}label={t.infoUniversity}       value={patient.universityName || t.infoNotAssigned}         color="text-indigo-500" />
+                <InfoCard icon={GraduationCap}label={t.infoUniversity}       value={patient.universityName || t.infoNotAssignedUniversity}         color="text-indigo-500" />
                 <InfoCard icon={Calendar}     label={t.infoCreatedAt}        value={new Date(patient.createdAt).toLocaleDateString()}    color="text-violet-500" />
                 <InfoCard icon={ClipboardList}label={t.infoTotalSessions}    value={`${patient.totalSessions}` || "0"}                  color="text-violet-500" />
                 {patient.createdByRole?.toLowerCase() !== "patient" && creatorData && (

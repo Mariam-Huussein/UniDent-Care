@@ -58,7 +58,7 @@ export default function Navbar() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600 dark:text-slate-300">
-          <NavLinks />
+          {/* <NavLinks /> */}
           {isLoggedIn ? (
             <Link
               href={userRole === "ClinicalDoctor" ? "/cases" : "/dashboard"}
