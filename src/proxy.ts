@@ -77,6 +77,8 @@ export const config = {
         '/my-student/:path*',
         '/pending-cases/:path*',
         '/add-case/:path*',
+        '/add-my-case/:path*',
+        '/ai-chatbot/:path*',
         '/login',
         '/signup',
         '/',
