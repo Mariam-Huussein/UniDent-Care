@@ -268,20 +268,10 @@ export default function AddCaseChatbot() {
         .map(m => m.content)
         .join("\n");
 
-      // Try to match a case type
-      let availableCaseTypes: any[] = [];
-      let caseTypeId = "";
-      try {
-        const res = await getCaseTypes(1, 40, "");
-        availableCaseTypes = (res as any).data?.items || (res as any).items || [];
-        if (availableCaseTypes.length > 0) {
-          // Use first/general type as fallback
-          const general = availableCaseTypes.find((i: any) =>
-            (i.name || "").toLowerCase().includes("general")
-          );
-          caseTypeId = general?.publicId || availableCaseTypes[0]?.publicId || "";
-        }
-      } catch { /* fallback: empty */ }
+      // Use publicId from the first diagnosis item returned by AI as the case type
+      const firstDiagCaseTypeId = Array.isArray(diagnosisData) && diagnosisData.length > 0
+        ? (diagnosisData[0].publicId || "")
+        : "";
 
       const title = isRtl ? "حالة جديدة" : "New Case";
 
@@ -289,7 +279,7 @@ export default function AddCaseChatbot() {
         PatientId: patientId,
         Title: title,
         Description: description,
-        CaseTypeId: caseTypeId,
+        CaseTypeId: firstDiagCaseTypeId,
         IsPublic: false,
         CreatedById: patientId,
         CreatedByRole: userRole,
@@ -299,16 +289,10 @@ export default function AddCaseChatbot() {
       console.log("Case created:", caseRes.data);
       const newCaseId = caseRes.data?.data || caseRes.data;
 
-      // Create Diagnoses
+      // Create Diagnoses — use publicId from each AI diagnosis item directly
       if (diagnosisData && Array.isArray(diagnosisData)) {
         for (const diag of diagnosisData) {
-          let diagCaseTypeId = caseTypeId;
-          if (diag.CaseTypeId) {
-             const matchedType = availableCaseTypes.find((t: any) => t.key === diag.CaseTypeId || t.name === diag.CaseTypeId);
-             if (matchedType) {
-                 diagCaseTypeId = matchedType.publicId;
-             }
-          }
+          const diagCaseTypeId = diag.publicId || firstDiagCaseTypeId;
 
           await createDiagnosisAi({
              patientCaseId: newCaseId,
@@ -347,19 +331,10 @@ export default function AddCaseChatbot() {
         .map(m => m.content)
         .join("\n");
 
-      // Fetch case types
-      let availableCaseTypes: any[] = [];
-      let caseTypeId = "";
-      try {
-        const res = await getCaseTypes(1, 40, "");
-        availableCaseTypes = (res as any).data?.items || (res as any).items || [];
-        if (availableCaseTypes.length > 0) {
-          const general = availableCaseTypes.find((i: any) =>
-            (i.name || "").toLowerCase().includes("general")
-          );
-          caseTypeId = general?.publicId || availableCaseTypes[0]?.publicId || "";
-        }
-      } catch { /* fallback */ }
+      // Use publicId from the first AI diagnosis item as the case type — no getCaseTypes call needed
+      const firstDiagCaseTypeId = Array.isArray(diagnosisArray) && diagnosisArray.length > 0
+        ? (diagnosisArray[0].publicId || "")
+        : "";
 
       const title = isRtl ? "حالة جديدة" : "New Case";
 
@@ -368,7 +343,7 @@ export default function AddCaseChatbot() {
         PatientId: patientId,
         Title: title,
         Description: description,
-        CaseTypeId: caseTypeId,
+        CaseTypeId: firstDiagCaseTypeId,
         IsPublic: false,
         CreatedById: patientId,
         CreatedByRole: userRole,
@@ -376,22 +351,16 @@ export default function AddCaseChatbot() {
 
       const newCaseId = caseRes.data?.data || caseRes.data;
 
-      // 2. Create Diagnoses
+      // 2. Create Diagnoses — use publicId from each AI diagnosis item directly
       if (diagnosisArray && Array.isArray(diagnosisArray)) {
         for (const diag of diagnosisArray) {
-          let diagCaseTypeId = caseTypeId;
-          if (diag.CaseTypeId) {
-             const matchedType = availableCaseTypes.find((t: any) => t.key === diag.CaseTypeId || t.name === diag.CaseTypeId);
-             if (matchedType) {
-                 diagCaseTypeId = matchedType.publicId;
-             }
-          }
+          const diagCaseTypeId = diag.publicId || firstDiagCaseTypeId;
 
           await createDiagnosisAi({
              patientCaseId: newCaseId,
              stage: 0,
              caseTypeId: diagCaseTypeId,
-             notes: diag.note,
+             notes: diag.note || diag.description,
              createdById: patientId,
              role: userRole,
              teethNumbers: diag.tooth_number
