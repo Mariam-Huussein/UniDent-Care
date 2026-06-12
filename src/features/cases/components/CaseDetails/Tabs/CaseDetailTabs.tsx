@@ -10,6 +10,7 @@ import ActivityTimeline from "../Tracking/ActivityTimeline";
 import { useCase } from "@/features/cases/context/CaseContext";
 import { getTabsForStatus } from "@/features/cases/utils/CaseDetails.utils";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import AIXrayAnalyzer from "./parts/AIXrayAnalyzer";
 
 
 export default function PatientDetailTabs() {
@@ -73,6 +74,7 @@ export default function PatientDetailTabs() {
                             {activeTab === "odontogram" && <Odontogram />}
                             {/* {activeTab === "medical" && <MedicalInfoTab medicalHistory={patient.medicalHistory} medications={patient.medications} />} */}
                             {activeTab === "timeline" && <ActivityTimeline caseId={patient.id} />}
+                            {/* {activeTab === "aiXray" && <AIXrayAnalyzer />} */}
 
                             {/* {activeTab === "beforeAfter" && (
                                 <BeforeAfterTab

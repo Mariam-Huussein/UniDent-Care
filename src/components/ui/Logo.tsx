@@ -38,7 +38,7 @@ export default function Logo({
             <>
               <span>
                 <span className="ps-0.5 bg-clip-text text-transparent bg-gradient-to-l from-slate-900 via-indigo-700 to-blue-600 dark:from-white dark:via-indigo-300 dark:to-blue-400">
-                  يوني دينت
+                  يونيدينت
                 </span>
               </span>
               <span className="text-[0.55em] font-bold text-slate-500 dark:text-slate-400 relative bottom-[2px]">
