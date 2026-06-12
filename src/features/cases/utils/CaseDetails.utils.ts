@@ -11,27 +11,44 @@ export function formatTimestamp(ts: string) {
 }
 
 type TabDef = { key: string; label: string };
+
+const AI_XRAY_ROLES = ["Doctor", "ClinicalDoctor", "Student"];
+
 export function getTabsForStatus(status: CaseStatus, patient: PatientCase, t?: Dictionary): TabDef[] {
-    const {userRole} = getUserDetailsFromCookies();
-    const odontogram  = { key: "odontogram",  label: t?.tabOdontogram  ?? "Odontogram"    };
-    const timeline    = { key: "timeline",    label: t?.tabTimeline    ?? "Timeline"       };
+    const { userRole } = getUserDetailsFromCookies();
+    const odontogram = { key: "odontogram", label: t?.tabOdontogram ?? "Odontogram" };
+    const timeline = { key: "timeline", label: t?.tabTimeline ?? "Timeline" };
     const beforeAfter = { key: "beforeAfter", label: t?.tabBeforeAfter ?? "Before & After" };
+    const aiXray = { key: "aiXray", label: t?.tabAiXray ?? "AI X-Ray" };
+
+    const canSeeAiXray = AI_XRAY_ROLES.includes(userRole ?? "");
 
     switch (status.toLowerCase()) {
         case "pending":
-        case "underReview":
+        case "underreview":
+            if (userRole !== "Patient") {
+                return [odontogram, aiXray];
+            }
             return [odontogram];
         case "inprogress":
-            if ((patient.userFlags.isAssignedDoctor || patient.hasEvaluatedSession )&& userRole==="Doctor") {
-                return [timeline, odontogram];
+            if ((patient.userFlags.isAssignedDoctor || patient.hasEvaluatedSession) && userRole === "Doctor") {
+                return canSeeAiXray
+                    ? [timeline, odontogram, aiXray]
+                    : [timeline, odontogram];
             }
-            if(userRole != "Patient"){
-                return [odontogram, timeline];
+            if (userRole !== "Patient") {
+                return canSeeAiXray
+                    ? [odontogram, timeline, aiXray]
+                    : [odontogram, timeline];
             }
-        case "completed":        
-            if(userRole != "Patient"){
-                return [odontogram, timeline];
-            }    
+            return [odontogram];
+        case "completed":
+            if (userRole !== "Patient") {
+                return canSeeAiXray
+                    ? [odontogram, timeline, aiXray]
+                    : [odontogram, timeline];
+            }
+            return [odontogram];
         default:
             return [odontogram];
     }
@@ -89,9 +106,9 @@ export function getPatientStatusConfig(status: CaseStatus, t?: Dictionary) {
 
 export function getToothStatusColor(status: ToothStatus) {
     switch (status) {
-        case 'healthy':           return { fill: '#e2e8f0', stroke: '#94a3b8', label: 'Healthy'          };
-        case 'needs-treatment':   return { fill: '#fecaca', stroke: '#ef4444', label: 'Needs Treatment'  };
-        case 'in-progress':       return { fill: '#fef08a', stroke: '#eab308', label: 'In Progress'      };
-        case 'treated':           return { fill: '#bbf7d0', stroke: '#22c55e', label: 'Treated'          };
+        case 'healthy': return { fill: '#e2e8f0', stroke: '#94a3b8', label: 'Healthy' };
+        case 'needs-treatment': return { fill: '#fecaca', stroke: '#ef4444', label: 'Needs Treatment' };
+        case 'in-progress': return { fill: '#fef08a', stroke: '#eab308', label: 'In Progress' };
+        case 'treated': return { fill: '#bbf7d0', stroke: '#22c55e', label: 'Treated' };
     }
 }
