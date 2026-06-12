@@ -24,16 +24,31 @@ export const dictionaries = {
     statsQuality: "Quality Care",
 
     // Auth
+    loginTitle: "Login",
     loginSubtitle: "Tooth Needs Care? UniDent Care",
     emailLabel: "Email Address",
     emailPlaceholder: "Email or Phone number",
     passwordLabel: "Password",
-    forgotPassword: "Forgot?",
+    forgotPassword: "Forgot Password?",
     passwordPlaceholder: "••••••••",
     signInBtn: "Sign In",
     signingIn: "Signing In...",
     noAccount: "Don't have an account?",
     createOne: "Create one",
+
+    // Forgot Password
+    forgotPasswordTitle: "Forgot Password?",
+    forgotPasswordDesc: "Enter your email and we'll send you a link to reset your password.",
+    sendResetLinkBtn: "Send Reset Link",
+    sendingLink: "Sending Link...",
+    backToLogin: "Back to Login",
+
+    // Reset Password
+    resetPasswordTitle: "Reset Password",
+    resetPasswordDesc: "Enter your new password below.",
+    confirmNewPassword: "Confirm New Password",
+    updatePasswordBtn: "Update Password",
+    updatingPassword: "Updating Password...",
 
     // Signup
     createAccountTitle: "Create Account",
@@ -409,16 +424,31 @@ export const dictionaries = {
     statsQuality: "رعاية ممتازة",
 
     // Auth
-    loginSubtitle: "ابتسامتك، شغفنا",
+    loginTitle: "تسجيل الدخول",
+    loginSubtitle: "أسنانك تعباك؟ يوني دينت معاك!",
     emailLabel: "البريد الإلكتروني",
     emailPlaceholder: "البريد الإلكتروني أو رقم الهاتف",
     passwordLabel: "كلمة المرور",
-    forgotPassword: "نسيت؟",
+    forgotPassword: "نسيت كلمة المرور؟",
     passwordPlaceholder: "••••••••",
     signInBtn: "تسجيل الدخول",
     signingIn: "جارٍ تسجيل الدخول...",
     noAccount: "ليس لديك حساب؟",
     createOne: "قم بإنشاء حساب",
+
+    // نسيت كلمة المرور
+    forgotPasswordTitle: "نسيت كلمة المرور؟",
+    forgotPasswordDesc: "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.",
+    sendResetLinkBtn: "إرسال رابط إعادة التعيين",
+    sendingLink: "جارٍ الإرسال...",
+    backToLogin: "العودة لتسجيل الدخول",
+
+    // إعادة تعيين كلمة المرور
+    resetPasswordTitle: "إعادة تعيين كلمة المرور",
+    resetPasswordDesc: "أدخل كلمة المرور الجديدة أدناه.",
+    confirmNewPassword: "تأكيد كلمة المرور الجديدة",
+    updatePasswordBtn: "تحديث كلمة المرور",
+    updatingPassword: "جارٍ التحديث...",
 
     // Signup
     createAccountTitle: "إنشاء حساب",
