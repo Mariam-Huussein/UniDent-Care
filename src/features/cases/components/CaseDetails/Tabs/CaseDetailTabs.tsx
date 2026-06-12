@@ -72,17 +72,8 @@ export default function PatientDetailTabs() {
                             transition={{ duration: 0.2 }}
                         >
                             {activeTab === "odontogram" && <Odontogram />}
-                            {/* {activeTab === "medical" && <MedicalInfoTab medicalHistory={patient.medicalHistory} medications={patient.medications} />} */}
                             {activeTab === "timeline" && <ActivityTimeline caseId={patient.id} />}
-                            {/* {activeTab === "aiXray" && <AIXrayAnalyzer />} */}
-
-                            {/* {activeTab === "beforeAfter" && (
-                                <BeforeAfterTab
-                                    beforeImageUrls={patient.beforeImageUrls}
-                                    afterImageUrls={patient.afterImageUrls}
-                                    defaultImageUrls={patient.imageUrls}
-                                />
-                            )} */}
+                            {activeTab === "aiXray" && <AIXrayAnalyzer />}
                         </motion.div>
                     </AnimatePresence>
                 </div>

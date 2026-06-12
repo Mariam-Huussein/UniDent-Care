@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Scan, AlertTriangle, CheckCircle, Loader2, X, ImageIcon, RotateCcw } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 interface BoundingBox {
@@ -76,6 +77,8 @@ function computeLabelSlots(detections: Detection[], imgW: number, imgH: number) 
 
 /* ── Component ─────────────────────────────────────────────────── */
 export default function AIXrayAnalyzer() {
+    const { t } = useLanguage();
+
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [result, setResult] = useState<AnalysisResponse | null>(null);
@@ -127,23 +130,23 @@ export default function AIXrayAnalyzer() {
         setError(null);
 
         try {
-            // const body = new FormData();
-            // body.append("file", file);
+            const body = new FormData();
+            body.append("file", file);
 
-            // const res = await fetch("/api/analyze-xray", {
-            //     method: "POST",
-            //     body,
-            // });
+            const res = await fetch("/api/analyze-xray", {
+                method: "POST",
+                body,
+            });
 
-            // if (!res.ok) {
-            //     const err = await res.json().catch(() => ({}));
-            //     throw new Error(err.error ?? `Server responded with ${res.status}`);
-            // }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error ?? `Server responded with ${res.status}`);
+            }
 
-            // const data: AnalysisResponse = await res.json();
-            // setResult(data);
+            const data: AnalysisResponse = await res.json();
+            setResult(data);
         } catch (err) {
-            // setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+            setError(err instanceof Error ? err.message : "An unexpected error occurred.");
         } finally {
             setLoading(false);
         }
@@ -160,10 +163,10 @@ export default function AIXrayAnalyzer() {
                     </div>
                     <div>
                         <h3 className="text-base font-bold text-slate-800 dark:text-white">
-                            AI X-Ray Analysis
+                            {t?.aiXrayTitle ?? "AI X-Ray Analysis"}
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Upload a dental X-ray for automated detection
+                            {t?.aiXraySubtitle ?? "Upload a dental X-ray for automated detection"}
                         </p>
                     </div>
                 </div>
@@ -174,7 +177,7 @@ export default function AIXrayAnalyzer() {
                         className="flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer"
                     >
                         <RotateCcw size={13} />
-                        Reset
+                        {t?.aiXrayReset ?? "Reset"}
                     </button>
                 )}
             </div>
@@ -214,15 +217,19 @@ export default function AIXrayAnalyzer() {
 
                             <div className="text-center">
                                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                    Drag & drop your X-ray here
+                                    {t?.aiXrayDragDrop ?? "Drag & drop your X-ray here"}
                                 </p>
                                 <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                                    or <span className="text-indigo-600 dark:text-indigo-400 font-medium">click</span> to browse
+                                    {t?.aiXrayOrClick ?? "or"}{" "}
+                                    <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+                                        {t?.aiXrayClickBrowse ?? "click"}
+                                    </span>{" "}
+                                    {t?.aiXrayToBrowse ?? "to browse"}
                                 </p>
                             </div>
 
                             <p className="text-[10px] text-slate-400 dark:text-slate-600 uppercase tracking-widest font-medium mt-1">
-                                PNG, JPG, WEBP supported
+                                {t?.aiXrayFormats ?? "PNG, JPG, WEBP supported"}
                             </p>
 
                             <input
@@ -342,12 +349,12 @@ export default function AIXrayAnalyzer() {
                                 {loading ? (
                                     <>
                                         <Loader2 size={16} className="animate-spin" />
-                                        Analyzing X-Ray…
+                                        {t?.aiXrayAnalyzing ?? "Analyzing X-Ray…"}
                                     </>
                                 ) : (
                                     <>
                                         <Scan size={16} />
-                                        Analyze X-Ray
+                                        {t?.aiXrayAnalyzeBtn ?? "Analyze X-Ray"}
                                     </>
                                 )}
                             </motion.button>
@@ -362,7 +369,9 @@ export default function AIXrayAnalyzer() {
                             >
                                 <AlertTriangle size={16} className="text-red-500 mt-0.5 shrink-0" />
                                 <div>
-                                    <p className="text-sm font-semibold text-red-700 dark:text-red-400">Analysis Failed</p>
+                                    <p className="text-sm font-semibold text-red-700 dark:text-red-400">
+                                        {t?.aiXrayErrTitle ?? "Analysis Failed"}
+                                    </p>
                                     <p className="text-xs text-red-600 dark:text-red-400/80 mt-0.5">{error}</p>
                                 </div>
                             </motion.div>
@@ -394,14 +403,14 @@ export default function AIXrayAnalyzer() {
                                                 : "text-emerald-700 dark:text-emerald-400"
                                         }`}>
                                             {result.detections.length > 0
-                                                ? `${result.detections.length} Issue${result.detections.length > 1 ? "s" : ""} Detected`
-                                                : "No Issues Detected"
+                                                ? `${result.detections.length} ${t?.aiXrayIssuesDetected ?? "Issues Detected"}`
+                                                : (t?.aiXrayNoIssues ?? "No Issues Detected")
                                             }
                                         </p>
                                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                                             {result.detections.length > 0
-                                                ? "Review the highlighted regions above for details."
-                                                : "The X-ray appears clear with no abnormalities detected."
+                                                ? (t?.aiXrayReviewDesc ?? "Review the highlighted regions above for details.")
+                                                : (t?.aiXrayNoIssuesDesc ?? "The X-ray appears clear with no abnormalities detected.")
                                             }
                                         </p>
                                     </div>
@@ -432,7 +441,7 @@ export default function AIXrayAnalyzer() {
                                                                 {det.class_name}
                                                             </p>
                                                             <p className="text-[11px] text-slate-400 dark:text-slate-500">
-                                                                Confidence: {confPct}%
+                                                                {t?.aiXrayConfidence ?? "Confidence"}: {confPct}%
                                                             </p>
                                                         </div>
                                                     </div>
@@ -453,7 +462,7 @@ export default function AIXrayAnalyzer() {
                                     className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
                                 >
                                     <RotateCcw size={14} />
-                                    Analyze Another X-Ray
+                                    {t?.aiXrayAnalyzeAnother ?? "Analyze Another X-Ray"}
                                 </button>
                             </motion.div>
                         )}
